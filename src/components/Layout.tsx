@@ -53,7 +53,7 @@ export function Layout() {
               <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
                 <Package className="w-5 h-5 text-white" />
               </div>
-              <span className="font-semibold text-gray-900">Smart Inventory</span>
+              <span className="font-semibold text-gray-900">Smart Stock</span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
