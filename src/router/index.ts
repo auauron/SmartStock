@@ -1,9 +1,9 @@
 import { createBrowserRouter } from "react-router";
-import { Layout } from "./components/Layout";
-import { Dashboard } from "./pages/Dashboard";
-import { Inventory } from "./pages/Inventory";
-import { Restock } from "./pages/Restock";
-import { Settings } from "./pages/Settings";
+import { Layout } from "../components/Layout";
+import { Dashboard } from "../pages/Dashboard";
+import { Inventory } from "../pages/Inventory";
+import { Restock } from "../pages/Restock";
+import { Settings } from "../pages/Settings";
 
 export const router = createBrowserRouter([
   {
