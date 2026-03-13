@@ -14,28 +14,28 @@ Many small retail stores, mini groceries, and supply shops still rely on manual 
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | React 19 + TypeScript |
-| Build Tool | Vite |
-| Styling | Tailwind CSS v4 (via `@tailwindcss/vite`) |
-| Routing | React Router v7 |
-| Backend / Auth | Supabase (PostgreSQL + Auth) |
-| Icons | Lucide React |
-| Notifications | Sonner |
-| Utilities | tailwind-merge, tw-animate-css |
+| Layer          | Technology                                |
+| -------------- | ----------------------------------------- |
+| Framework      | React 19 + TypeScript                     |
+| Build Tool     | Vite                                      |
+| Styling        | Tailwind CSS v4 (via `@tailwindcss/vite`) |
+| Routing        | React Router v7                           |
+| Backend / Auth | Supabase (PostgreSQL + Auth)              |
+| Icons          | Lucide React                              |
+| Notifications  | Sonner                                    |
+| Utilities      | tailwind-merge, tw-animate-css            |
 
 ## Pages & Features
 
-| Page | Status | Description |
-|---|---|---|
-| Landing | Done | Public marketing/entry page |
-| Login / Signup | Done | Supabase Auth with email confirmation and user-friendly error messages |
-| Dashboard | In Progress | Stats overview; currently displays mock data |
-| Inventory | In Progress | Full CRUD (add, edit, delete), search, and category filter; currently uses local state with mock data |
-| Restock | In Progress | Restock entry form and history log; currently uses local state with mock data |
-| Settings | Done (UI) | Profile info editor and notification toggles |
-| Not Found | Done | 404 fallback page with route error boundary |
+| Page           | Status      | Description                                                                                           |
+| -------------- | ----------- | ----------------------------------------------------------------------------------------------------- |
+| Landing        | Done        | Public marketing/entry page                                                                           |
+| Login / Signup | Done        | Supabase Auth with email confirmation and user-friendly error messages                                |
+| Dashboard      | In Progress | Stats overview; currently displays mock data                                                          |
+| Inventory      | In Progress | Full CRUD (add, edit, delete), search, and category filter; currently uses local state with mock data |
+| Restock        | In Progress | Restock entry form and history log; currently uses local state with mock data                         |
+| Settings       | Done (UI)   | Profile info editor and notification toggles                                                          |
+| Not Found      | Done        | 404 fallback page with route error boundary                                                           |
 
 ## Authentication
 
@@ -51,3 +51,24 @@ Many small retail stores, mini groceries, and supply shops still rely on manual 
 - Implement `generateReport` server function for downloadable inventory reports
 - Implement `sendLowStockAlert` email notifications via the `emailService` utility
 - Real-time stock updates using Supabase subscriptions
+
+## Testing Plan
+
+Planned testing coverage to satisfy course requirements:
+
+| Type               | Tool                               | Scope                                                                        |
+| ------------------ | ---------------------------------- | ---------------------------------------------------------------------------- |
+| Unit Testing       | Vitest                             | Utility functions, store logic, hooks                                        |
+| API Testing        | Vitest + MSW (Mock Service Worker) | Supabase client calls and server functions                                   |
+| Component Testing  | Storybook                          | UI component library (`Button`, `InputField`, `Modal`, `StatsCard`, etc.)    |
+| End-to-End Testing | Playwright                         | Critical user flows: sign up, log in, add/edit/delete product, log a restock |
+
+## Design Patterns Plan
+
+Planned structural patterns to satisfy course requirements:
+
+| Pattern        | Planned Usage                                                                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Singleton      | Supabase client instance (`supabaseClient.ts`) — a single shared client across the app                                                      |
+| Factory Method | Product and restock entry creation — factory functions that construct typed objects with defaults and validation                            |
+| Decorator      | Form field components — wrapping base input elements with added behavior (labels, error states, validation) without modifying the originals |
