@@ -1,11 +1,21 @@
+import { useState } from "react";
 import { Save, User, Bell, Shield, Database } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
 import { ToggleSwitch } from "../components/ui/ToggleSwitch";
+import { DisplayProfile } from "../components/auth/DisplayProfile";
 
 export function Settings() {
+  const [profile, setProfile] = useState({
+    fullName: "",
+    email: "",
+    businessName: "",
+  });
+
   return (
     <div className="space-y-6">
+      <DisplayProfile onLoad={setProfile} />
+
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Settings</h1>
         <p className="text-gray-600 mt-1">
@@ -29,6 +39,10 @@ export function Settings() {
                 label="Full Name"
                 placeholder="John Doe"
                 className="py-2"
+                value={profile.fullName}
+                onChange={(e) =>
+                  setProfile((prev) => ({ ...prev, fullName: e.target.value }))
+                }
               />
             </div>
             <div>
@@ -37,6 +51,10 @@ export function Settings() {
                 label="Email"
                 placeholder="john@example.com"
                 className="py-2"
+                value={profile.email}
+                onChange={(e) =>
+                  setProfile((prev) => ({ ...prev, email: e.target.value }))
+                }
               />
             </div>
           </div>
@@ -46,6 +64,13 @@ export function Settings() {
               label="Business Name"
               placeholder="My Small Business"
               className="py-2"
+              value={profile.businessName}
+              onChange={(e) =>
+                setProfile((prev) => ({
+                  ...prev,
+                  businessName: e.target.value,
+                }))
+              }
             />
           </div>
         </div>

@@ -1,9 +1,20 @@
+import { useState } from "react";
 import { Package, AlertTriangle, RefreshCw, DollarSign } from "lucide-react";
 import { StatsCard } from "../components/ui/StatsCard";
-import { DisplayEmail } from "../components/auth/DisplayEmail";
-import { DisplayName } from "../components/auth/DisplayName";
+import {
+  DisplayProfile,
+  type UserProfile,
+} from "../components/auth/DisplayProfile";
 
 export function Dashboard() {
+  const [profile, setProfile] = useState<UserProfile>({
+    fullName: "",
+    email: "",
+    businessName: "",
+  });
+
+  const firstName = profile.fullName.trim().split(/\s+/)[0] || "there";
+
   const stats = [
     {
       title: "Total Products",
@@ -81,11 +92,11 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
+      <DisplayProfile onLoad={setProfile} />
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
         <p className="text-gray-600 mt-1">
-          Welcome back <DisplayName />! Here's what's happening with your
-          inventory.
+          Welcome back {firstName}! Here's what's happening with your inventory.
         </p>
       </div>
 

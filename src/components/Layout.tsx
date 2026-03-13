@@ -12,9 +12,14 @@ import {
   User,
 } from "lucide-react";
 import { InputField } from "./ui/InputField";
-import { DisplayName } from "./auth/DisplayName";
-import { DisplayEmail } from "./auth/DisplayEmail";
+import { DisplayProfile, type UserProfile } from "./auth/DisplayProfile";
+
 export function Layout() {
+  const [profile, setProfile] = useState<UserProfile>({
+    fullName: "",
+    email: "",
+    businessName: "",
+  });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -31,6 +36,8 @@ export function Layout() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <DisplayProfile onLoad={setProfile} />
+
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -93,10 +100,10 @@ export function Layout() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  <DisplayName fallback="Name" />  
+                  {profile.fullname || "No name"}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  <DisplayEmail fallback="Email" />
+                  {profile.email || "No email"}
                 </p>
               </div>
             </div>
