@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Modal } from "./ui/Modal";
+import { Modal } from "../ui/Modal";
 
 export interface Product {
   id: string;

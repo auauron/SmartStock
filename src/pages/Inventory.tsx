@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Plus, Edit2, Trash2, RefreshCw, Search, Filter } from "lucide-react";
-import { ProductModal, Product } from "../components/ProductModal";
+import { ProductModal, Product } from "../components/inventory/ProductModal";
 
 const initialProducts: Product[] = [
   {
@@ -53,7 +53,7 @@ const initialProducts: Product[] = [
   },
   {
     id: "7",
-    name: "Monitor 24\"",
+    name: 'Monitor 24"',
     category: "Electronics",
     price: 199.99,
     quantity: 18,
@@ -93,7 +93,8 @@ export function Inventory() {
   const [filterCategory, setFilterCategory] = useState("");
 
   const getStatus = (product: Product) => {
-    if (product.quantity === 0) return { label: "Out of Stock", color: "bg-red-100 text-red-700" };
+    if (product.quantity === 0)
+      return { label: "Out of Stock", color: "bg-red-100 text-red-700" };
     if (product.quantity < product.minStock)
       return { label: "Low Stock", color: "bg-yellow-100 text-yellow-700" };
     return { label: "In Stock", color: "bg-green-100 text-green-700" };
@@ -124,15 +125,20 @@ export function Inventory() {
     if (quantity && !isNaN(parseInt(quantity))) {
       setProducts(
         products.map((p) =>
-          p.id === product.id ? { ...p, quantity: p.quantity + parseInt(quantity) } : p
-        )
+          p.id === product.id
+            ? { ...p, quantity: p.quantity + parseInt(quantity) }
+            : p,
+        ),
       );
     }
   };
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !filterCategory || product.category === filterCategory;
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      !filterCategory || product.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -223,7 +229,9 @@ export function Inventory() {
                 return (
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="font-medium text-gray-900">{product.name}</span>
+                      <span className="font-medium text-gray-900">
+                        {product.name}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-600">
                       {product.category}
