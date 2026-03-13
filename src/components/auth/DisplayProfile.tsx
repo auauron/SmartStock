@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { supabase } from "../../lib/supabaseClient";
+import type { UserProfile } from "../../types";
 
-export interface UserProfile {
-  fullName: string;
-  email: string;
-  businessName: string;
-}
+export type { UserProfile };
 
 interface DisplayProfileProps {
   fallback?: UserProfile;

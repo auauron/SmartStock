@@ -4,14 +4,7 @@ import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
 import { SelectField } from "../components/ui/SelectField";
 import { TextAreaField } from "../components/ui/TextAreaField";
-
-interface RestockEntry {
-  id: string;
-  productName: string;
-  quantityAdded: number;
-  date: string;
-  notes: string;
-}
+import type { RestockEntry } from "../types";
 
 const initialHistory: RestockEntry[] = [
   {

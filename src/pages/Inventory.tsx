@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus, Edit2, Trash2, RefreshCw, Search, Filter } from "lucide-react";
-import { ProductModal, Product } from "../components/inventory/ProductModal";
+import { ProductModal } from "../components/inventory/ProductModal";
+import type { Product } from "../types";
 import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
 import { SelectField } from "../components/ui/SelectField";

@@ -29,6 +29,10 @@ Current implementation notes:
 - Do not assume testing infrastructure or design patterns are already fully implemented unless the code confirms it
 - When making changes, preserve the existing stack unless there is a strong reason to change it
 - Prefer solutions that are realistic for a student project: clear structure, maintainable code, and demonstrable requirements
+- Reuse existing UI components before introducing new markup or duplicate component logic
+- If a needed UI element does not exist yet, prefer creating it as a reusable component instead of building it inline in a page
+- Favor component-based frontend changes that can later be covered in Storybook and component-focused tests
+- Keep page-level files focused on layout, data flow, and page composition; extract substantial or reusable UI into components
 
 ## Course Requirements To Keep In View
 
@@ -78,6 +82,8 @@ When responding to prompts in this repository:
 - If documenting features, distinguish clearly between implemented, in-progress, and planned work
 - If adding tests in the future, prioritize critical user flows: authentication, inventory CRUD, and restock logging
 - If adding Storybook in the future, start with shared UI components such as buttons, inputs, modals, cards, toggles, and selectors
+- Before creating new frontend UI, check whether an existing component in `src/components` or `src/components/ui` can be reused or extended
+- When new frontend UI is necessary, extract it into a reusable component with clear props so it can be documented and tested independently later
 
 ## Documentation Expectations
 

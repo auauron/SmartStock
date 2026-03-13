@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router";
 import { Package, AlertTriangle, RefreshCw, DollarSign } from "lucide-react";
 import { StatsCard } from "../components/ui/StatsCard";
-import type { LayoutOutletContext } from "../components/Layout";
+import type { LayoutOutletContext } from "../types";
 
 export function Dashboard() {
   const { profile } = useOutletContext<LayoutOutletContext>();

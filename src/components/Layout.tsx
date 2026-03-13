@@ -12,7 +12,7 @@ import {
   User,
 } from "lucide-react";
 import { InputField } from "./ui/InputField";
-import type { UserProfile } from "./auth/DisplayProfile";
+import type { UserProfile, LayoutOutletContext } from "../types";
 import { supabase } from "../lib/supabaseClient";
 import {
   clearCachedProfile,
@@ -20,9 +20,7 @@ import {
   writeCachedProfile,
 } from "../hooks/useProfileCache";
 
-export interface LayoutOutletContext {
-  profile: UserProfile;
-}
+export type { LayoutOutletContext };
 
 const emptyProfile: UserProfile = {
   fullName: "",

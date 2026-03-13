@@ -4,8 +4,7 @@ import { Save, User, Bell, Shield, Database } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
 import { ToggleSwitch } from "../components/ui/ToggleSwitch";
-import type { UserProfile } from "../components/auth/DisplayProfile";
-import type { LayoutOutletContext } from "../components/Layout";
+import type { UserProfile, LayoutOutletContext } from "../types";
 
 export function Settings() {
   const { profile: loadedProfile } = useOutletContext<LayoutOutletContext>();

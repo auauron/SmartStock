@@ -3,15 +3,9 @@ import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { InputField } from "../ui/InputField";
 import { SelectField } from "../ui/SelectField";
+import type { Product } from "../../types";
 
-export interface Product {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  quantity: number;
-  minStock: number;
-}
+export type { Product };
 
 interface ProductModalProps {
   isOpen: boolean;

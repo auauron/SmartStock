@@ -1,12 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "../lib/supabaseClient";
-
-interface SignUpPayload {
-  email: string;
-  password: string;
-  fullName: string;
-  businessName: string;
-}
+import type { SignUpPayload } from "../types";
 
 interface AuthState {
   loading: boolean;

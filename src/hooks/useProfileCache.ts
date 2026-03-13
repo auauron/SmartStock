@@ -1,4 +1,4 @@
-import type { UserProfile } from "../components/auth/DisplayProfile";
+import type { UserProfile } from "../types";
 
 const PROFILE_CACHE_KEY = "smart-stock:profile-cache";
 const PROFILE_CACHE_TTL_MS = 10 * 60 * 1000;
