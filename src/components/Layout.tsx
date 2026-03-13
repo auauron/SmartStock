@@ -12,7 +12,8 @@ import {
   User,
 } from "lucide-react";
 import { InputField } from "./ui/InputField";
-
+import { DisplayName } from "./auth/DisplayName";
+import { DisplayEmail } from "./auth/DisplayEmail";
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
@@ -92,10 +93,10 @@ export function Layout() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  John Doe
+                  <DisplayName fallback="Name" />  
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  john@example.com
+                  <DisplayEmail fallback="Email" />
                 </p>
               </div>
             </div>

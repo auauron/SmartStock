@@ -1,5 +1,6 @@
 import { Package, AlertTriangle, RefreshCw, DollarSign } from "lucide-react";
 import { StatsCard } from "../components/ui/StatsCard";
+import { DisplayEmail } from "../components/auth/DisplayEmail";
 import { DisplayName } from "../components/auth/DisplayName";
 
 export function Dashboard() {
@@ -83,8 +84,8 @@ export function Dashboard() {
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
         <p className="text-gray-600 mt-1">
-          Welcome back <DisplayName fallback="there" />! Here's what's happening
-          with your inventory.
+          Welcome back <DisplayName />! Here's what's happening with your
+          inventory.
         </p>
       </div>
 
