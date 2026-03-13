@@ -27,7 +27,7 @@ export function Settings() {
               <InputField
                 type="text"
                 label="Full Name"
-                defaultValue="John Doe"
+                placeholder="John Doe"
                 className="py-2"
               />
             </div>
@@ -35,7 +35,7 @@ export function Settings() {
               <InputField
                 type="email"
                 label="Email"
-                defaultValue="john@example.com"
+                placeholder="john@example.com"
                 className="py-2"
               />
             </div>
@@ -44,7 +44,7 @@ export function Settings() {
             <InputField
               type="text"
               label="Business Name"
-              defaultValue="My Small Business"
+              placeholder="My Small Business"
               className="py-2"
             />
           </div>

@@ -1,5 +1,6 @@
 import { Package, AlertTriangle, RefreshCw, DollarSign } from "lucide-react";
 import { StatsCard } from "../components/ui/StatsCard";
+import { DisplayName } from "../components/auth/DisplayName";
 
 export function Dashboard() {
   const stats = [
@@ -38,7 +39,12 @@ export function Dashboard() {
   ];
 
   const lowStockItems = [
-    { name: "Wireless Mouse", category: "Electronics", quantity: 8, minStock: 20 },
+    {
+      name: "Wireless Mouse",
+      category: "Electronics",
+      quantity: 8,
+      minStock: 20,
+    },
     { name: "Office Chair", category: "Furniture", quantity: 3, minStock: 10 },
     { name: "USB Cable", category: "Electronics", quantity: 15, minStock: 50 },
     { name: "Notebook", category: "Stationery", quantity: 12, minStock: 30 },
@@ -59,7 +65,7 @@ export function Dashboard() {
       time: "5 hours ago",
     },
     {
-      product: "Monitor 24\"",
+      product: 'Monitor 24"',
       action: "Restocked",
       quantity: "+25 units",
       time: "1 day ago",
@@ -77,7 +83,8 @@ export function Dashboard() {
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
         <p className="text-gray-600 mt-1">
-          Welcome back! Here's what's happening with your inventory.
+          Welcome back <DisplayName fallback="there" />! Here's what's happening
+          with your inventory.
         </p>
       </div>
 
@@ -93,8 +100,12 @@ export function Dashboard() {
         {/* Low Stock Items */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Low Stock Alert</h2>
-            <p className="text-sm text-gray-600 mt-1">Items that need restocking soon</p>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Low Stock Alert
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Items that need restocking soon
+            </p>
           </div>
           <div className="p-6">
             <div className="space-y-4">
@@ -122,8 +133,12 @@ export function Dashboard() {
         {/* Recent Activity */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
-            <p className="text-sm text-gray-600 mt-1">Latest updates to your inventory</p>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Recent Activity
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Latest updates to your inventory
+            </p>
           </div>
           <div className="p-6">
             <div className="space-y-4">
@@ -133,11 +148,15 @@ export function Dashboard() {
                   className="flex items-start justify-between pb-4 border-b border-gray-100 last:border-0 last:pb-0"
                 >
                   <div>
-                    <p className="font-medium text-gray-900">{activity.product}</p>
+                    <p className="font-medium text-gray-900">
+                      {activity.product}
+                    </p>
                     <p className="text-sm text-gray-600">{activity.action}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">{activity.quantity}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {activity.quantity}
+                    </p>
                     <p className="text-xs text-gray-500">{activity.time}</p>
                   </div>
                 </div>
