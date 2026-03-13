@@ -13,22 +13,26 @@ export function Landing() {
     {
       icon: Package,
       title: "Inventory Tracking",
-      description: "Track all your products in one place with real-time updates and status monitoring.",
+      description:
+        "Track all your products in one place with real-time updates and status monitoring.",
     },
     {
       icon: Bell,
       title: "Low Stock Alerts",
-      description: "Get instant notifications when products fall below minimum stock levels.",
+      description:
+        "Get instant notifications when products fall below minimum stock levels.",
     },
     {
       icon: BarChart3,
       title: "Smart Analytics",
-      description: "Visualize inventory trends and make data-driven restocking decisions.",
+      description:
+        "Visualize inventory trends and make data-driven restocking decisions.",
     },
     {
       icon: Shield,
       title: "Secure & Reliable",
-      description: "Your data is encrypted and backed up automatically for peace of mind.",
+      description:
+        "Your data is encrypted and backed up automatically for peace of mind.",
     },
   ];
 
@@ -47,11 +51,17 @@ export function Landing() {
       <nav className="border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-                <Package className="w-5 h-5 text-white" />
+            <div className="flex items-center">
+              <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/smartstock.png"
+                  alt="Smart Stock logo"
+                  className="w-8 h-8 object-contain scale-110"
+                />
               </div>
-              <span className="text-xl font-semibold text-gray-900">Smart Inventory</span>
+              <span className="text-xl font-semibold text-gray-900">
+                Smart Stock
+              </span>
             </div>
             <div className="flex items-center gap-4">
               <Link
@@ -80,21 +90,19 @@ export function Landing() {
               <span className="text-emerald-600">Confidence</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8">
-              The smart way for small businesses to track products, manage restocking, and
-              never run out of stock again.
+              The smart way for small businesses to track products, manage
+              restocking, and never run out of stock again.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link   
+              <Link
                 to="dashboard"
                 className="flex items-center gap-2 px-8 py-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-lg shadow-lg hover:shadow-xl"
               >
                 Start Stocking
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              
             </div>
-            <p className="text-sm text-gray-500 mt-4">
-            </p>
+            <p className="text-sm text-gray-500 mt-4"></p>
           </div>
         </div>
       </section>
@@ -141,8 +149,9 @@ export function Landing() {
                 Built for Small Business Success
               </h2>
               <p className="text-lg text-gray-600 mb-8">
-                Smart Inventory helps you stay organized, save time, and make better
-                business decisions with our intuitive inventory management platform.
+                Smart Stock helps you stay organized, save time, and make
+                better business decisions with our intuitive inventory
+                management platform.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {benefits.map((benefit, index) => (
@@ -157,7 +166,9 @@ export function Landing() {
               <div className="bg-white rounded-lg shadow-xl p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Total Products</span>
-                  <span className="text-2xl font-bold text-gray-900">1,248</span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    1,248
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Low Stock Items</span>
@@ -165,7 +176,9 @@ export function Landing() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Inventory Value</span>
-                  <span className="text-2xl font-bold text-emerald-600">$124.5K</span>
+                  <span className="text-2xl font-bold text-emerald-600">
+                    $124.5K
+                  </span>
                 </div>
               </div>
             </div>
@@ -180,7 +193,7 @@ export function Landing() {
             Ready to Take Control of Your Inventory?
           </h2>
           <p className="text-xl text-emerald-100 mb-8">
-            Join hundreds of small businesses already using Smart Inventory
+            Join hundreds of small businesses already using Smart Stock
           </p>
           <Link
             to="/signup"
@@ -196,13 +209,19 @@ export function Landing() {
       <footer className="bg-gray-900 text-gray-400 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-              <Package className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
+              <img
+                src="/smartstock.png"
+                alt="Smart Stock logo"
+                className="w-8 h-8 object-contain scale-110"
+              />
             </div>
-            <span className="text-xl font-semibold text-white">Smart Inventory</span>
+            <span className="text-xl font-semibold text-white">
+              Smart Stock
+            </span>
           </div>
           <p className="text-sm">
-            © 2026 Smart Inventory. All rights reserved.
+            © 2026 Smart Stock. All rights reserved.
           </p>
         </div>
       </footer>

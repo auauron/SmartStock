@@ -103,9 +103,13 @@ export function Layout() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-                <Package className="w-5 h-5 text-white" />
+            <div className="flex items-center">
+              <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/smartstock.png"
+                  alt="Smart Stock logo"
+                  className="w-8 h-8 object-contain scale-110"
+                />
               </div>
               <span className="font-semibold text-gray-900">Smart Stock</span>
             </div>

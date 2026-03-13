@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { Package } from "lucide-react";
 
 interface AuthShellProps {
   title: string;
@@ -12,8 +11,12 @@ export function AuthShell({ title, subtitle, children }: AuthShellProps) {
     <div className="flex min-h-screen flex-col justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-600">
-            <Package className="h-7 w-7 text-white" />
+          <div className="flex h-14 w-14 items-center justify-center overflow-hidden">
+            <img
+              src="/smartstock.png"
+              alt="Smart Stock logo"
+              className="h-10 w-10 object-contain scale-110"
+            />
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
