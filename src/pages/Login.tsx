@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useNavigate } from "react-router";
 import { Mail, Lock } from "lucide-react";
@@ -7,27 +7,25 @@ import { Button } from "../components/ui/Button";
 import { CheckboxField } from "../components/ui/CheckboxField";
 import { FormDivider } from "../components/ui/FormDivider";
 import { InputField } from "../components/ui/InputField";
-import { supabase } from "../lib/supabaseClient";
+import { useAuthStore } from "../stores/authStore";
 
 export function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { loading, error, signIn, clearError } = useAuthStore();
+
+  useEffect(() => {
+    return () => {
+      clearError();
+    };
+  }, [clearError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    const success = await signIn(email, password);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    setLoading(false);
-
-    if (error) {
-      alert(error.message);
+    if (!success) {
       return;
     }
 
@@ -50,6 +48,15 @@ export function Login() {
       }
     >
       <form className="space-y-6" onSubmit={handleSubmit}>
+        {error ? (
+          <p
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
+            {error}
+          </p>
+        ) : null}
+
         <InputField
           id="email"
           name="email"
@@ -59,7 +66,12 @@ export function Login() {
           label="Email address"
           icon={Mail}
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            if (error) {
+              clearError();
+            }
+            setEmail(e.target.value);
+          }}
           placeholder="you@example.com"
         />
 
@@ -72,7 +84,12 @@ export function Login() {
           label="Password"
           icon={Lock}
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            if (error) {
+              clearError();
+            }
+            setPassword(e.target.value);
+          }}
           placeholder="••••••••"
         />
 

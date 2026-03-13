@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useNavigate } from "react-router";
 import { Mail, Lock, User, Building } from "lucide-react";
@@ -7,10 +7,11 @@ import { Button } from "../components/ui/Button";
 import { CheckboxField } from "../components/ui/CheckboxField";
 import { FormDivider } from "../components/ui/FormDivider";
 import { InputField } from "../components/ui/InputField";
-import { supabase } from "../lib/supabaseClient";
+import { useAuthStore } from "../stores/authStore";
 
 export function Signup() {
   const navigate = useNavigate();
+  const { loading, error, signUp, clearError } = useAuthStore();
   const [formData, setFormData] = useState({
     fullName: "",
     businessName: "",
@@ -18,39 +19,33 @@ export function Signup() {
     password: "",
     confirmPassword: "",
   });
-  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      clearError();
+    };
+  }, [clearError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (error) {
+      clearError();
+    }
+
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match!");
+      window.alert("Passwords don't match!");
       return;
     }
 
-    setLoading(true);
-
-    const { data, error } = await supabase.auth.signUp({
+    const success = await signUp({
       email: formData.email,
       password: formData.password,
-      options: {
-        data: {
-          full_name: formData.fullName,
-          business_name: formData.businessName,
-        },
-      },
+      fullName: formData.fullName,
+      businessName: formData.businessName,
     });
 
-    setLoading(false);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    if (!data.session) {
-      alert("Account created. Check your email to confirm your account.");
-      navigate("/login");
+    if (!success) {
       return;
     }
 
@@ -73,6 +68,15 @@ export function Signup() {
       }
     >
       <form className="space-y-5" onSubmit={handleSubmit}>
+        {error ? (
+          <p
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
+            {error}
+          </p>
+        ) : null}
+
         <InputField
           id="fullName"
           name="fullName"
@@ -81,9 +85,12 @@ export function Signup() {
           label="Full Name"
           icon={User}
           value={formData.fullName}
-          onChange={(e) =>
-            setFormData({ ...formData, fullName: e.target.value })
-          }
+          onChange={(e) => {
+            if (error) {
+              clearError();
+            }
+            setFormData({ ...formData, fullName: e.target.value });
+          }}
           placeholder="John Doe"
         />
 
@@ -95,9 +102,12 @@ export function Signup() {
           label="Business Name"
           icon={Building}
           value={formData.businessName}
-          onChange={(e) =>
-            setFormData({ ...formData, businessName: e.target.value })
-          }
+          onChange={(e) => {
+            if (error) {
+              clearError();
+            }
+            setFormData({ ...formData, businessName: e.target.value });
+          }}
           placeholder="My Small Business"
         />
 
@@ -110,7 +120,12 @@ export function Signup() {
           label="Email address"
           icon={Mail}
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          onChange={(e) => {
+            if (error) {
+              clearError();
+            }
+            setFormData({ ...formData, email: e.target.value });
+          }}
           placeholder="you@example.com"
         />
 
@@ -123,9 +138,12 @@ export function Signup() {
           label="Password"
           icon={Lock}
           value={formData.password}
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
+          onChange={(e) => {
+            if (error) {
+              clearError();
+            }
+            setFormData({ ...formData, password: e.target.value });
+          }}
           placeholder="••••••••"
         />
 
@@ -138,9 +156,12 @@ export function Signup() {
           label="Confirm Password"
           icon={Lock}
           value={formData.confirmPassword}
-          onChange={(e) =>
-            setFormData({ ...formData, confirmPassword: e.target.value })
-          }
+          onChange={(e) => {
+            if (error) {
+              clearError();
+            }
+            setFormData({ ...formData, confirmPassword: e.target.value });
+          }}
           placeholder="••••••••"
         />
 
