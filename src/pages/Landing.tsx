@@ -88,15 +88,12 @@ export function Landing() {
                 to="/signup"
                 className="flex items-center gap-2 px-8 py-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-lg shadow-lg hover:shadow-xl"
               >
-                Start Free Trial
+                Start Stocking
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <button className="px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors font-medium text-lg">
-                Watch Demo
-              </button>
+              
             </div>
             <p className="text-sm text-gray-500 mt-4">
-              No credit card required • 14-day free trial
             </p>
           </div>
         </div>
