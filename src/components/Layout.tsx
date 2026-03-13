@@ -17,16 +17,13 @@ export function Layout() {
   const location = useLocation();
 
   const navigation = [
-    { name: "Dashboard", path: "/", icon: LayoutDashboard },
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "Inventory", path: "/inventory", icon: Package },
     { name: "Restock", path: "/restock", icon: RefreshCw },
     { name: "Settings", path: "/settings", icon: Settings },
   ];
 
   const isActive = (path: string) => {
-    if (path === "/") {
-      return location.pathname === "/";
-    }
     return location.pathname.startsWith(path);
   };
 
@@ -93,8 +90,12 @@ export function Layout() {
                 <User className="w-4 h-4 text-emerald-700" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">John Doe</p>
-                <p className="text-xs text-gray-500 truncate">john@example.com</p>
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  John Doe
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  john@example.com
+                </p>
               </div>
             </div>
           </div>

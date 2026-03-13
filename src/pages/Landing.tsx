@@ -84,8 +84,8 @@ export function Landing() {
               never run out of stock again.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                to="/signup"
+              <Link   
+                to="dashboard"
                 className="flex items-center gap-2 px-8 py-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-lg shadow-lg hover:shadow-xl"
               >
                 Start Stocking
