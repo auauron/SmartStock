@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import { Mail, Lock, User, Building } from "lucide-react";
 import { AuthShell } from "../components/auth/AuthShell";
 import { Button } from "../components/ui/Button";
 import { CheckboxField } from "../components/ui/CheckboxField";
 import { FormDivider } from "../components/ui/FormDivider";
 import { InputField } from "../components/ui/InputField";
+import { supabase } from "../lib/supabaseClient";
 
 export function Signup() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
     businessName: "",
@@ -27,13 +30,31 @@ export function Signup() {
 
     setLoading(true);
 
-    // TODO: Implement Supabase authentication
-    console.log("Sign up with:", formData);
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        data: {
+          full_name: formData.fullName,
+          business_name: formData.businessName,
+        },
+      },
+    });
 
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    setLoading(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    if (!data.session) {
+      alert("Account created. Check your email to confirm your account.");
+      navigate("/login");
+      return;
+    }
+
+    navigate("/dashboard");
   };
 
   return (

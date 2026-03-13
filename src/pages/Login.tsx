@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import { Mail, Lock } from "lucide-react";
 import { AuthShell } from "../components/auth/AuthShell";
 import { Button } from "../components/ui/Button";
 import { CheckboxField } from "../components/ui/CheckboxField";
 import { FormDivider } from "../components/ui/FormDivider";
 import { InputField } from "../components/ui/InputField";
+import { supabase } from "../lib/supabaseClient";
 
 export function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,13 +19,19 @@ export function Login() {
     e.preventDefault();
     setLoading(true);
 
-    // TODO: Implement Supabase authentication
-    console.log("Login with:", { email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    setLoading(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    navigate("/dashboard");
   };
 
   return (
