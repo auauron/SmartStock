@@ -11,6 +11,7 @@ import {
   X,
   User,
 } from "lucide-react";
+import { InputField } from "./ui/InputField";
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -115,14 +116,12 @@ export function Layout() {
             </button>
 
             <div className="flex-1 max-w-lg mx-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                />
-              </div>
+              <InputField
+                type="text"
+                placeholder="Search products..."
+                icon={Search}
+                className="py-2"
+              />
             </div>
 
             <div className="flex items-center gap-4">

@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { Button } from "../components/ui/Button";
+import { InputField } from "../components/ui/InputField";
+import { SelectField } from "../components/ui/SelectField";
+import { TextAreaField } from "../components/ui/TextAreaField";
 
 interface RestockEntry {
   id: string;
@@ -26,7 +30,7 @@ const initialHistory: RestockEntry[] = [
   },
   {
     id: "3",
-    productName: "Monitor 24\"",
+    productName: 'Monitor 24"',
     quantityAdded: 25,
     date: "2026-03-09",
     notes: "Low stock replenishment",
@@ -71,83 +75,84 @@ export function Restock() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Restock Management</h1>
-        <p className="text-gray-600 mt-1">Add new stock and track restock history</p>
+        <h1 className="text-2xl font-semibold text-gray-900">
+          Restock Management
+        </h1>
+        <p className="text-gray-600 mt-1">
+          Add new stock and track restock history
+        </p>
       </div>
 
       {/* Restock Form */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Add Restock</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Add Restock
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Product Name
-              </label>
-              <select
-                required
-                value={formData.productName}
-                onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              >
-                <option value="">Select a product</option>
-                <option value="Wireless Mouse">Wireless Mouse</option>
-                <option value="Office Chair">Office Chair</option>
-                <option value="USB Cable">USB Cable</option>
-                <option value="Laptop Stand">Laptop Stand</option>
-                <option value="Mechanical Keyboard">Mechanical Keyboard</option>
-                <option value="Notebook">Notebook</option>
-                <option value="Monitor 24&quot;">Monitor 24"</option>
-                <option value="Desk Lamp">Desk Lamp</option>
-                <option value="Webcam HD">Webcam HD</option>
-                <option value="Pen Set">Pen Set</option>
-              </select>
-            </div>
+            <SelectField
+              required
+              label="Product Name"
+              value={formData.productName}
+              onChange={(e) =>
+                setFormData({ ...formData, productName: e.target.value })
+              }
+              className="py-2"
+            >
+              <option value="">Select a product</option>
+              <option value="Wireless Mouse">Wireless Mouse</option>
+              <option value="Office Chair">Office Chair</option>
+              <option value="USB Cable">USB Cable</option>
+              <option value="Laptop Stand">Laptop Stand</option>
+              <option value="Mechanical Keyboard">Mechanical Keyboard</option>
+              <option value="Notebook">Notebook</option>
+              <option value='Monitor 24"'>Monitor 24"</option>
+              <option value="Desk Lamp">Desk Lamp</option>
+              <option value="Webcam HD">Webcam HD</option>
+              <option value="Pen Set">Pen Set</option>
+            </SelectField>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Restock Quantity
-              </label>
-              <input
-                type="number"
-                required
-                min="1"
-                value={formData.quantity}
-                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="Enter quantity"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Notes (Optional)
-            </label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
-              placeholder="Add any notes about this restock..."
+            <InputField
+              type="number"
+              required
+              min="1"
+              label="Restock Quantity"
+              value={formData.quantity}
+              onChange={(e) =>
+                setFormData({ ...formData, quantity: e.target.value })
+              }
+              className="py-2"
+              placeholder="Enter quantity"
             />
           </div>
 
-          <button
-            type="submit"
-            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
-          >
+          <TextAreaField
+            label="Notes (Optional)"
+            value={formData.notes}
+            onChange={(e) =>
+              setFormData({ ...formData, notes: e.target.value })
+            }
+            rows={3}
+            className="resize-none"
+            placeholder="Add any notes about this restock..."
+          />
+
+          <Button type="submit">
             <Plus className="w-5 h-5" />
             Add Restock Entry
-          </button>
+          </Button>
         </form>
       </div>
 
       {/* Restock History */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Restock History</h2>
-          <p className="text-sm text-gray-600 mt-1">Recent restocking activities</p>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Restock History
+          </h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Recent restocking activities
+          </p>
         </div>
 
         <div className="overflow-x-auto">
@@ -172,7 +177,9 @@ export function Restock() {
               {history.map((entry) => (
                 <tr key={entry.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="font-medium text-gray-900">{entry.productName}</span>
+                    <span className="font-medium text-gray-900">
+                      {entry.productName}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">

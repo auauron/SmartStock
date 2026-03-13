@@ -1,5 +1,6 @@
 import { Link, isRouteErrorResponse, useRouteError } from "react-router";
 import { AlertTriangle, ArrowLeft, House } from "lucide-react";
+import { Button } from "./ui/Button";
 
 export function RouteErrorBoundary() {
   const error = useRouteError();
@@ -28,18 +29,19 @@ export function RouteErrorBoundary() {
         <p className="mt-3 text-slate-600">{message}</p>
 
         <div className="mt-8 flex flex-wrap gap-3">
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={() => window.history.back()}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            className="border-slate-300 text-slate-700 hover:bg-slate-100 focus:ring-slate-400"
           >
             <ArrowLeft className="h-4 w-4" />
             Go back
-          </button>
+          </Button>
 
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700"
           >
             <House className="h-4 w-4" />
             Home
