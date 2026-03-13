@@ -1,21 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router";
 import { Save, User, Bell, Shield, Database } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
 import { ToggleSwitch } from "../components/ui/ToggleSwitch";
-import { DisplayProfile } from "../components/auth/DisplayProfile";
+import type { UserProfile } from "../components/auth/DisplayProfile";
+import type { LayoutOutletContext } from "../components/Layout";
 
 export function Settings() {
-  const [profile, setProfile] = useState({
+  const { profile: loadedProfile } = useOutletContext<LayoutOutletContext>();
+  const [profile, setProfile] = useState<UserProfile>({
     fullName: "",
     email: "",
     businessName: "",
   });
 
+  useEffect(() => {
+    setProfile(loadedProfile);
+  }, [loadedProfile]);
+
   return (
     <div className="space-y-6">
-      <DisplayProfile onLoad={setProfile} />
-
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Settings</h1>
         <p className="text-gray-600 mt-1">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, Link, useLocation } from "react-router";
 import {
   LayoutDashboard,
@@ -12,13 +12,27 @@ import {
   User,
 } from "lucide-react";
 import { InputField } from "./ui/InputField";
-import { DisplayProfile, type UserProfile } from "./auth/DisplayProfile";
+import type { UserProfile } from "./auth/DisplayProfile";
+import { supabase } from "../lib/supabaseClient";
+import {
+  clearCachedProfile,
+  readCachedProfile,
+  writeCachedProfile,
+} from "../hooks/useProfileCache";
+
+export interface LayoutOutletContext {
+  profile: UserProfile;
+}
+
+const emptyProfile: UserProfile = {
+  fullName: "",
+  email: "",
+  businessName: "",
+};
 
 export function Layout() {
-  const [profile, setProfile] = useState<UserProfile>({
-    fullName: "",
-    email: "",
-    businessName: "",
+  const [profile, setProfile] = useState<UserProfile>(() => {
+    return readCachedProfile() || emptyProfile;
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
@@ -34,10 +48,44 @@ export function Layout() {
     return location.pathname.startsWith(path);
   };
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (!user) {
+        setProfile(emptyProfile);
+        clearCachedProfile();
+        return;
+      }
+
+      const nextProfile = {
+        fullName: (user.user_metadata?.full_name as string | undefined) || "",
+        email: user.email || "",
+        businessName:
+          (user.user_metadata?.business_name as string | undefined) || "",
+      };
+
+      setProfile(nextProfile);
+      writeCachedProfile(nextProfile);
+    };
+
+    void loadUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <DisplayProfile onLoad={setProfile} />
-
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -100,7 +148,7 @@ export function Layout() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {profile.fullname || "No name"}
+                  {profile.fullName || "No name"}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
                   {profile.email || "No email"}
@@ -146,7 +194,7 @@ export function Layout() {
 
         {/* Page Content */}
         <main className="p-4 sm:p-6 lg:p-8">
-          <Outlet />
+          <Outlet context={{ profile }} />
         </main>
       </div>
     </div>

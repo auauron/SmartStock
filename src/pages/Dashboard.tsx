@@ -1,17 +1,10 @@
-import { useState } from "react";
+import { useOutletContext } from "react-router";
 import { Package, AlertTriangle, RefreshCw, DollarSign } from "lucide-react";
 import { StatsCard } from "../components/ui/StatsCard";
-import {
-  DisplayProfile,
-  type UserProfile,
-} from "../components/auth/DisplayProfile";
+import type { LayoutOutletContext } from "../components/Layout";
 
 export function Dashboard() {
-  const [profile, setProfile] = useState<UserProfile>({
-    fullName: "",
-    email: "",
-    businessName: "",
-  });
+  const { profile } = useOutletContext<LayoutOutletContext>();
 
   const firstName = profile.fullName.trim().split(/\s+/)[0] || "there";
 
@@ -92,7 +85,6 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <DisplayProfile onLoad={setProfile} />
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
         <p className="text-gray-600 mt-1">
