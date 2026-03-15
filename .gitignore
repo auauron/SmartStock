@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 .env
 smartstock_bundle.txt
+*storybook.log
+storybook-static
