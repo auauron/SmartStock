@@ -92,3 +92,7 @@ Keep README and related explanations consistent with the real state of the codeb
 - Do not describe planned features as already implemented
 - Call out mock-data areas honestly
 - Keep explanations clear enough for academic review and project defense
+
+## Response Format Preference
+
+- End each implementation-oriented final response with a suggested Git commit message
