@@ -26,3 +26,4 @@ dist-ssr
 smartstock_bundle.txt
 *storybook.log
 storybook-static
+.github/copilot-instructions.md
