@@ -93,6 +93,20 @@ Keep README and related explanations consistent with the real state of the codeb
 - Call out mock-data areas honestly
 - Keep explanations clear enough for academic review and project defense
 
+## SCD Final Project Rubric Integration (Mandatory)
+
+Use `docs/scd-final-project-guide.md` as required context for Software Component Design (SCD) work.
+
+When a prompt is related to SCD deliverables, always align suggestions and code changes with that guide, especially:
+
+- Design pattern justification quality (why needed, what breaks without pattern)
+- Required implementation visibility in code (clear pattern components and locations)
+- Documentation completeness for all required paper sections
+- Testing evidence planning (Vitest, MSW, Storybook, Playwright)
+- Demo readiness and GitHub contribution expectations
+
+When preparing explanations or documentation support, avoid generic textbook pattern definitions. Focus on SmartStock-specific rationale and traceable file-level implementation.
+
 ## Response Format Preference
 
 - End each implementation-oriented final response with a suggested Git commit message

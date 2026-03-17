@@ -63,12 +63,18 @@ Planned testing coverage to satisfy course requirements:
 | Component Testing  | Storybook                          | UI component library (`Button`, `InputField`, `Modal`, `StatsCard`, etc.)    |
 | End-to-End Testing | Playwright                         | Critical user flows: sign up, log in, add/edit/delete product, log a restock |
 
-## Design Patterns Plan
+## Design Patterns Plan (SCD-Aligned)
 
-Planned structural patterns to satisfy course requirements:
+This section is aligned to the SCD final-project requirements by showing pattern category, implementation status, code location, and system-specific justification.
 
-| Pattern        | Planned Usage                                                                                                                               |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Singleton      | Supabase client instance (`supabaseClient.ts`) — a single shared client across the app                                                      |
-| Factory Method | Product and restock entry creation — factory functions that construct typed objects with defaults and validation                            |
-| Decorator      | Form field components — wrapping base input elements with added behavior (labels, error states, validation) without modifying the originals |
+| Pattern        | Category   | Status                  | SmartStock Usage                                                                                                              | Code Location                                                                                                  | Problem Without Pattern                                                                                         |
+| -------------- | ---------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Singleton      | Creational | Implemented             | One shared Supabase client used across auth and data-access code                                                              | `src/lib/supabaseClient.ts`                                                                                    | Repeated client setup, inconsistent configuration, and higher risk of auth/session behavior drift               |
+| Decorator      | Structural | Implemented             | Reusable form-field wrappers add labels, icon/adornment support, and consistent UI behavior around base input/select/textarea | `src/components/ui/InputField.tsx`, `src/components/ui/SelectField.tsx`, `src/components/ui/TextAreaField.tsx` | Repeated form UI logic across pages, inconsistent field behavior, and harder maintenance                        |
+| Factory Method | Creational | Planned (next priority) | Typed creation functions for product/restock entities with centralized defaults and validation                                | Planned in `src/factories` and to be used from `src/pages/Inventory.tsx`, `src/pages/Restock.tsx`              | Scattered object-construction logic in UI handlers, inconsistent defaults/validation, and tighter page coupling |
+
+### Pattern Demonstration Notes (for SCD panel)
+
+- Singleton can be demonstrated by tracing all Supabase usage back to one exported client instance.
+- Decorator can be demonstrated by showing multiple forms that reuse the same field wrappers with different props.
+- Factory Method will be demonstrable after factory functions are implemented and wired into product/restock creation flows.
