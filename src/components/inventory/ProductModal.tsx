@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { InputField } from "../ui/InputField";
-import { SelectField } from "../ui/SelectField";
+import { DropdownField } from "../ui/DropdownField";
 import type { Product } from "../../types";
 
 export type { Product };
@@ -76,7 +76,7 @@ export function ProductModal({
           placeholder="Enter product name"
         />
 
-        <SelectField
+        <DropdownField
           required
           label="Category"
           value={formData.category}
@@ -91,7 +91,7 @@ export function ProductModal({
           <option value="Stationery">Stationery</option>
           <option value="Accessories">Accessories</option>
           <option value="Office Supplies">Office Supplies</option>
-        </SelectField>
+        </DropdownField>
 
         <InputField
           type="number"

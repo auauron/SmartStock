@@ -4,7 +4,7 @@ import { ProductModal } from "../components/inventory/ProductModal";
 import type { Product } from "../types";
 import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
-import { SelectField } from "../components/ui/SelectField";
+import { DropdownField } from "../components/ui/DropdownField";
 
 const initialProducts: Product[] = [
   {
@@ -180,7 +180,7 @@ export function Inventory() {
             />
           </div>
           <div className="sm:w-64 relative">
-            <SelectField
+            <DropdownField
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
               icon={Filter}
@@ -192,7 +192,7 @@ export function Inventory() {
                   {cat}
                 </option>
               ))}
-            </SelectField>
+            </DropdownField>
           </div>
         </div>
       </div>

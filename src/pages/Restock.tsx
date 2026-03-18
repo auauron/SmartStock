@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
-import { SelectField } from "../components/ui/SelectField";
+import { DropdownField } from "../components/ui/DropdownField";
 import { TextAreaField } from "../components/ui/TextAreaField";
 import type { RestockEntry } from "../types";
 
@@ -83,7 +83,7 @@ export function Restock() {
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <SelectField
+            <DropdownField
               required
               label="Product Name"
               value={formData.productName}
@@ -103,7 +103,7 @@ export function Restock() {
               <option value="Desk Lamp">Desk Lamp</option>
               <option value="Webcam HD">Webcam HD</option>
               <option value="Pen Set">Pen Set</option>
-            </SelectField>
+            </DropdownField>
 
             <InputField
               type="number"

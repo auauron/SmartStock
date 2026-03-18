@@ -2,7 +2,7 @@ import type { ReactNode, SelectHTMLAttributes } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "../../lib/cn";
 
-interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
+interface DropdownFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   children: ReactNode;
   label?: string;
   icon?: LucideIcon;
@@ -10,7 +10,7 @@ interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   labelClassName?: string;
 }
 
-export function SelectField({
+export function DropdownField({
   children,
   className,
   icon: Icon,
@@ -19,7 +19,7 @@ export function SelectField({
   wrapperClassName,
   labelClassName,
   ...props
-}: SelectFieldProps) {
+}: DropdownFieldProps) {
   return (
     <div className={wrapperClassName}>
       {label ? (
