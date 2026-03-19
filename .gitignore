@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Ignore OneNote notebook folders
+MyNotebook/
+*.one
+*.onetoc2
+
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
