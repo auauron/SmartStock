@@ -8,14 +8,11 @@ export interface Product {
   quantity: number;
   minStock: number;
 }
-
-export interface RestockEntry {
-  id: string;
-  productName: string;
-  quantityAdded: number;
-  date: string;
-  notes: string;
-}
+export type {
+  CreateRestockInput,
+  RestockEntry,
+  RestockProductOption,
+} from "./restock";
 
 // ─── Auth / User Types ────────────────────────────────────────────────────────
 

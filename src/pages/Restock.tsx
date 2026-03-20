@@ -4,65 +4,46 @@ import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
 import { DropdownField } from "../components/ui/DropdownField";
 import { TextAreaField } from "../components/ui/TextAreaField";
-import type { RestockEntry } from "../types";
-
-const initialHistory: RestockEntry[] = [
-  {
-    id: "1",
-    productName: "Laptop Stand",
-    quantityAdded: 50,
-    date: "2026-03-10",
-    notes: "Regular monthly restock",
-  },
-  {
-    id: "2",
-    productName: "Mechanical Keyboard",
-    quantityAdded: 100,
-    date: "2026-03-10",
-    notes: "New product launch",
-  },
-  {
-    id: "3",
-    productName: 'Monitor 24"',
-    quantityAdded: 25,
-    date: "2026-03-09",
-    notes: "Low stock replenishment",
-  },
-  {
-    id: "4",
-    productName: "Wireless Mouse",
-    quantityAdded: 75,
-    date: "2026-03-08",
-    notes: "Emergency restock due to high demand",
-  },
-  {
-    id: "5",
-    productName: "USB Cable",
-    quantityAdded: 200,
-    date: "2026-03-07",
-    notes: "Bulk order from supplier",
-  },
-];
+import { useRestocks } from "../hooks/useRestocks";
 
 export function Restock() {
-  const [history, setHistory] = useState<RestockEntry[]>(initialHistory);
+  const {
+    history,
+    products,
+    loading,
+    submitting,
+    error,
+    addRestock,
+    clearError,
+  } = useRestocks();
   const [formData, setFormData] = useState({
-    productName: "",
+    productId: "",
     quantity: "",
     notes: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newEntry: RestockEntry = {
-      id: Date.now().toString(),
-      productName: formData.productName,
-      quantityAdded: parseInt(formData.quantity),
-      date: new Date().toISOString().split("T")[0],
-      notes: formData.notes,
-    };
-    setHistory([newEntry, ...history]);
-    setFormData({ productName: "", quantity: "", notes: "" });
+
+    const quantityValue = Number.parseInt(formData.quantity, 10);
+    if (
+      !formData.productId ||
+      Number.isNaN(quantityValue) ||
+      quantityValue < 1
+    ) {
+      return;
+    }
+
+    try {
+      await addRestock({
+        productId: formData.productId,
+        quantityAdded: quantityValue,
+        notes: formData.notes,
+      });
+      setFormData({ productId: "", quantity: "", notes: "" });
+    } catch {
+      // Error state is handled in hook.
+    }
   };
 
   return (
@@ -81,28 +62,38 @@ export function Restock() {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           Add Restock
         </h2>
+        {error ? (
+          <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="flex items-center justify-between gap-3">
+              <span>{error}</span>
+              <button
+                type="button"
+                onClick={clearError}
+                className="text-red-600 hover:text-red-800"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        ) : null}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <DropdownField
               required
               label="Product Name"
-              value={formData.productName}
+              value={formData.productId}
               onChange={(e) =>
-                setFormData({ ...formData, productName: e.target.value })
+                setFormData({ ...formData, productId: e.target.value })
               }
+              disabled={loading || submitting}
               className="py-2"
             >
               <option value="">Select a product</option>
-              <option value="Wireless Mouse">Wireless Mouse</option>
-              <option value="Office Chair">Office Chair</option>
-              <option value="USB Cable">USB Cable</option>
-              <option value="Laptop Stand">Laptop Stand</option>
-              <option value="Mechanical Keyboard">Mechanical Keyboard</option>
-              <option value="Notebook">Notebook</option>
-              <option value='Monitor 24"'>Monitor 24"</option>
-              <option value="Desk Lamp">Desk Lamp</option>
-              <option value="Webcam HD">Webcam HD</option>
-              <option value="Pen Set">Pen Set</option>
+              {products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name}
+                </option>
+              ))}
             </DropdownField>
 
             <InputField
@@ -114,6 +105,7 @@ export function Restock() {
               onChange={(e) =>
                 setFormData({ ...formData, quantity: e.target.value })
               }
+              disabled={submitting}
               className="py-2"
               placeholder="Enter quantity"
             />
@@ -125,14 +117,15 @@ export function Restock() {
             onChange={(e) =>
               setFormData({ ...formData, notes: e.target.value })
             }
+            disabled={submitting}
             rows={3}
             className="resize-none"
             placeholder="Add any notes about this restock..."
           />
 
-          <Button type="submit">
+          <Button type="submit" disabled={submitting || loading}>
             <Plus className="w-5 h-5" />
-            Add Restock Entry
+            {submitting ? "Adding..." : "Add Restock Entry"}
           </Button>
         </form>
       </div>
