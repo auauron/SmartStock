@@ -85,10 +85,18 @@ export function Restock() {
               onChange={(e) =>
                 setFormData({ ...formData, productId: e.target.value })
               }
-              disabled={loading || submitting}
+              disabled={loading || submitting || products.length === 0}
               className="py-2"
             >
-              <option value="">Select a product</option>
+              {loading ? (
+                <option value="">Loading products...</option>
+              ) : products.length === 0 ? (
+                <option value="">No products available</option>
+              ) : (
+                <option value="" disabled>
+                  Select a product
+                </option>
+              )}
               {products.map((product) => (
                 <option key={product.id} value={product.id}>
                   {product.name}
