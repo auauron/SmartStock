@@ -33,3 +33,8 @@ export const EditProduct: Story = {
     },
   },
 };
+
+// restock test
+// delete test
+// filter categories test
+// search product test

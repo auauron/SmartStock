@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { InputField } from "../ui/InputField";
@@ -20,33 +20,13 @@ export function ProductModal({
   onSave,
   product,
 }: ProductModalProps) {
-  const [formData, setFormData] = useState<Omit<Product, "id">>({
-    name: "",
-    category: "",
-    price: 0,
-    quantity: 0,
-    minStock: 0,
-  });
-
-  useEffect(() => {
-    if (product) {
-      setFormData({
-        name: product.name,
-        category: product.category,
-        price: product.price,
-        quantity: product.quantity,
-        minStock: product.minStock,
-      });
-    } else {
-      setFormData({
-        name: "",
-        category: "",
-        price: 0,
-        quantity: 0,
-        minStock: 0,
-      });
-    }
-  }, [product, isOpen]);
+  const [formData, setFormData] = useState<Omit<Product, "id">>(() => ({
+    name: product?.name || "",
+    category: product?.category || "",
+    price: product?.price || 0,
+    quantity: product?.quantity || 0,
+    minStock: product?.minStock || 0,
+  }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,7 +79,7 @@ export function ProductModal({
           min="0"
           step="0.01"
           label="Price"
-          startAdornment={<span>$</span>}
+          startAdornment={<span>₱</span>}
           value={formData.price}
           onChange={(e) =>
             setFormData({

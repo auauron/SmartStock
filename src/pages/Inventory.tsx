@@ -1,96 +1,16 @@
-import { useState } from "react";
-import { Plus, Edit2, Trash2, RefreshCw, Search, Filter } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, Edit2, Trash2, Search, Filter, Loader2 } from "lucide-react"; 
 import { ProductModal } from "../components/inventory/ProductModal";
 import type { Product } from "../types";
 import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
 import { DropdownField } from "../components/ui/DropdownField";
+import { useInventory } from "../hooks/useProducts";
 
-const initialProducts: Product[] = [
-  {
-    id: "1",
-    name: "Wireless Mouse",
-    category: "Electronics",
-    price: 29.99,
-    quantity: 8,
-    minStock: 20,
-  },
-  {
-    id: "2",
-    name: "Office Chair",
-    category: "Furniture",
-    price: 249.99,
-    quantity: 3,
-    minStock: 10,
-  },
-  {
-    id: "3",
-    name: "USB Cable",
-    category: "Electronics",
-    price: 9.99,
-    quantity: 15,
-    minStock: 50,
-  },
-  {
-    id: "4",
-    name: "Laptop Stand",
-    category: "Accessories",
-    price: 49.99,
-    quantity: 45,
-    minStock: 20,
-  },
-  {
-    id: "5",
-    name: "Mechanical Keyboard",
-    category: "Electronics",
-    price: 89.99,
-    quantity: 32,
-    minStock: 15,
-  },
-  {
-    id: "6",
-    name: "Notebook",
-    category: "Stationery",
-    price: 4.99,
-    quantity: 12,
-    minStock: 30,
-  },
-  {
-    id: "7",
-    name: 'Monitor 24"',
-    category: "Electronics",
-    price: 199.99,
-    quantity: 18,
-    minStock: 10,
-  },
-  {
-    id: "8",
-    name: "Desk Lamp",
-    category: "Furniture",
-    price: 34.99,
-    quantity: 5,
-    minStock: 15,
-  },
-  {
-    id: "9",
-    name: "Webcam HD",
-    category: "Electronics",
-    price: 79.99,
-    quantity: 0,
-    minStock: 12,
-  },
-  {
-    id: "10",
-    name: "Pen Set",
-    category: "Stationery",
-    price: 12.99,
-    quantity: 55,
-    minStock: 40,
-  },
-];
 
 export function Inventory() {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const { products, loading, saveProduct, deleteProduct, error, clearError } = useInventory();
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
@@ -104,49 +24,43 @@ export function Inventory() {
     return { label: "In Stock", color: "bg-green-100 text-green-700" };
   };
 
-  const handleSave = (product: Product) => {
-    if (editingProduct) {
-      setProducts(products.map((p) => (p.id === product.id ? product : p)));
-    } else {
-      setProducts([...products, product]);
+  const handleSave = async (productData: Product) => {
+    try {
+      await saveProduct(productData);
+      setIsModalOpen(false);
+      setEditingProduct(undefined);
+    } catch (err) {
+      console.error("UI Error Catch:", err);
     }
-    setEditingProduct(undefined);
   };
 
-  const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
-      setProducts(products.filter((p) => p.id !== id));
+      try {
+        await deleteProduct(id);
+      } catch (err) {
+        console.error("Delete failed:", err);
+      }
     }
   };
 
-  const handleRestock = (product: Product) => {
-    const quantity = prompt(`Enter restock quantity for ${product.name}:`, "0");
-    if (quantity && !isNaN(parseInt(quantity))) {
-      setProducts(
-        products.map((p) =>
-          p.id === product.id
-            ? { ...p, quantity: p.quantity + parseInt(quantity) }
-            : p,
-        ),
-      );
-    }
-  };
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = !filterCategory || product.category === filterCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchQuery, filterCategory]);
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      !filterCategory || product.category === filterCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const categories = useMemo(() => Array.from(new Set(products.map((p) => p.category))), [products]);
 
-  const categories = Array.from(new Set(products.map((p) => p.category)));
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -165,6 +79,15 @@ export function Inventory() {
           Add Product
         </Button>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
+          <span className="block sm:inline">{error}</span>
+          <button onClick={clearError} className="absolute top-0 bottom-0 right-0 px-4 py-3">
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
@@ -188,9 +111,7 @@ export function Inventory() {
             >
               <option value="">All Categories</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
+                <option key={cat} value={cat}>{cat}</option>
               ))}
             </DropdownField>
           </div>
@@ -203,27 +124,12 @@ export function Inventory() {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Quantity
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Min Stock
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -231,52 +137,22 @@ export function Inventory() {
                 const status = getStatus(product);
                 return (
                   <tr key={product.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{product.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">{product.category}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">${product.price.toFixed(2)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">{product.quantity}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="font-medium text-gray-900">
-                        {product.name}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                      {product.category}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                      ${product.price.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                      {product.quantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                      {product.minStock}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}
-                      >
+                      <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}>
                         {status.label}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleEdit(product)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                          title="Edit"
-                        >
+                        <button onClick={() => { setEditingProduct(product); setIsModalOpen(true); }} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded">
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
-                          title="Delete"
-                        >
+                        <button onClick={() => handleDelete(product.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded">
                           <Trash2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleRestock(product)}
-                          className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
-                          title="Restock"
-                        >
-                          <RefreshCw className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -286,20 +162,11 @@ export function Inventory() {
             </tbody>
           </table>
         </div>
-
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No products found</p>
-          </div>
-        )}
       </div>
 
       <ProductModal
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingProduct(undefined);
-        }}
+        onClose={() => { setIsModalOpen(false); setEditingProduct(undefined); }}
         onSave={handleSave}
         product={editingProduct}
       />
