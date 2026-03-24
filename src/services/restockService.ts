@@ -5,19 +5,20 @@ import type {
   RestockProductOption,
 } from "../types";
 
-interface ProductRow {
-  id: string;
-  name: string;
-  quantity: number;
-  user_id: string;
-}
-
 interface RestockRow {
   id: string;
   quantity_added: number;
   notes: string | null;
   restocked_at: string;
   products: { name: string } | { name: string }[] | null;
+}
+
+interface CreateRestockRpcRow {
+  id: string;
+  product_name: string;
+  quantity_added: number;
+  notes: string;
+  restocked_at: string;
 }
 
 async function requireUserId(): Promise<string> {
@@ -88,51 +89,26 @@ export async function getRestockHistory(): Promise<RestockEntry[]> {
 export async function createRestock(
   input: CreateRestockInput,
 ): Promise<RestockEntry> {
-  const userId = await requireUserId();
+  await requireUserId();
 
-  const { data: productData, error: productError } = await supabase
-    .from("products")
-    .select("id, name, quantity, user_id")
-    .eq("id", input.productId)
-    .eq("user_id", userId)
-    .single();
+  const { data, error } = await supabase.rpc("create_restock_transaction", {
+    p_product_id: input.productId,
+    p_quantity_added: input.quantityAdded,
+    p_notes: input.notes,
+  });
 
-  if (productError) {
-    throw new Error(productError.message);
+  if (error) {
+    throw new Error(error.message);
   }
 
-  const product = productData as ProductRow;
-  const nextQuantity = product.quantity + input.quantityAdded;
-
-  const { error: updateError } = await supabase
-    .from("products")
-    .update({ quantity: nextQuantity })
-    .eq("id", product.id)
-    .eq("user_id", userId);
-
-  if (updateError) {
-    throw new Error(updateError.message);
-  }
-
-  const trimmedNotes = input.notes.trim();
-  const { data: restockData, error: insertError } = await supabase
-    .from("restocks")
-    .insert({
-      product_id: product.id,
-      user_id: userId,
-      quantity_added: input.quantityAdded,
-      notes: trimmedNotes.length > 0 ? trimmedNotes : null,
-    })
-    .select("id, quantity_added, notes, restocked_at")
-    .single();
-
-  if (insertError) {
-    throw new Error(insertError.message);
+  const restockData = (data as CreateRestockRpcRow[] | null)?.[0];
+  if (!restockData) {
+    throw new Error("Failed to create restock entry.");
   }
 
   return {
     id: restockData.id,
-    productName: product.name,
+    productName: restockData.product_name,
     quantityAdded: restockData.quantity_added,
     date: restockData.restocked_at,
     notes: restockData.notes ?? "",
