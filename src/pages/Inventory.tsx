@@ -70,13 +70,14 @@ export function Inventory() {
           <p className="text-gray-600 mt-1">Manage your product inventory</p>
         </div>
         <Button
-          onClick={() => {
-            setEditingProduct(undefined);
-            setIsModalOpen(true);
-          }}
+        onClick={() => {
+          setEditingProduct(undefined)
+          setIsModalOpen(true);
+        }}
         >
-          <Plus className="w-5 h-5" />
-          Add Product
+          <Plus className="w-5 h-5">
+            Add Product
+          </Plus>
         </Button>
       </div>
 
@@ -88,7 +89,6 @@ export function Inventory() {
           </button>
         </div>
       )}
-
       {/* Filters */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex flex-col sm:flex-row gap-4">
@@ -100,14 +100,14 @@ export function Inventory() {
               onChange={(e) => setSearchQuery(e.target.value)}
               icon={Search}
               className="py-2"
-            />
+              />
           </div>
           <div className="sm:w-64 relative">
             <DropdownField
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              icon={Filter}
-              className="py-2"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            icon={Filter}
+            className="py-2"
             >
               <option value="">All Categories</option>
               {categories.map((cat) => (
@@ -135,11 +135,11 @@ export function Inventory() {
             <tbody className="divide-y divide-gray-200">
               {filteredProducts.map((product) => {
                 const status = getStatus(product);
-                return (
+                return(
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{product.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-600">{product.category}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">${product.price.toFixed(2)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">{product.price.toFixed(2)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">{product.quantity}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}>
@@ -152,7 +152,7 @@ export function Inventory() {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button onClick={() => handleDelete(product.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded">
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4"/>
                         </button>
                       </div>
                     </td>
@@ -165,11 +165,11 @@ export function Inventory() {
       </div>
 
       <ProductModal
-        isOpen={isModalOpen}
-        onClose={() => { setIsModalOpen(false); setEditingProduct(undefined); }}
-        onSave={handleSave}
-        product={editingProduct}
+      isOpen={isModalOpen}
+      onClose={() => { setIsModalOpen(false); setEditingProduct(undefined); }}
+      onSave={handleSave}
+      product={editingProduct}
       />
     </div>
-  );
+  )
 }

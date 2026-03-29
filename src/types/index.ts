@@ -8,6 +8,7 @@ export interface Product {
   quantity: number;
   minStock: number;
 }
+
 export type {
   CreateRestockInput,
   RestockEntry,
