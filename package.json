@@ -16,6 +16,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.99.0",
     "@tailwindcss/vite": "^4.2.1",
+    "cross-fetch": "^4.1.0",
     "lucide-react": "^0.577.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.4",
@@ -44,6 +45,7 @@
     "eslint-plugin-storybook": "^10.2.19",
     "globals": "^16.5.0",
     "jsdom": "^29.0.1",
+    "msw": "^2.12.14",
     "playwright": "^1.58.2",
     "postcss": "^8.5.8",
     "storybook": "^10.2.19",

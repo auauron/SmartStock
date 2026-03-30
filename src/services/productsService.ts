@@ -67,7 +67,6 @@ export class ProductServiceProxy implements IProductService {
 
             this.cache = null;
             return this.service.saveProduct(product, userId);
-
     }
 
     async deleteProduct(id: string) { 
