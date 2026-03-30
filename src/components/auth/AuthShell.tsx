@@ -11,11 +11,11 @@ export function AuthShell({ title, subtitle, children }: AuthShellProps) {
     <div className="flex min-h-screen flex-col justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="flex h-14 w-14 items-center justify-center overflow-hidden">
+          <div className="flex h-30 w-30 items-center justify-center overflow-hidden">
             <img
               src="/smartstock.png"
               alt="Smart Stock logo"
-              className="h-10 w-10 object-contain scale-110"
+              className="h-full w-full object-contain scale-110"
             />
           </div>
         </div>
