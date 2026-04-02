@@ -1,75 +1,99 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { testClient, clearDatabase } from "./utils/db";
 
-// In Vitest, environmental variables from .env are automatically loaded onto import.meta.env
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const TEST_USER_ID = "11111111-1111-1111-1111-111111111111";
 
-/**
- * API TEST
- * Unlike the unit test which mocks the database, an API test verifies
- * the actual HTTP REST endpoints over the network.
- * 
- * Since this application relies on Supabase, the API is PostgREST,
- * which provides a RESTful interface to your database.
- */
-describe("Restock REST API Tests", () => {
-  const headers = {
-    apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    "Content-Type": "application/json",
-  };
+let createdProductId: string;
+let createdRestockId: string;
 
-  it("GET /rest/v1/products - should return 200 OK with success data", async () => {
-    // Making a direct HTTP call to the Supabase REST API
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/products?select=id,name`,
-      {
-        method: "GET",
-        headers,
-      }
-    );
+beforeAll(async () => {
+  await clearDatabase();
 
-    // Verify HTTP Status Code
-    expect(response.status).toBe(200);
-    
-    // Verify JSON Response format
-    const data = await response.json();
-    expect(Array.isArray(data)).toBe(true);
+  const { data, error } = await testClient
+    .from("products")
+    .insert({
+      user_id: TEST_USER_ID,
+      name: "Test Product (API)",
+      category: "Electronics",
+      price: 99.99,
+      quantity: 0,
+      min_stock: 5,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(`beforeAll seed failed: ${error.message}`);
+  createdProductId = data.id;
+});
+
+afterAll(async () => {
+  await clearDatabase();
+});
+
+
+describe("Restocks API", () => {
+  it("POST restocks — should create a new restock row frfr", async () => {
+    const { data, error } = await testClient
+      .from("restocks")
+      .insert({
+        product_id: createdProductId,
+        user_id: TEST_USER_ID,
+        quantity_added: 20,
+        notes: "API integration test restock",
+      })
+      .select()
+      .single();
+
+    expect(error).toBeNull();
+    expect(data!.quantity_added).toBe(20);
+    expect(data!.notes).toBe("API integration test restock");
+    expect(data!.product_id).toBe(createdProductId);
+
+    createdRestockId = data!.id;
   });
 
-  it("GET /rest/v1/restocks - should return 200 OK array data", async () => {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/restocks?select=*`, {
-      method: "GET",
-      headers,
-    });
+  it("GET restocks by ID — should fetch the created restock", async () => {
+    // Arrange & Act
+    const { data, error } = await testClient
+      .from("restocks")
+      .select("id, quantity_added, notes")
+      .eq("id", createdRestockId)
+      .single();
 
-    expect(response.status).toBe(200);
-    const data = await response.json();
-    expect(Array.isArray(data)).toBe(true);
+    // Assert
+    expect(error).toBeNull();
+    expect(data!.id).toBe(createdRestockId);
+    expect(data!.quantity_added).toBe(20);
   });
 
-  it("POST /rest/v1/rpc/create_restock_transaction - should respond properly to RPC", async () => {
-    // Making an HTTP POST to test the RPC (Remote Procedure Call) endpoint.
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/rpc/create_restock_transaction`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          p_product_id: "fake-id",
-          p_quantity_added: 10,
-          p_notes: "API test request",
-        }),
-      }
-    );
+  it("GET restocks — should list all restocks as an array", async () => {
+    // Arrange & Act
+    const { data, error } = await testClient
+      .from("restocks")
+      .select("*");
 
-    // Since we are not passing a valid user session JWT (just the anon key), 
-    // depending on your Row Level Security (RLS) policies, this should safely return 
-    // standard HTTP codes (200 empty array, or 401/403 access denied) rather than crashing.
-    expect([200, 400, 401, 403, 404]).toContain(response.status);
-    
-    // We confirm this is a valid structured API response
-    const data = await response.json().catch(() => null);
-    expect(data).toBeDefined();
+    // Assert
+    expect(error).toBeNull();
+    expect(Array.isArray(data)).toBe(true);
+    expect(data!.length).toBeGreaterThan(0);
+  });
+
+  it("DELETE restocks — should delete the restock row", async () => {
+    // Arrange & Act
+    const { error } = await testClient
+      .from("restocks")
+      .delete()
+      .eq("id", createdRestockId);
+
+    // Assert — no error means successful delete
+    expect(error).toBeNull();
+
+    // Verify it's gone
+    const { data } = await testClient
+      .from("restocks")
+      .select("id")
+      .eq("id", createdRestockId);
+
+    expect(data).toHaveLength(0);
   });
 });
