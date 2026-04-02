@@ -1,5 +1,6 @@
 import {
   Children,
+  Fragment,
   type FocusEvent,
   isValidElement,
   useEffect,
@@ -33,6 +34,19 @@ interface NativeOptionProps {
   disabled?: boolean;
 }
 
+/** Recursively unwraps React fragments so <option> elements nested inside
+ *  <>{...}</> are discovered regardless of nesting depth. */
+function flattenOptions(children: ReactNode): ReactNode[] {
+  return Children.toArray(children).flatMap((child) => {
+    if (isValidElement(child) && child.type === Fragment) {
+      return flattenOptions(
+        (child.props as { children?: ReactNode }).children,
+      );
+    }
+    return [child];
+  });
+}
+
 export function DropdownField({
   children,
   className,
@@ -59,7 +73,7 @@ export function DropdownField({
   const currentValue = value !== undefined ? String(value) : uncontrolledValue;
 
   const options = useMemo<DropdownOption[]>(() => {
-    return Children.toArray(children).flatMap((child) => {
+    return flattenOptions(children).flatMap((child) => {
       if (
         !isValidElement<NativeOptionProps>(child) ||
         child.type !== "option"
