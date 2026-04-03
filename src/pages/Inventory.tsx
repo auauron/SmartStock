@@ -16,6 +16,7 @@ export function Inventory() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
 
+
   const getStatus = (product: Product) => {
     if (product.quantity === 0)
       return { label: "Out of Stock", color: "bg-red-100 text-red-700" };
@@ -75,9 +76,8 @@ export function Inventory() {
           setIsModalOpen(true);
         }}
         >
-          <Plus className="w-5 h-5">
+          <Plus className="w-5 h-5"/>
             Add Product
-          </Plus>
         </Button>
       </div>
 

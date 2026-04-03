@@ -9,6 +9,7 @@ export function useInventory() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null); 
 
+
     const load = useCallback(async () => {
     setLoading(true);
     setError(null);

@@ -3,9 +3,9 @@ import type { Product } from "../types";
 import { supabase } from "../lib/supabaseClient";
 
 export interface IProductService {
-    getProducts(): Promise<Product[]>;
+    getProducts( forceRefresh?: boolean): Promise<Product[]>;
     saveProduct(product: Omit<Product, "id"> & { id?: string }): Promise<void>;
-    deleteProduct(id: string): Promise<void>
+    deleteProduct(id: string): Promise<void>;
 }
 
 class ProductService {
@@ -37,7 +37,6 @@ class ProductService {
 
 export class ProductServiceProxy implements IProductService {
     private service: ProductService = new ProductService();
-    private cache: Product[] | null = null;
 
     private async getUserId() {
         const { data: { user }, error} = await supabase.auth.getUser();
@@ -46,15 +45,9 @@ export class ProductServiceProxy implements IProductService {
     }
 
     async getProducts() { 
-        if (this.cache) {
-            return this.cache
-        } 
 
         const userId = await this.getUserId();
-        const products = await this.service.getProducts(userId); 
-
-        this.cache = products;
-        return products
+        return this.service.getProducts(userId); 
     }
 
     async saveProduct(product: Omit<Product, "id"> & { id?: string;}) {
@@ -64,15 +57,12 @@ export class ProductServiceProxy implements IProductService {
 
 
             console.log(`[Proxy] Logging activity: Saving product ${product.name}`);
-
-            this.cache = null;
             return this.service.saveProduct(product, userId);
     }
 
     async deleteProduct(id: string) { 
         const userId = await this.getUserId()
 
-        this.cache = null;
         return this.service.deleteProduct(id, userId); 
         
     }
