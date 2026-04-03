@@ -23,16 +23,20 @@ export function ProductModal ({
     const [formData, setFormData] = useState<Omit<Product, "id">>(() => ({
         name: product?.name || "",
         category: product?.category || "",
-        price: product?.price || 0,
+        price:product?.price || 0,
         quantity: product?.quantity || 0,
         minStock: product?.minStock || 0,
     }));
 
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         onSave({
-            id: product?.id || Date.now().toString(),
+            id: product?.id || "",
             ...formData,
+            price: isNaN(formData.price) ? 0 : formData.price,
+            quantity: isNaN(formData.quantity) ? 0 : formData.quantity,
+            minStock: isNaN(formData.minStock) ? 0 : formData.minStock
         });
         onClose();
     };
@@ -76,7 +80,7 @@ export function ProductModal ({
                 step="0.01"
                 label="Price"
                 startAdornment={<span>₱</span>}
-                value={formData.price}
+                value={isNaN(formData.price) ? "" : formData.price}
                 onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})}
                 className="py-2 pl-8"
                 placeholder="0.00"
@@ -86,7 +90,7 @@ export function ProductModal ({
                 required
                 min={0}
                 label="Quantity"
-                value={formData.quantity}
+                value={isNaN(formData.quantity) ? "" : formData.quantity}
                 onChange={(e) => setFormData({ ...formData, quantity: parseFloat(e.target.value)})}
                 className="py-2"
                 placeholder="0"
@@ -96,7 +100,7 @@ export function ProductModal ({
                 required
                 min={0}
                 label="Minimum Stock Level"
-                value={formData.minStock}
+                value={isNaN(formData.minStock) ? "" : formData.minStock}
                 onChange={(e) => setFormData({ ...formData, minStock: parseFloat(e.target.value)})}
                 className="py-2"
                 placeholder="0"

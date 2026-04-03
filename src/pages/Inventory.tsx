@@ -165,6 +165,7 @@ export function Inventory() {
       </div>
 
       <ProductModal
+      key={editingProduct?.id || "new-product"}
       isOpen={isModalOpen}
       onClose={() => { setIsModalOpen(false); setEditingProduct(undefined); }}
       onSave={handleSave}
