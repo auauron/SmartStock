@@ -29,6 +29,7 @@ MyNotebook/
 *.sln
 *.sw?
 .env
+.env.test
 smartstock_bundle.txt
 *storybook.log
 storybook-static

@@ -1,5 +1,7 @@
 import {
   Children,
+  Fragment,
+  type FocusEvent,
   isValidElement,
   useEffect,
   useMemo,
@@ -24,6 +26,25 @@ interface DropdownOption {
   value: string;
   label: string;
   disabled: boolean;
+}
+
+interface NativeOptionProps {
+  value?: string | number;
+  children?: ReactNode;
+  disabled?: boolean;
+}
+
+/** Recursively unwraps React fragments so <option> elements nested inside
+ *  <>{...}</> are discovered regardless of nesting depth. */
+function flattenOptions(children: ReactNode): ReactNode[] {
+  return Children.toArray(children).flatMap((child) => {
+    if (isValidElement(child) && child.type === Fragment) {
+      return flattenOptions(
+        (child.props as { children?: ReactNode }).children,
+      );
+    }
+    return [child];
+  });
 }
 
 export function DropdownField({
@@ -52,8 +73,11 @@ export function DropdownField({
   const currentValue = value !== undefined ? String(value) : uncontrolledValue;
 
   const options = useMemo<DropdownOption[]>(() => {
-    return Children.toArray(children).flatMap((child) => {
-      if (!isValidElement(child) || child.type !== "option") {
+    return flattenOptions(children).flatMap((child) => {
+      if (
+        !isValidElement<NativeOptionProps>(child) ||
+        child.type !== "option"
+      ) {
         return [];
       }
 
@@ -118,6 +142,10 @@ export function DropdownField({
     setIsOpen(false);
   };
 
+  const handleTriggerBlur = (event: FocusEvent<HTMLButtonElement>) => {
+    onBlur?.(event as unknown as FocusEvent<HTMLSelectElement>);
+  };
+
   return (
     <div className={wrapperClassName}>
       {label ? (
@@ -147,7 +175,7 @@ export function DropdownField({
               setIsOpen((prev) => !prev);
             }
           }}
-          onBlur={onBlur}
+          onBlur={handleTriggerBlur}
           className={cn(
             "flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white py-2.5 text-left text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500",
             Icon ? "pl-10 pr-10" : "px-3 pr-3",
