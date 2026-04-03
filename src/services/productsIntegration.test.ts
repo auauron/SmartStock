@@ -96,6 +96,7 @@ describe('ProductsService Integration (MSW)', () => {
     it('should delete a product through the proxy to the fake server', async () => {
         const service = new ProductServiceProxy();
         const productId = 'msw-123';
+        console.log(import.meta.env.VITE_SUPABASE_URL)
 
         await expect(service.deleteProduct(productId)).resolves.not.toThrow();
 

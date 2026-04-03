@@ -6,7 +6,7 @@ import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
 import { DropdownField } from "../components/ui/DropdownField";
 import { useInventory } from "../hooks/useProducts";
-import { DeleteConfirmationModal } from "../components/inventory/DeleteConfirmationModal";
+import { DeleteConfirmationModal }  from "../components/inventory/DeleteConfirmationModal";
 
 
 export function Inventory() {

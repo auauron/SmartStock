@@ -116,6 +116,7 @@ export function ProductModal ({
                 label="Price"
                 startAdornment={<span>₱</span>}
                 value={isNaN(formData.price) ? "" : formData.price}
+                onFocus={(e) => e.target.select()}
                 onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})}
                 className="py-2 pl-8"
                 placeholder="0.00"
@@ -126,6 +127,7 @@ export function ProductModal ({
                 min={0}
                 label="Quantity"
                 value={isNaN(formData.quantity) ? "" : formData.quantity}
+                onFocus={(e) => e.target.select()}
                 onChange={(e) => setFormData({ ...formData, quantity: parseFloat(e.target.value)})}
                 className="py-2"
                 placeholder="0"
@@ -136,6 +138,7 @@ export function ProductModal ({
                 min={0}
                 label="Minimum Stock Level"
                 value={isNaN(formData.minStock) ? "" : formData.minStock}
+                onFocus={(e) => e.target.select()}
                 onChange={(e) => setFormData({ ...formData, minStock: parseFloat(e.target.value)})}
                 className="py-2"
                 placeholder="0"
