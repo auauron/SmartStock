@@ -6,6 +6,7 @@ import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
 import { DropdownField } from "../components/ui/DropdownField";
 import { useInventory } from "../hooks/useProducts";
+import { DeleteConfirmationModal } from "../components/inventory/DeleteConfirmationModal";
 
 
 export function Inventory() {
@@ -15,6 +16,8 @@ export function Inventory() {
   const [editingProduct, setEditingProduct] = useState<Product | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null)
 
 
   const getStatus = (product: Product) => {
@@ -35,15 +38,22 @@ export function Inventory() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
+  const openDeleteConfirm = (id: string) => {
+    setProductToDelete(id);
+    setIsDeleteModalOpen(true);
+  }
+
+  const confirmDelete = async () => {
+    if (productToDelete) {
       try {
-        await deleteProduct(id);
+        await deleteProduct(productToDelete);
       } catch (err) {
         console.error("Delete failed:", err);
+      } finally {
+        setProductToDelete(null);
       }
     }
-  };
+  }
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -151,7 +161,8 @@ export function Inventory() {
                         <button onClick={() => { setEditingProduct(product); setIsModalOpen(true); }} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded">
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(product.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded">
+                        <button onClick={() => openDeleteConfirm(product.id)} 
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded">
                           <Trash2 className="w-4 h-4"/>
                         </button>
                       </div>
@@ -170,6 +181,14 @@ export function Inventory() {
       onClose={() => { setIsModalOpen(false); setEditingProduct(undefined); }}
       onSave={handleSave}
       product={editingProduct}
+      />
+
+      <DeleteConfirmationModal
+      isOpen={isDeleteModalOpen}
+      onClose={() => setIsDeleteModalOpen(false)}
+      onConfirm={confirmDelete}
+      title="Delete Product"
+      message="Are you sure you want to delete this product?"
       />
     </div>
   )

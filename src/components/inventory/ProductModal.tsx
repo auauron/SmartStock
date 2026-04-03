@@ -4,7 +4,6 @@ import type { Product } from "../../types"
 import { Modal } from "../ui/Modal";
 import { InputField } from "../ui/InputField";
 import { DropdownField } from "../ui/DropdownField";
-import { Plus } from "lucide-react";
 
 
 
