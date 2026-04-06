@@ -5,19 +5,46 @@ const INVENTORY_URL = 'http://localhost:5173/inventory'
 
 test.describe('Inventory End-to-End Flow', () => {
     test.beforeEach(async ({ page }) => {
+
         await page.goto(LOGIN_URL);
         await page.fill('input[type="email"]', 'johndoe@gmail.com');
         await page.fill('input[type="password"]', 'HelloWorld');
 
-        await Promise.all([
-            page.click('button[type="submit"]'),
-            page.waitForURL('**/dashboard') 
-        ]);
+        await page.click('button[type="submit"]')
+        await page.waitForURL('**/dashboard') 
         
         await page.goto(INVENTORY_URL);
-        
-        await expect(page.locator('button:has-text("Add Product")')).toBeVisible();
+        await page.waitForLoadState('networkidle')
     });
+
+    test('should add a new product with a custom category', async ({ page }) => {
+        const productName = `Test-Product-${Date.now()}`;
+        const customCategory = 'Hardware';
+
+        await page.click('button:has-text("Add Product")');
+
+        const modal = page.locator('form');
+
+        await modal.getByPlaceholder('Enter product name').fill(productName);
+
+        await modal.getByRole('button', { name: 'Select a category' }).click();
+        await modal.getByRole('option', { name: '+ Add New Category' }).click();
+
+        const customInput = modal.getByPlaceholder('e.g. Hardware');
+        await expect(customInput).toBeVisible();
+        await customInput.fill(customCategory);
+
+        await modal.locator('input[type="number"]').nth(0).fill('1500');
+        await modal.locator('input[type="number"]').nth(1).fill('50');
+        await modal.locator('input[type="number"]').nth(2).fill('10');
+
+        await modal.getByRole('button', { name: 'Save Product'}).click();
+
+        await expect(page.locator('table')).toContainText(productName);
+        await expect(page.locator('table')).toContainText(customCategory);
+    });
+
+
 
 
     test('should show the custom Delete Confirmation Modal and delete a product', async ({ page }) => {
