@@ -21,6 +21,7 @@ export function Restock() {
     quantity: "",
     notes: "",
   });
+  const [formKey, setFormKey] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +42,7 @@ export function Restock() {
         notes: formData.notes,
       });
       setFormData({ productId: "", quantity: "", notes: "" });
+      setFormKey((k) => k + 1);
     } catch {
       // Error state is handled in hook.
     }
@@ -76,7 +78,7 @@ export function Restock() {
             </div>
           </div>
         ) : null}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form key={formKey} onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <DropdownField
               required

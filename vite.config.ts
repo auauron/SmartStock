@@ -109,7 +109,17 @@ export default defineConfig({
           name: 'unit',
           environment: 'node',
           include: ['src/__tests__/**/*.test.ts'],
-          exclude: ['src/__tests__/**/*.integration.test.ts']
+          exclude: ['src/__tests__/**/*.integration.test.ts'],
+          setupFiles: ['./src/__tests__/setup.ts'],
+        }
+      },
+      {
+        extends: true,
+        test: {
+          name: 'integration',
+          environment: 'node',
+          include: ['src/__tests__/**/*.integration.test.ts'],
+          // No setupFiles — intentionally no MSW so real Supabase HTTP calls go through
         }
       },
       {
