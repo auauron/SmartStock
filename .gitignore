@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Ignore OneNote notebook folders
+MyNotebook/
+*.one
+*.onetoc2
+
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -28,3 +34,10 @@ smartstock_bundle.txt
 *storybook.log
 storybook-static
 .github/copilot-instructions.md
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
