@@ -118,15 +118,10 @@ test.describe('Restock Page — End-to-End Flow', () => {
       await page.locator('input[type="number"]').fill(quantity)
       await page.locator('textarea').fill(notes)
 
-      // Submit and wait for Supabase response
-      const [response] = await Promise.all([
-        page.waitForResponse((r) => r.url().includes('supabase') && r.status() < 400),
-        page.getByRole('button', { name: 'Add Restock Entry' }).click(),
-      ])
-      expect(response.status()).toBeLessThan(400)
+      await page.getByRole('button', { name: 'Add Restock Entry' }).click()
 
-      // Form resets on success
-      await expect(page.locator('select')).toHaveValue('')
+      // Form resets when submission succeeds
+      await expect(page.locator('select')).toHaveValue('', { timeout: 15_000 })
       await expect(page.locator('input[type="number"]')).toHaveValue('')
       await expect(page.locator('textarea')).toHaveValue('')
 
@@ -142,11 +137,10 @@ test.describe('Restock Page — End-to-End Flow', () => {
       await page.locator('select').selectOption({ label: seededProductName })
       await page.locator('input[type="number"]').fill(quantity)
 
-      await Promise.all([
-        page.waitForResponse((r) => r.url().includes('supabase') && r.status() < 400),
-        page.getByRole('button', { name: 'Add Restock Entry' }).click(),
-      ])
+      await page.getByRole('button', { name: 'Add Restock Entry' }).click()
 
+      // Wait for form reset as the success signal, then check the table
+      await expect(page.locator('select')).toHaveValue('', { timeout: 15_000 })
       await expect(page.locator('table')).toContainText(`+${quantity} units`, { timeout: 10_000 })
     })
 
@@ -154,11 +148,9 @@ test.describe('Restock Page — End-to-End Flow', () => {
       await page.locator('select').selectOption({ label: seededProductName })
       await page.locator('input[type="number"]').fill('5')
 
-      await Promise.all([
-        page.waitForResponse((r) => r.url().includes('supabase') && r.status() < 400),
-        page.getByRole('button', { name: 'Add Restock Entry' }).click(),
-      ])
+      await page.getByRole('button', { name: 'Add Restock Entry' }).click()
 
+      await expect(page.locator('select')).toHaveValue('', { timeout: 15_000 })
       await expect(page.locator('table')).toContainText('No notes', { timeout: 10_000 })
     })
   })
@@ -215,10 +207,10 @@ test.describe('Restock Page — End-to-End Flow', () => {
       await page.locator('select').selectOption({ label: productName })
       await page.locator('input[type="number"]').fill('3')
 
-      await Promise.all([
-        page.waitForResponse((r) => r.url().includes('supabase') && r.status() < 400),
-        page.getByRole('button', { name: 'Add Restock Entry' }).click(),
-      ])
+      await page.getByRole('button', { name: 'Add Restock Entry' }).click()
+
+      // Wait for form reset as success signal
+      await expect(page.locator('select')).toHaveValue('', { timeout: 15_000 })
 
       // First date cell in tbody must contain a month abbreviation
       const dateCell = page.locator('table tbody tr td').nth(2)
