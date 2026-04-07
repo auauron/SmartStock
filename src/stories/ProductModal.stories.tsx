@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ProductModal } from './ProductModal';
+import { ProductModal } from '../components/inventory/ProductModal';
 
 const meta: Meta<typeof ProductModal> = {
   title: 'Inventory/ProductModal',

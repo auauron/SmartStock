@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { ProductServiceProxy } from "./productsService";
+import { ProductServiceProxy } from "../services/productsService";
 import type { Product } from "../types";
 
 interface SupabaseResponse<T = unknown> {
