@@ -75,7 +75,14 @@ test.describe('Restock Page — End-to-End Flow', () => {
       const hasEmpty = await emptyState.isVisible().catch(() => false)
       const hasTable = await historyTable.isVisible().catch(() => false)
 
+<<<<<<< Updated upstream
       expect(hasEmpty || hasTable).toBe(true)
+=======
+      await Promise.any([
+        expect(emptyMsg).toBeVisible({ timeout: 10_000 }).catch(() => null),
+        expect(table).toBeVisible({ timeout: 10_000 }).catch(() => null),
+      ])
+>>>>>>> Stashed changes
     })
   })
 
