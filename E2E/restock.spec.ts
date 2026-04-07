@@ -89,14 +89,10 @@ test.describe('Restock Page — End-to-End Flow', () => {
       const emptyMsg = page.getByText('No restock history available')
       const table = page.locator('table')
 
-<<<<<<< Updated upstream
-      expect(hasEmpty || hasTable).toBe(true)
-=======
       await Promise.any([
         expect(emptyMsg).toBeVisible({ timeout: 10_000 }).catch(() => null),
         expect(table).toBeVisible({ timeout: 10_000 }).catch(() => null),
       ])
->>>>>>> Stashed changes
     })
   })
 
