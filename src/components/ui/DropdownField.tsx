@@ -251,9 +251,7 @@ export function DropdownField({
           tabIndex={-1}
           className="sr-only"
           value={currentValue}
-          onChange={() => {
-            // Keeps parity with native select semantics for forms without exposing browser UI.
-          }}
+          onChange={(e) => handleSelect(e.target.value)}
           aria-hidden="true"
           disabled={disabled}
           {...props}
