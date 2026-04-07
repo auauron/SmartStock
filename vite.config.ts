@@ -6,21 +6,100 @@ import react from '@vitejs/plugin-react-swc';
 import { fileURLToPath } from 'node:url';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { playwright } from '@vitest/browser-playwright';
+import { VitePWA } from 'vite-plugin-pwa';
+
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   plugins: [
-  // The React and Tailwind plugins are both required for Make, even if
-  // Tailwind is not being actively used – do not remove them
-  react(), tailwindcss()],
+    react(),
+    tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon-16.png', 'favicon-32.png', 'favicon-256.png', 'smartstock.png'],
+      manifest: {
+        name: 'Smart Stock',
+        short_name: 'SmartStock',
+        description: 'Inventory management for small businesses',
+        theme_color: '#059669',
+        background_color: '#f9fafb',
+        display: 'standalone',
+        orientation: 'portrait-primary',
+        scope: '/',
+        start_url: '/',
+        icons: [
+          {
+            src: '/favicon-16.png',
+            sizes: '16x16',
+            type: 'image/png',
+          },
+          {
+            src: '/favicon-32.png',
+            sizes: '32x32',
+            type: 'image/png',
+          },
+          {
+            src: '/favicon-256.png',
+            sizes: '256x256',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+          {
+            src: '/smartstock.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+        ],
+        screenshots: [
+          {
+            src: '/smartstock.png',
+            sizes: '192x192',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'Smart Stock Dashboard',
+          },
+        ],
+      },
+      workbox: {
+        // Cache app shell and critical routes
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        runtimeCaching: [
+          {
+            // Cache Supabase API responses (stale-while-revalidate)
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-api',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 5, // 5 minutes
+              },
+            },
+          },
+          {
+            // Cache Google Fonts
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'google-fonts-stylesheets',
+            },
+          },
+        ],
+      },
+      devOptions: {
+        // Enable PWA in dev mode to test install prompt
+        enabled: true,
+        type: 'module',
+      },
+    }),
+  ],
   resolve: {
     alias: {
-      // Alias @ to the src directory
       '@': path.resolve(__dirname, './src')
     }
   },
-  // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
   test: {
     projects: [
@@ -35,24 +114,24 @@ export default defineConfig({
       },
       {
         extends: true,
-      plugins: [
-      // The plugin will run tests for the stories defined in your Storybook config
-      // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
-      storybookTest({
-        configDir: path.join(dirname, '.storybook')
-      })],
-      test: {
-        name: 'storybook',
-        browser: {
-          enabled: true,
-          headless: true,
-          provider: playwright({}),
-          instances: [{
-            browser: 'chromium'
-          }]
-        },
-        setupFiles: ['.storybook/vitest.setup.ts']
+        plugins: [
+          storybookTest({
+            configDir: path.join(dirname, '.storybook')
+          })
+        ],
+        test: {
+          name: 'storybook',
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({}),
+            instances: [{
+              browser: 'chromium'
+            }]
+          },
+          setupFiles: ['.storybook/vitest.setup.ts']
+        }
       }
-    }]
+    ]
   }
 });
