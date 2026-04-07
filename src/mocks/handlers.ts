@@ -4,10 +4,16 @@ import { http, HttpResponse} from 'msw';
 export const handlers = [
     http.get('*/auth/v1/user', () => { 
         return HttpResponse.json({
-            data: {
-                user: { id: 'test-user-123', email: 'test@example.com' },
-            },
-            error: null
+            id: 'test-user-123',
+            aud: 'authenticated',
+            role: 'authenticated',
+            email: 'test@example.com',
+            email_confirmed_at: '2024-01-01T00:00:00Z',
+            app_metadata: { provider: 'email' },
+            user_metadata: {},
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z',
+            last_sign_in_at: '2024-01-01T00:00:00Z',
         })
     }),
 

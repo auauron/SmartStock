@@ -7,7 +7,7 @@ const meta: Meta<typeof ProductModal> = {
   tags: ['autodocs'],
   args: {
     onClose: () => console.log('Close button clicked'),
-    onSave: (data) => console.log('Saved product data:', data),
+    onSave: async (data) => { console.log('Saved product data:', data); },
   },
 };
 
@@ -34,7 +34,7 @@ export const EditProduct: Story = {
   },
 };
 
-// restock test
-// delete test
-// filter categories test
-// search product test
+// TODO: implement restock story — track in issue tracker (e.g. ISSUE-001)
+// TODO: implement delete story — track in issue tracker (e.g. ISSUE-002)
+// TODO: implement filter categories story — track in issue tracker (e.g. ISSUE-003)
+// TODO: implement search product story — track in issue tracker (e.g. ISSUE-004)

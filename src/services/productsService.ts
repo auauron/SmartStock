@@ -3,7 +3,7 @@ import type { Product } from "../types";
 import { supabase } from "../lib/supabaseClient";
 
 export interface IProductService {
-    getProducts( forceRefresh?: boolean): Promise<Product[]>;
+    getProducts(): Promise<Product[]>;
     saveProduct(product: Omit<Product, "id"> & { id?: string }): Promise<void>;
     deleteProduct(id: string): Promise<void>;
 }
@@ -54,6 +54,7 @@ export class ProductServiceProxy implements IProductService {
         const userId = await this.getUserId();
         if (product.price < 0) throw new Error("Price cannot be negative");
         if (product.quantity < 0) throw new Error("Quantity cannot be negative");
+        if (product.minStock < 0) throw new Error("minStock cannot be negative");
 
 
             console.log(`[Proxy] Logging activity: Saving product ${product.name}`);

@@ -35,9 +35,9 @@ export function DeleteConfirmationModal({
         setIsDeleting(true);
         try {
             await onConfirm();
+            onClose();
         } finally {
             setIsDeleting(false);
-            onClose();
         }
     };
 

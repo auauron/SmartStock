@@ -1,5 +1,5 @@
 import { Product } from "../types";
-interface ProductRow {
+export interface ProductRow {
     id: string;
     name: string;
     category: string;

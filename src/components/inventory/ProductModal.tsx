@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/Button";
 import type { Product } from "../../types"
 import { Modal } from "../ui/Modal";
@@ -10,7 +10,7 @@ import { DropdownField } from "../ui/DropdownField";
 interface ProductModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (product: Omit<Product, "id"> & { id: string }) => void;
+    onSave: (product: Omit<Product, "id"> & { id: string }) => Promise<void>;
     product?: Product
 }
 
@@ -23,23 +23,37 @@ export function ProductModal ({
     const [formData, setFormData] = useState<Omit<Product, "id">>(() => ({
         name: product?.name || "",
         category: product?.category || "",
-        price:product?.price || 0,
+        price: product?.price || 0,
         quantity: product?.quantity || 0,
         minStock: product?.minStock || 0,
     }));
+
+    useEffect(() => {
+        setFormData({
+            name: product?.name || "",
+            category: product?.category || "",
+            price: product?.price || 0,
+            quantity: product?.quantity || 0,
+            minStock: product?.minStock || 0,
+        });
+    }, [product]);
     const [isCustomCategory, setIsCustomCategory] = useState(false);
 
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onSave({
-            id: product?.id || "",
-            ...formData,
-            price: isNaN(formData.price) ? 0 : formData.price,
-            quantity: isNaN(formData.quantity) ? 0 : formData.quantity,
-            minStock: isNaN(formData.minStock) ? 0 : formData.minStock
-        });
-        onClose();
+        try {
+            await onSave({
+                id: product?.id || "",
+                ...formData,
+                price: isNaN(formData.price) ? 0 : formData.price,
+                quantity: isNaN(formData.quantity) ? 0 : formData.quantity,
+                minStock: isNaN(formData.minStock) ? 0 : formData.minStock,
+            });
+            onClose();
+        } catch (err) {
+            console.error("Failed to save product:", err);
+        }
     };
 
     if (!isOpen) return null;
@@ -66,7 +80,7 @@ export function ProductModal ({
                 value={isCustomCategory ? "OTHER" : formData.category}
                 onChange={(e) => {
                   const val = e.target.value
-                  if (val == "OTHER") {
+                  if (val === "OTHER") {
                   setIsCustomCategory(true);
                   setFormData({ ...formData, category: ""})
                   } else {
@@ -128,7 +142,7 @@ export function ProductModal ({
                 label="Quantity"
                 value={isNaN(formData.quantity) ? "" : formData.quantity}
                 onFocus={(e) => e.target.select()}
-                onChange={(e) => setFormData({ ...formData, quantity: parseFloat(e.target.value)})}
+                onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value, 10) || 0 })}
                 className="py-2"
                 placeholder="0"
                 />
@@ -139,7 +153,7 @@ export function ProductModal ({
                 label="Minimum Stock Level"
                 value={isNaN(formData.minStock) ? "" : formData.minStock}
                 onFocus={(e) => e.target.select()}
-                onChange={(e) => setFormData({ ...formData, minStock: parseFloat(e.target.value)})}
+                onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value, 10) || 0 })}
                 className="py-2"
                 placeholder="0"
                 />
