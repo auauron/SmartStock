@@ -48,14 +48,13 @@ describe('ProductServiceProxy', () => {
         }
 
         try {
-    await service.saveProduct(goodProduct);
-    } catch (err) { 
-        void err
-    }
-
-        expect(consoleSpy).toHaveBeenCalledWith(
-            expect.stringContaining('[Proxy] Logging activity')
-        )
+            await service.saveProduct(goodProduct);
+        } finally {
+            expect(consoleSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[Proxy] Logging activity')
+            );
+            consoleSpy.mockRestore();
+        }
     })
 })
 

@@ -28,13 +28,14 @@ export function Inventory() {
     return { label: "In Stock", color: "bg-green-100 text-green-700" };
   };
 
-  const handleSave = async (productData: Product) => {
+  const handleSave = async (productData: Product): Promise<void> => {
     try {
       await saveProduct(productData);
       setIsModalOpen(false);
       setEditingProduct(undefined);
     } catch (err) {
       console.error("UI Error Catch:", err);
+      throw err;
     }
   };
 
@@ -143,7 +144,14 @@ export function Inventory() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredProducts.map((product) => {
+              {filteredProducts.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
+                    No products match your filters
+                  </td>
+                </tr>
+              ) : (
+              filteredProducts.map((product) => {
                 const status = getStatus(product);
                 return(
                   <tr key={product.id} className="hover:bg-gray-50">
@@ -158,18 +166,27 @@ export function Inventory() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <button onClick={() => { setEditingProduct(product); setIsModalOpen(true); }} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded">
+                        <button
+                          aria-label={`Edit product ${product.name}`}
+                          onClick={() => { setEditingProduct(product); setIsModalOpen(true); }}
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                        >
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => openDeleteConfirm(product.id)} 
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded">
+                        <button
+                          aria-label={`Delete product ${product.name}`}
+                          data-testid="delete-product-button"
+                          onClick={() => openDeleteConfirm(product.id)}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                        >
                           <Trash2 className="w-4 h-4"/>
                         </button>
                       </div>
                     </td>
                   </tr>
                 );
-              })}
+              })
+              )}
             </tbody>
           </table>
         </div>

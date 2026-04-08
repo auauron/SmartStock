@@ -77,7 +77,7 @@ export default defineConfig({
   webServer: {
     command: 'npx vite --mode test',
     url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
   },
 
 });

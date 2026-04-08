@@ -7,7 +7,7 @@ const meta: Meta<typeof ProductModal> = {
   tags: ['autodocs'],
   args: {
     onClose: () => console.log('Close button clicked'),
-    onSave: (data) => console.log('Saved product data:', data),
+    onSave: async (data) => { console.log('Saved product data:', data); },
   },
 };
 

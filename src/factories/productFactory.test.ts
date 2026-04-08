@@ -36,6 +36,9 @@ describe('ProductFactory', () => {
         const dbRow = ProductFactory.toDb(frontendProduct, userId)
 
         expect(dbRow.name).toBe('Gaming Mouse')
+        expect(dbRow.category).toBe('Accessories')
+        expect(dbRow.price).toBe(50)
+        expect(dbRow.quantity).toBe(20)
         expect(dbRow.min_stock).toBe(10)
         expect(dbRow.user_id).toBe(userId)
     })

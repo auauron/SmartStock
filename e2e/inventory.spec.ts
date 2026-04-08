@@ -3,12 +3,21 @@ import { test, expect } from '@playwright/test'
 const LOGIN_URL = 'http://localhost:5173/login'
 const INVENTORY_URL = 'http://localhost:5173/inventory'
 
+const TEST_EMAIL = process.env.TEST_USER_EMAIL;
+const TEST_PASSWORD = process.env.TEST_USER_PASSWORD;
+
+if (!TEST_EMAIL || !TEST_PASSWORD) {
+    throw new Error(
+        'Missing required environment variables: TEST_USER_EMAIL and TEST_USER_PASSWORD must be set before running Playwright tests.'
+    );
+}
+
 test.describe('Inventory End-to-End Flow', () => {
     test.beforeEach(async ({ page }) => {
 
         await page.goto(LOGIN_URL);
-        await page.fill('input[type="email"]', 'johndoe@gmail.com');
-        await page.fill('input[type="password"]', 'HelloWorld');
+        await page.fill('input[type="email"]', TEST_EMAIL!);
+        await page.fill('input[type="password"]', TEST_PASSWORD!);
 
         await page.click('button[type="submit"]')
         await page.waitForURL('**/dashboard') 
@@ -44,11 +53,23 @@ test.describe('Inventory End-to-End Flow', () => {
         await expect(page.locator('table')).toContainText(customCategory);
     });
 
-
-
-
     test('should show the custom Delete Confirmation Modal and delete a product', async ({ page }) => {
-        await page.locator('button.text-red-600').first().click();
+        // Seed a test-specific product so the test is hermetic
+        const testProductName = `Delete-Test-${Date.now()}`;
+
+        await page.click('button:has-text("Add Product")');
+        const modal = page.locator('form');
+        await modal.getByPlaceholder('Enter product name').fill(testProductName);
+        await modal.locator('select').selectOption('Electronics');
+        await modal.locator('input[type="number"]').nth(0).fill('10');
+        await modal.locator('input[type="number"]').nth(1).fill('1');
+        await modal.locator('input[type="number"]').nth(2).fill('1');
+        await modal.getByRole('button', { name: 'Save Product' }).click();
+        await expect(page.locator('table')).toContainText(testProductName);
+
+        // Find the row for our seeded product and click its delete button
+        const row = page.locator('tr', { hasText: testProductName });
+        await row.getByTestId('delete-product-button').click();
 
         const deleteModal = page.locator('text=Delete Product');
         await expect(deleteModal).toBeVisible();
@@ -56,17 +77,6 @@ test.describe('Inventory End-to-End Flow', () => {
 
         await page.click('button:has-text("Delete")');
 
-        await expect(page.locator('table')).not.toContainText('Logitech MX Master');
+        await expect(page.locator('table')).not.toContainText(testProductName);
     })
 })
-
-
-
-
-
-
-
-
-
-
-
