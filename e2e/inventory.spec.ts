@@ -59,3 +59,14 @@ test.describe('Inventory End-to-End Flow', () => {
         await expect(page.locator('table')).not.toContainText('Logitech MX Master');
     })
 })
+
+
+
+
+
+
+
+
+
+
+

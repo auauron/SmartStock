@@ -181,6 +181,7 @@ export function Inventory() {
       onClose={() => { setIsModalOpen(false); setEditingProduct(undefined); }}
       onSave={handleSave}
       product={editingProduct}
+      existingCategories={categories}
       />
 
       <DeleteConfirmationModal

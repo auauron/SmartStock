@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ProductModal } from './ProductModal';
+import { ProductModal } from '../components/inventory/ProductModal';
 
 const meta: Meta<typeof ProductModal> = {
   title: 'Inventory/ProductModal',
@@ -34,7 +34,3 @@ export const EditProduct: Story = {
   },
 };
 
-// restock test
-// delete test
-// filter categories test
-// search product test

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { ProductServiceProxy } from "./productsService";
+import { ProductServiceProxy } from "../services/productsService";
 
 vi.mock('../lib/supabaseClient', () => ({
   supabase: {
@@ -58,3 +58,8 @@ describe('ProductServiceProxy', () => {
         )
     })
 })
+
+
+
+
+

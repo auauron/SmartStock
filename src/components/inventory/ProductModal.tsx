@@ -11,14 +11,16 @@ interface ProductModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (product: Omit<Product, "id"> & { id: string }) => void;
-    product?: Product
+    product?: Product;
+    existingCategories: string[];
 }
 
 export function ProductModal ({ 
     isOpen,
     onClose,
     onSave,
-    product
+    product,
+    existingCategories = []
 }: ProductModalProps) {
     const [formData, setFormData] = useState<Omit<Product, "id">>(() => ({
         name: product?.name || "",
@@ -39,6 +41,8 @@ export function ProductModal ({
             quantity: isNaN(formData.quantity) ? 0 : formData.quantity,
             minStock: isNaN(formData.minStock) ? 0 : formData.minStock
         });
+
+        setIsCustomCategory(false);
         onClose();
     };
 
@@ -60,50 +64,55 @@ export function ProductModal ({
                 className="py-2"
                 placeholder="Enter product name"
               />
-              <DropdownField
+
+              {!isCustomCategory ? (
+                <DropdownField
                 required
                 label="Category"
-                value={isCustomCategory ? "OTHER" : formData.category}
+                value={formData.category}
                 onChange={(e) => {
-                  const val = e.target.value
-                  if (val == "OTHER") {
-                  setIsCustomCategory(true);
-                  setFormData({ ...formData, category: ""})
+                  const val = e.target.value;
+                  if (val === "OTHER") {
+                    setIsCustomCategory(true);
+                    setFormData({ ...formData, category: "" });
                   } else {
-                    setIsCustomCategory(false);
-                    setFormData({...formData, category: val})
+                    setFormData({ ...formData, category: val});
                   }
-                }
-              } 
+                }}
                 className="py-2"
-              >
-                <option value="">Select a category</option>
-                <option value="Electronics">Electronics</option>
-                <option value="Furniture">Furniture</option>
-                <option value="Stationery">Stationery</option>
-                <option value="Accessories">Accessories</option>
-                <option value="Office Supplies">Office Supplies</option>
-                <option value="OTHER">+ Add New Category</option>
-              </DropdownField>
-
-
-              {isCustomCategory && (
+                >
+                  <option value="">Select a category</option>
+                  {existingCategories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                  <option value="OTHER" className="font-bold text-emerald-600">
+                    + Add New Category
+                  </option>
+                </DropdownField>
+              ) : (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
                   <InputField
                   type="text"
                   required
-                  label="Category"
+                  label="New Category"
                   value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  placeholder="e.g. Hardware"
+                  onChange={(e) => 
+                    setFormData({ ...formData, category: e.target.value })
+                  }
+                  placeholder="e.g. Accessories"
                   className="py-2"
                   />
                   <button
                   type="button"
-                  onClick={() => setIsCustomCategory(false)}
+                  onClick={() => {
+                    setIsCustomCategory(false);
+                    setFormData({...formData, category: ""});
+                  }}
                   className="text-xs text-emerald-600 hover:text-emerald-700 underline"
                   >
-                    Back to List
+                    Back to existing categories
                   </button>
                 </div>
               )}
@@ -157,7 +166,7 @@ export function ProductModal ({
                   type="submit"
                   className="flex-1"
                   >
-                    Save Product
+                    {product ? "Update Product" : "Save Product"}
                   </Button>
                 </div>
             </form>
