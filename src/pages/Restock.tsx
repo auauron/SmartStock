@@ -23,16 +23,23 @@ export function Restock() {
         notes: "",
     });
     const [formKey, setFormKey ] = useState(0);
+    const [validationError, setValidationError] = useState("");
 
     const handleSubmit = async(e: React.FormEvent) => { 
         e.preventDefault();   
+        setValidationError("");
+
+        if (!formData.productId) {
+            setValidationError("Please select a product before adding a restock entry.");
+            return;
+        }
 
         const quantityValue = Number.parseInt(formData.quantity, 10);
         if (
-            !formData.productId || 
             Number.isNaN(quantityValue) ||
             quantityValue < 1
         ) {
+            setValidationError("Please enter a valid quantity.");
             return;
         }
         
@@ -62,13 +69,16 @@ return (
             <h2 className="text-lg font-semibvold text-gray-900 mb-4">
                 Add restock
             </h2>
-            {error ? (
+            {error || validationError ? (
                 <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
                     <div className="flex items-center justify-between gap-3">
-                        <span>{error}</span>
+                        <span>{error || validationError}</span>
                         <button
                         type="button"
-                        onClick = {clearError}
+                        onClick={() => {
+                            if (error) clearError();
+                            setValidationError("");
+                        }}
                         className="text-red-600 hover:text-red-800"
                         >
                             Dismiss
@@ -82,9 +92,10 @@ return (
                         required
                         label="Product Name"
                         value={formData.productId}
-                        onChange={(e) =>
-                            setFormData({ ...formData, productId: e.target.value})
-                        }
+                        onChange={(e) => {
+                            setFormData({ ...formData, productId: e.target.value});
+                            if (validationError) setValidationError("");
+                        }}
                         disabled={loading || submitting || products.length == 0}
                         className="py-2"
                         >
@@ -110,9 +121,10 @@ return (
                         placeholder="Enter Quantity"
                         min='1'
                         value={formData.quantity}
-                        onChange={(e) => 
-                            setFormData({...formData, quantity: e.target.value})
-                        }
+                        onChange={(e) => {
+                            setFormData({...formData, quantity: e.target.value});
+                            if (validationError) setValidationError("");
+                        }}
                         disabled={submitting}
                         className="py-2"
                         />
