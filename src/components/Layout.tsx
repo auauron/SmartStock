@@ -5,13 +5,11 @@ import {
   Package,
   RefreshCw,
   Settings,
-  Search,
   Bell,
   Menu,
   X,
   User,
 } from "lucide-react";
-import { InputField } from "./ui/InputField";
 import type { UserProfile, LayoutOutletContext } from "../types";
 import { supabase } from "../lib/supabaseClient";
 import {
@@ -173,14 +171,7 @@ export function Layout() {
               <Menu className="w-6 h-6" />
             </button>
 
-            <div className="flex-1 max-w-lg mx-4">
-              <InputField
-                type="text"
-                placeholder="Search products..."
-                icon={Search}
-                className="py-2"
-              />
-            </div>
+            <div className="flex-1" />
 
             <div className="flex items-center gap-4">
               <button className="relative p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-50">
