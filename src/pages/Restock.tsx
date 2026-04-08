@@ -161,15 +161,15 @@ return (
                 </p>
             </div>
 
-        {loading? (
+        {loading ? (
             <div 
-            className="flext items-center justify-center gap-3 py-12"
+            className="flex items-center justify-center gap-3 py-12"
             role="status"
             aria-live="polite"
             >
                 <span 
                 className="h-5 w-5 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600"
-                area-hidden="true"
+                aria-hidden="true"
                 />
                 <p className="text-gray-500">Loading restock history...</p>
             </div>
