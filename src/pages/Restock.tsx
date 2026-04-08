@@ -204,7 +204,7 @@ return (
                                         day: "numeric",
                                     })}
                                 </td>
-                                <td className="px-6 py-4 text-gray-600">
+                                <td className="px-6 py-4 text-gray-600 whitespace-normal break-words max-w-xs sm:max-w-sm md:max-w-md">
                                     {entry.notes || (
                                         <span className="text-gray-400 italic">No notes</span>
                                     )}
@@ -223,4 +223,5 @@ return (
              )}
         </div>
     </div>
-)}
+  )
+}
