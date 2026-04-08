@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabaseClient";
 
 export interface IProductService {
     getProducts(): Promise<Product[]>;
-    saveProduct(product: Omit<Product, "id"> & { id?: string }): Promise<void>;
+    saveProduct(product: Omit<Product, "id"> & { id?: string }): Promise<Product>;
     deleteProduct(id: string): Promise<void>;
 }
 
@@ -19,10 +19,16 @@ class ProductService {
         return data.map(ProductFactory.createFromDb);
     }
 
-    async saveProduct(product: Omit<Product, "id"> & {id?: string}, userId: string): Promise<void> {
+    async saveProduct(product: Omit<Product, "id"> & {id?: string}, userId: string): Promise<Product> {
         const dbData = ProductFactory.toDb(product, userId);
-        const { error } = await supabase.from("products").upsert(dbData);
+        const { data, error } = await supabase
+            .from("products")
+            .upsert(dbData)
+            .select()
+            .single();
+
         if (error) throw error;
+        return ProductFactory.createFromDb(data);
     }
     async deleteProduct(id: string, userId: string): Promise<void> {
         const { error } = await supabase

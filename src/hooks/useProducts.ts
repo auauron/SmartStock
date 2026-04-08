@@ -11,16 +11,14 @@ export function useInventory() {
 
 
     const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-        const data = await service.getProducts();
-        setProducts(data);
-    } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load inventory");
-    } finally {
-        setLoading(false);
-    }
+        try {
+            const data = await service.getProducts()
+            setProducts(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to load inventory");
+        } finally {
+            setLoading(false)
+        }
     }, []);
 
     useEffect(() => { load(); }, [load]);
@@ -28,8 +26,15 @@ export function useInventory() {
     const saveProduct = async (product: Omit<Product, "id"> & { id?: string }) => {
     try {
         setError(null);
-        await service.saveProduct(product);
-        await load();
+        const savedProduct = await service.saveProduct(product);
+        setProducts((prev) => {
+            const exists = prev.find((p) => p.id === savedProduct.id);
+            if (exists) {
+                return prev.map((p) => (p.id === savedProduct.id ? savedProduct : p));
+            } else {
+                return [savedProduct, ...prev]
+            }
+        })
     } catch (err) {
         const msg = err instanceof Error ? err.message : "Failed to save product";
         setError(msg);
@@ -41,7 +46,7 @@ export function useInventory() {
     try {
         setError(null);
         await service.deleteProduct(id);
-        await load();
+        setProducts((prev) => prev.filter(p => p .id != id))
     } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to delete product");
         throw err;
@@ -54,7 +59,6 @@ export function useInventory() {
     error,
     saveProduct, 
     deleteProduct, 
-    refresh: load,
     clearError: () => setError(null) 
     };
 }
