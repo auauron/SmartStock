@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Edit2, Trash2, Search, Filter, Loader2 } from "lucide-react"; 
+import { Plus, Edit2, Trash2, Search, Filter, Loader2, ArrowUpDown } from "lucide-react"; 
 import { ProductModal } from "../components/inventory/ProductModal";
 import type { Product } from "../types";
 import { Button } from "../components/ui/Button";
@@ -16,6 +16,7 @@ export function Inventory() {
   const [editingProduct, setEditingProduct] = useState<Product | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+  const [sortBy, setSortBy] = useState("latest");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null)
 
@@ -57,12 +58,35 @@ export function Inventory() {
   }
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
+    const result = products.filter((product) => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = !filterCategory || product.category === filterCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [products, searchQuery, filterCategory]);
+
+    switch (sortBy) {
+      case "name-asc":
+        result.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "name-desc":
+        result.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case "price-asc":
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case "quantity-asc":
+        result.sort((a, b) => a.quantity - b.quantity);
+        break;
+      case "quantity-desc":
+        result.sort((a, b) => b.quantity - a.quantity);
+        break;
+    }
+
+    return result;
+  }, [products, searchQuery, filterCategory, sortBy]);
 
   const categories = useMemo(() => Array.from(new Set(products.map((p) => p.category))), [products]);
 
@@ -113,7 +137,23 @@ export function Inventory() {
               className="py-2"
               />
           </div>
-          <div className="sm:w-64 relative">
+          <div className="sm:w-48 relative">
+            <DropdownField
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              icon={ArrowUpDown}
+              className="py-2"
+            >
+              <option value="latest">Latest</option>
+              <option value="name-asc">Name (A to Z)</option>
+              <option value="name-desc">Name (Z to A)</option>
+              <option value="price-asc">Price (Low - High)</option>
+              <option value="price-desc">Price (High - Low)</option>
+              <option value="quantity-asc">Quantity (Low - High)</option>
+              <option value="quantity-desc">Quantity (High - Low)</option>
+            </DropdownField>
+          </div>
+          <div className="sm:w-48 relative">
             <DropdownField
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}

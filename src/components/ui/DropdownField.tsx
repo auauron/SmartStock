@@ -189,7 +189,7 @@ export function DropdownField({
           onBlur={handleTriggerBlur}
           className={cn(
             "flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white py-2.5 text-left text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500",
-            Icon ? "pl-10 pr-10" : "px-3 pr-3",
+            Icon ? "pl-10 pr-3" : "px-3",
             className,
           )}
           disabled={disabled}

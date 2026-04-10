@@ -1,5 +1,5 @@
 import React, { useState  } from "react";
-import { Plus} from "lucide-react"
+import { Plus, Filter, Calendar } from "lucide-react"
 import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
 import { DropdownField } from "../components/ui/DropdownField";
@@ -24,6 +24,42 @@ export function Restock() {
     });
     const [formKey, setFormKey ] = useState(0);
     const [validationError, setValidationError] = useState("");
+    
+    const [historyProductFilter, setHistoryProductFilter] = useState("");
+    const [historyDateFilter, setHistoryDateFilter] = useState("");
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 4;
+    
+    React.useEffect(() => {
+        setCurrentPage(1);
+    }, [historyProductFilter, historyDateFilter]);
+
+    const filteredHistory = React.useMemo(() => {
+        let result = history;
+        if (historyProductFilter) {
+            result = result.filter(entry => entry.productName === historyProductFilter);
+        }
+        if (historyDateFilter !== "all" && historyDateFilter !== "") {
+            const now = new Date();
+            const past = new Date();
+            if (historyDateFilter === "7days") {
+                past.setDate(now.getDate() - 7);
+            } else if (historyDateFilter === "30days") {
+                past.setDate(now.getDate() - 30);
+            }
+            result = result.filter(entry => new Date(entry.date) >= past);
+        }
+        return result;
+    }, [history, historyProductFilter, historyDateFilter]);
+
+    const totalItems = filteredHistory.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    const paginatedHistory = React.useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return filteredHistory.slice(startIndex, startIndex + itemsPerPage);
+    }, [filteredHistory, currentPage, itemsPerPage]);
 
     const handleSubmit = async(e: React.FormEvent) => { 
         e.preventDefault();   
@@ -153,13 +189,43 @@ return (
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-            <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-grayt-200">
-                    Restock History
-                </h2>
-                <p className="test-sm text-gray-600 mt-1">
-                    Recent restocking activities
-                </p>
+            <div className="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-lg font-semibold text-gray-900">
+                        Restock History
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                        Recent restocking activities
+                    </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <DropdownField
+                        icon={Calendar}
+                        value={historyDateFilter}
+                        onChange={(e) => setHistoryDateFilter(e.target.value)}
+                        className="py-1.5 text-sm"
+                        wrapperClassName="w-full sm:w-40"
+                    >
+                        <option value="" disabled>Date Range</option>
+                        <option value="all">All Time</option>
+                        <option value="7days">Last 7 Days</option>
+                        <option value="30days">Last 30 Days</option>
+                    </DropdownField>
+                    <DropdownField
+                        icon={Filter}
+                        value={historyProductFilter}
+                        onChange={(e) => setHistoryProductFilter(e.target.value)}
+                        className="py-1.5 text-sm"
+                        wrapperClassName="w-full sm:w-48"
+                    >
+                        <option value="">All Products</option>
+                        {products.map((p) => (
+                            <option key={`filter-${p.id}`} value={p.name}>
+                                {p.name}
+                            </option>
+                        ))}
+                    </DropdownField>
+                </div>
             </div>
 
         {loading ? (
@@ -185,8 +251,8 @@ return (
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Notes</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-299">
-                        {history.map((entry) => (
+                    <tbody className="divide-y divide-gray-200">
+                        {paginatedHistory.map((entry) => (
                             <tr key={entry.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className="font-medium text-gray-900">
@@ -217,7 +283,33 @@ return (
             </div>
              )}
 
-             {!loading && history.length === 0 && (
+             {!loading && totalItems > 0 && (
+                <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between text-sm bg-gray-50/50">
+                    <span className="text-gray-500 font-medium">
+                        Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} transactions
+                    </span>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="secondary"
+                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="px-4 py-1.5 font-bold text-gray-500"
+                        >
+                            PREV
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-1.5 font-bold text-emerald-600"
+                        >
+                            NEXT
+                        </Button>
+                    </div>
+                </div>
+             )}
+
+             {!loading && filteredHistory.length === 0 && (
                 <div className="text-center py-12">
                     <p className="text-gray-500">No restock history available</p>
                 </div>
