@@ -8,10 +8,21 @@ vi.mock('../lib/supabaseClient', () => ({
     },
     from: vi.fn().mockReturnThis(),
     select: vi.fn().mockReturnThis(),
-    upsert: vi.fn().mockResolvedValue({ error: null }),
-    delete: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
-  },
+    upsert: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue({
+        data: {
+            id: 'mock-id',
+            name: 'Valid Product',
+            category: 'Electronics',
+            price: 80,
+            quantity: 10,
+            min_stock: 15,
+            user_id: 'mock-user-123'
+        },
+        error: null
+        }),
+    },
 }));
 
 describe('ProductServiceProxy', () => {

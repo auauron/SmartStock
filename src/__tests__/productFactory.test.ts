@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ProductFactory } from './productFactory';
+import { ProductFactory } from '../factories/productFactory';
 
 describe('ProductFactory', () => {
     it('should transform database row to frontend product correctly', () => {

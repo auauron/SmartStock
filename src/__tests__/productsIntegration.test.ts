@@ -1,103 +1,72 @@
-import { describe, it, expect, vi } from "vitest";
 import { ProductServiceProxy } from "../services/productsService";
-import type { Product } from "../types";
+import { describe, it, expect, beforeAll } from "vitest";
+import { clearDatabase, testClient } from "./utils/db";
 
-interface SupabaseResponse<T = unknown> {
-    data: T | null;
-    error: Error | null;
-}
 
-interface MockSupabase {
-    auth: { 
-        getUser: () => Promise<{ data: { user: { id: string } }; error: null }>;
-    };
-    from: (table: string) => MockSupabase;
-    select: (columns?: string) => MockSupabase;
-    delete: () => MockSupabase;
-    upsert: (data: object) => Promise<{ error: Error | null }>;
-    eq: (col: string, val: string | number) => MockSupabase & PromiseLike<SupabaseResponse>;
-    then?: (resolve: (value: SupabaseResponse) => void) => void;
-}
+describe("Product Service Integration", () => {
+    const service = new ProductServiceProxy();
 
-vi.mock('../lib/supabaseClient', () => {
-    let currentMode: 'SELECT' | 'DELETE' | 'UPSERT' = 'SELECT';
+    let createdProductId: string;
 
-    const mockSupabase: MockSupabase = {
-        auth: {
-            getUser: vi.fn().mockResolvedValue({
-                data: { user: { id: 'test-user-123' } },
-                error: null,
-            }),
-        },
-        from: vi.fn().mockReturnThis(),
-        select: vi.fn().mockImplementation(() => {
-            currentMode = 'SELECT';
-            return mockSupabase;
-        }),
-        delete: vi.fn().mockImplementation(() => {
-            currentMode = 'DELETE';
-            return mockSupabase;
-        }),
-        upsert: vi.fn().mockImplementation(async () => {
-            return { error: null };
-        }),
-        eq: vi.fn().mockImplementation(function (this: MockSupabase) {
-            this.then = async (resolve) => {
-                const mockProducts = [{
-                    id: 'msw-123',
-                    name: 'MSW Test Phone',
-                    category: 'Electronics',
-                    price: 500,
-                    quantity: 10,
-                    min_stock: 2,
-                    user_id: 'test-user-123',
-                }];
+    beforeAll(async () => {
+        await clearDatabase();
+    })
 
-                const data = currentMode === 'SELECT' ? mockProducts : null;
-                resolve({ data, error: null });
-            };
-            return this;
-        }),
-    };
+    it('Should save a product and return the database-generated ID', async () => {
+        const newProduct = {
+            name: "Integration Keyboard",
+            category: "Electronics",
+            price: 150,
+            quantity: 5,
+            minStock: 2,
+        };
+        const savedProduct = await service.saveProduct(newProduct);
 
-    return { supabase: mockSupabase };
-});
+        expect(savedProduct.id).toBeDefined();
+        expect(typeof savedProduct.id).toBe('string');
+        expect(savedProduct.name).toBe('Integration Keyboard');
 
-describe('ProductsService Integration (MSW)', () => {
-    it('should fetch and transform products from the fake server', async () => {
-        const service = new ProductServiceProxy();
+        createdProductId = savedProduct.id;
+    })
 
+    it('Should fetch the products including the one that was just saved', async () => {
         const products = await service.getProducts();
 
-        expect(products).toHaveLength(1);
-        expect(products[0].id).toBe('msw-123')
-        expect(products[0].name).toBe('MSW Test Phone')
-        expect(products[0]).toHaveProperty('minStock')
+        expect(Array.isArray(products)).toBe(true);
+        const found = products.find(p => p.id === createdProductId);
+
+        expect(found).toBeDefined();
+        expect(found?.name).toBe('Integration Keyboard');
+        expect(found).toHaveProperty('minStock');
     })
 
-    it('should successfully save a product through the proxy to the fake server', async () => {
-        const service = new ProductServiceProxy()
-        const newProduct = {
-            name: 'Integration Phone',
-            price: 999,
-            quantity: 5,
+    it('Should update the existing product', async () => {
+        const updateData = {
+            id: createdProductId,
+            name: 'Updated Keyboard',
             category: 'Electronics',
-            minStock: 20
+            price: 175,
+            quantity: 3,
+            minStock: 1,
         }
 
-        await expect(service.saveProduct(newProduct as Product)).resolves.not.toThrow();
+        const updatedProduct = await service.saveProduct(updateData);
+
+        expect(updatedProduct.id).toBe(createdProductId);
+        expect(updatedProduct.name).toBe("Updated Keyboard");
+        expect(updatedProduct.price).toBe(175);
     })
 
-    it('should delete a product through the proxy to the fake server', async () => {
-        const service = new ProductServiceProxy();
-        const productId = 'msw-123';
+    it('Should delete the product correctly', async () => {
+        await service.deleteProduct(createdProductId)
 
-        await expect(service.deleteProduct(productId)).resolves.not.toThrow();
+        const { data } = await testClient
+            .from('products')
+            .select('id')
+            .eq('id', createdProductId);
 
+        expect(data).toHaveLength(0);
     })
-}) 
-
-
-
+})
 
 
