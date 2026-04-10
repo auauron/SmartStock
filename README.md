@@ -217,6 +217,12 @@ This section is aligned to the SCD final-project requirements by showing pattern
 
 ## Planned / In Progress
 
+- [ ] **Smart Analysis — Inventory Insights Dashboard**
+  - Restock frequency analysis (which products are restocked most often)
+  - Low stock predictions based on historical restock intervals
+  - Category breakdown (total value, product count, average stock per category)
+  - Spending trends over time (weekly/monthly restock volume)
+  - Stock health score (% in stock vs low vs out-of-stock)
 - [ ] Connect Dashboard page to live Supabase data (replace mock stats/low-stock/activity)
 - [ ] Wire up Settings page to persist notification preferences to `notification_preferences` table
 - [ ] Implement `generateReport` server function for downloadable inventory reports
