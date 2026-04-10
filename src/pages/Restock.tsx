@@ -28,6 +28,13 @@ export function Restock() {
     const [historyProductFilter, setHistoryProductFilter] = useState("");
     const [historyDateFilter, setHistoryDateFilter] = useState("");
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 4;
+    
+    React.useEffect(() => {
+        setCurrentPage(1);
+    }, [historyProductFilter, historyDateFilter]);
+
     const filteredHistory = React.useMemo(() => {
         let result = history;
         if (historyProductFilter) {
@@ -45,6 +52,14 @@ export function Restock() {
         }
         return result;
     }, [history, historyProductFilter, historyDateFilter]);
+
+    const totalItems = filteredHistory.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    const paginatedHistory = React.useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return filteredHistory.slice(startIndex, startIndex + itemsPerPage);
+    }, [filteredHistory, currentPage, itemsPerPage]);
 
     const handleSubmit = async(e: React.FormEvent) => { 
         e.preventDefault();   
@@ -237,7 +252,7 @@ return (
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {filteredHistory.map((entry) => (
+                        {paginatedHistory.map((entry) => (
                             <tr key={entry.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className="font-medium text-gray-900">
@@ -266,6 +281,32 @@ return (
                     </tbody>
                 </table>
             </div>
+             )}
+
+             {!loading && totalItems > 0 && (
+                <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between text-sm bg-gray-50/50">
+                    <span className="text-gray-500 font-medium">
+                        Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} transactions
+                    </span>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="secondary"
+                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="px-4 py-1.5 font-bold text-gray-500"
+                        >
+                            PREV
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-1.5 font-bold text-emerald-600"
+                        >
+                            NEXT
+                        </Button>
+                    </div>
+                </div>
              )}
 
              {!loading && filteredHistory.length === 0 && (
