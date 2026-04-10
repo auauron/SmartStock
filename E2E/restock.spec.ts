@@ -57,9 +57,25 @@ async function waitForProductOption(
   page: import('@playwright/test').Page,
   productName: string,
 ) {
-  await expect(page.locator('select option', { hasText: productName })).toBeAttached({
+  // The custom DropdownField renders a hidden sr-only <select> with native <option> elements.
+  // Target the first select (the "Product Name" dropdown) to avoid strict-mode violations.
+  await expect(page.locator('select.sr-only').first().locator('option', { hasText: productName })).toBeAttached({
     timeout: 15_000,
   })
+}
+
+/**
+ * Selects a product from the custom DropdownField component.
+ * The component uses a button trigger + listbox pattern (not a native <select>),
+ * so we click the trigger to open the popover, then click the matching option.
+ */
+async function selectProduct(page: import('@playwright/test').Page, productName: string) {
+  // Click the product dropdown trigger button (the first button with aria-haspopup="listbox")
+  const trigger = page.locator('button[aria-haspopup="listbox"]').first()
+  await trigger.click()
+
+  // Click the matching option in the listbox
+  await page.getByRole('option', { name: productName }).click()
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -73,7 +89,8 @@ test.describe('Restock Page — End-to-End Flow', () => {
       await expect(page.getByRole('heading', { name: 'Restock Management' })).toBeVisible()
       await expect(page.getByRole('heading', { name: 'Add Restock' })).toBeVisible()
       await expect(page.getByRole('heading', { name: 'Restock History' })).toBeVisible()
-      await expect(page.locator('select')).toBeVisible()
+      // The product dropdown is a custom DropdownField (button trigger, not a native <select>)
+      await expect(page.getByRole('button', { name: /Select a product|Loading products/ })).toBeVisible()
       await expect(page.locator('input[type="number"]')).toBeVisible()
       await expect(page.locator('textarea')).toBeVisible()
       await expect(page.getByRole('button', { name: 'Add Restock Entry' })).toBeVisible()
@@ -114,14 +131,15 @@ test.describe('Restock Page — End-to-End Flow', () => {
       const quantity = '25'
       const notes = `E2E restock note ${Date.now()}`
 
-      await page.locator('select').selectOption({ label: seededProductName })
+      await selectProduct(page, seededProductName)
       await page.locator('input[type="number"]').fill(quantity)
       await page.locator('textarea').fill(notes)
 
       await page.getByRole('button', { name: 'Add Restock Entry' }).click()
 
       // Form resets when submission succeeds
-      await expect(page.locator('select')).toHaveValue('', { timeout: 15_000 })
+      // After successful submission the form resets — the dropdown trigger shows the placeholder again
+      await expect(page.getByRole('button', { name: /Select a product/ })).toBeVisible({ timeout: 15_000 })
       await expect(page.locator('input[type="number"]')).toHaveValue('')
       await expect(page.locator('textarea')).toHaveValue('')
 
@@ -134,23 +152,23 @@ test.describe('Restock Page — End-to-End Flow', () => {
     test('should show the quantity badge with correct format (+N units)', async ({ page }) => {
       const quantity = '10'
 
-      await page.locator('select').selectOption({ label: seededProductName })
+      await selectProduct(page, seededProductName)
       await page.locator('input[type="number"]').fill(quantity)
 
       await page.getByRole('button', { name: 'Add Restock Entry' }).click()
 
       // Wait for form reset as the success signal, then check the table
-      await expect(page.locator('select')).toHaveValue('', { timeout: 15_000 })
+      await expect(page.getByRole('button', { name: /Select a product/ })).toBeVisible({ timeout: 15_000 })
       await expect(page.locator('table')).toContainText(`+${quantity} units`, { timeout: 10_000 })
     })
 
     test('should add restock without notes and show "No notes" fallback', async ({ page }) => {
-      await page.locator('select').selectOption({ label: seededProductName })
+      await selectProduct(page, seededProductName)
       await page.locator('input[type="number"]').fill('5')
 
       await page.getByRole('button', { name: 'Add Restock Entry' }).click()
 
-      await expect(page.locator('select')).toHaveValue('', { timeout: 15_000 })
+      await expect(page.getByRole('button', { name: /Select a product/ })).toBeVisible({ timeout: 15_000 })
       await expect(page.locator('table')).toContainText('No notes', { timeout: 10_000 })
     })
   })
@@ -204,13 +222,13 @@ test.describe('Restock Page — End-to-End Flow', () => {
       await page.waitForLoadState('networkidle')
       await waitForProductOption(page, productName)
 
-      await page.locator('select').selectOption({ label: productName })
+      await selectProduct(page, productName)
       await page.locator('input[type="number"]').fill('3')
 
       await page.getByRole('button', { name: 'Add Restock Entry' }).click()
 
       // Wait for form reset as success signal
-      await expect(page.locator('select')).toHaveValue('', { timeout: 15_000 })
+      await expect(page.getByRole('button', { name: /Select a product/ })).toBeVisible({ timeout: 15_000 })
 
       // First date cell in tbody must contain a month abbreviation
       const dateCell = page.locator('table tbody tr td').nth(2)
