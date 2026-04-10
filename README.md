@@ -138,7 +138,7 @@ smart-stock/
 
 ## Database
 
-The Supabase PostgreSQL schema (see [`docs/supabase-schema-rls.sql`](docs/supabase-schema-rls.sql)) contains:
+The Supabase PostgreSQL schema contains:
 
 | Table                        | Purpose                                           |
 | ---------------------------- | ------------------------------------------------- |
@@ -228,7 +228,7 @@ This section is aligned to the SCD final-project requirements by showing pattern
 ### Prerequisites
 
 - Node.js 20+
-- A Supabase project with the schema from [`docs/supabase-schema-rls.sql`](docs/supabase-schema-rls.sql)
+- A Supabase project with the required schema applied
 
 ### Installation
 
