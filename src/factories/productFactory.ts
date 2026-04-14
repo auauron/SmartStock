@@ -7,6 +7,8 @@ export interface ProductRow {
     quantity: number;
     min_stock: number;
     user_id: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export class ProductFactory {
@@ -19,6 +21,8 @@ static createFromDb(row: ProductRow): Product {
         price: row.price,
         quantity: row.quantity,
         minStock: row.min_stock, 
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
     };
 }
 

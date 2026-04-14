@@ -13,6 +13,7 @@ export function useInventory() {
     const load = useCallback(async () => {
         try {
             const data = await service.getProducts()
+            console.log(data)
             setProducts(data);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to load inventory");

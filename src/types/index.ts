@@ -7,6 +7,8 @@ export interface Product {
   price: number;
   quantity: number;
   minStock: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export type {
