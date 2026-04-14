@@ -21,8 +21,8 @@ static createFromDb(row: ProductRow): Product {
         price: row.price,
         quantity: row.quantity,
         minStock: row.min_stock, 
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
+        createdAt: new Date(row.created_at),
+        updatedAt: new Date(row.updated_at),
     };
 }
 

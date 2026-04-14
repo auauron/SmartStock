@@ -3,6 +3,7 @@ import { ProductFactory } from '../factories/productFactory';
 
 describe('ProductFactory', () => {
     it('should transform database row to frontend product correctly', () => {
+        const fixedDate = '2023-01-01T10:00:00.000Z';
         const mockDbRow = {
             id: 'prod_123',
             name: 'Mechanical Keyboard',
@@ -10,7 +11,9 @@ describe('ProductFactory', () => {
             price: 150.50,
             quantity: 10,
             min_stock: 5,
-            user_id: 'user_99'
+            user_id: 'user_99',
+            created_at: fixedDate,
+            updated_at: fixedDate,
         };
 
         const result = ProductFactory.createFromDb(mockDbRow);
@@ -21,6 +24,8 @@ describe('ProductFactory', () => {
         expect(result.price).toBe(150.50)
         expect(result.quantity).toBe(10)
         expect(result.minStock).toBe(5)
+        expect(result.createdAt).toBeInstanceOf(Date)
+        expect(result.createdAt?.toISOString()).toBe(fixedDate)
     })
 
     it('should prepare data for the database correctly', () => {

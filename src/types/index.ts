@@ -7,8 +7,8 @@ export interface Product {
   price: number;
   quantity: number;
   minStock: number;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export type {
