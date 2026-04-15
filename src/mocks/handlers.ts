@@ -16,7 +16,7 @@ export const handlers = [
         })
     }),
 
-    http.get('*/rest/v1/inventories*', () => {
+    http.get('https://jpduugrknlzxmwnlqbcm.supabase.co/rest/v1/inventories*', () => {
         return HttpResponse.json([
             {
                 id: 'msw-123',
@@ -29,11 +29,11 @@ export const handlers = [
         ]);
     }),
 
-    http.post('*/rest/v1/inventories*', () => {
+    http.post('https://jpduugrknlzxmwnlqbcm.supabase.co/rest/v1/inventories*', () => {
         return HttpResponse.json({ message: 'Success'}, {status: 201})
     }),
 
-    http.delete('*/rest/v1/inventories*', () => {
+    http.delete('https://jpduugrknlzxmwnlqbcm.supabase.co/rest/v1/inventories*', () => {
         return new HttpResponse(null, {status: 204})
     })
 ];

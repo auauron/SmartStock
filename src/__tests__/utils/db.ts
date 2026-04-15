@@ -18,11 +18,11 @@ export const clearDatabase = async () => {
   }
 
   const { error: productError } = await testClient
-    .from("products")
+    .from("inventories")
     .delete()
     .neq("id", "00000000-0000-0000-0000-000000000000");
 
   if (productError) {
-    throw new Error(`Failed to clear products: ${productError.message}`);
+    throw new Error(`Failed to clear inventories: ${productError.message}`);
   }
 };

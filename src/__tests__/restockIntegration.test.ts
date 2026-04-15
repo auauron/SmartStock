@@ -3,17 +3,17 @@ import { testClient, clearDatabase } from "./utils/db";
 
 const TEST_USER_ID = "11111111-1111-1111-1111-111111111111";
 
-let createdProductId: string;
+let createdInventoryId: string;
 let createdRestockId: string;
 
 beforeAll(async () => {
   await clearDatabase();
 
   const { data, error } = await testClient
-    .from("products")
+    .from("inventories")
     .insert({
       user_id: TEST_USER_ID,
-      name: "Test Product (API)",
+      name: "Test Item (API)",
       category: "Electronics",
       price: 99.99,
       quantity: 0,
@@ -23,7 +23,7 @@ beforeAll(async () => {
     .single();
 
   if (error) throw new Error(`beforeAll seed failed: ${error.message}`);
-  createdProductId = data.id;
+  createdInventoryId = data.id;
 });
 
 afterAll(async () => {
@@ -36,7 +36,7 @@ describe("Restocks API", () => {
     const { data, error } = await testClient
       .from("restocks")
       .insert({
-        product_id: createdProductId,
+        inventory_id: createdInventoryId,
         user_id: TEST_USER_ID,
         quantity_added: 20,
         notes: "API integration test restock",
@@ -47,7 +47,7 @@ describe("Restocks API", () => {
     expect(error).toBeNull();
     expect(data!.quantity_added).toBe(20);
     expect(data!.notes).toBe("API integration test restock");
-    expect(data!.product_id).toBe(createdProductId);
+    expect(data!.inventory_id).toBe(createdInventoryId);
 
     createdRestockId = data!.id;
   });
