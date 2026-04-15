@@ -2,6 +2,11 @@
 
 Course: Software Component Design (BSSE 2, 2nd Semester, A.Y. 2025-2026)
 
+> [!IMPORTANT]
+> **Key Project Files:**
+> - [Assignment Rubric & Instructions](file:///c:/projects/smart-stock/docs/REFERENCE_INSTRUCTIONS.md)
+> - [DRAFT Final Documentation Paper](file:///c:/projects/smart-stock/docs/SMARTSTOCK_FINAL_PROJECT.md)
+
 This guide converts your SCD final-project instructions and rubric into a project-specific implementation and documentation checklist for SmartStock.
 
 ## 1) Repository Reality Check (Current State)
