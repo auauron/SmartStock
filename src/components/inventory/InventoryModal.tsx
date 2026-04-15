@@ -146,7 +146,7 @@ export function InventoryModal ({
                 label="Current Quantity"
                 value={isNaN(formData.quantity) ? "" : formData.quantity}
                 onFocus={(e) => e.target.select()}
-                onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value, 10) || 0 })}
+                onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value, 10) })}
                 className="py-2"
                 placeholder="0"
                 />
@@ -157,7 +157,7 @@ export function InventoryModal ({
                 label="Minimum Stock Level"
                 value={isNaN(formData.minStock) ? "" : formData.minStock}
                 onFocus={(e) => e.target.select()}
-                onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value, 10) || 0 })}
+                onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value, 10) })}
                 className="py-2"
                 placeholder="0"
                 />
