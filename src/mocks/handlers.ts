@@ -1,6 +1,5 @@
 import { http, HttpResponse} from 'msw';
 
-
 export const handlers = [
     http.get('*/auth/v1/user', () => { 
         return HttpResponse.json({
@@ -17,7 +16,7 @@ export const handlers = [
         })
     }),
 
-    http.get('*/rest/v1/products*', () => {
+    http.get('*/rest/v1/inventory*', () => {
         return HttpResponse.json([
             {
                 id: 'msw-123',
@@ -30,11 +29,11 @@ export const handlers = [
         ]);
     }),
 
-    http.post('*/rest/v1/products*', () => {
+    http.post('*/rest/v1/inventory*', () => {
         return HttpResponse.json({ message: 'Success'}, {status: 201})
     }),
 
-    http.delete('*/rest/v1/products*', () => {
+    http.delete('*/rest/v1/inventory*', () => {
         return new HttpResponse(null, {status: 204})
     })
 ];

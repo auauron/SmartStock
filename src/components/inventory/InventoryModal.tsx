@@ -1,50 +1,48 @@
 import { useState, useEffect } from "react";
 import { Button } from "../ui/Button";
-import type { Product } from "../../types"
+import type { Inventory } from "../../types"
 import { Modal } from "../ui/Modal";
 import { InputField } from "../ui/InputField";
 import { DropdownField } from "../ui/DropdownField";
 
-
-
-interface ProductModalProps {
+interface InventoryModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (product: Omit<Product, "id"> & { id: string }) => Promise<void>;
-    product?: Product
+    onSave: (item: Omit<Inventory, "id"> & { id: string }) => Promise<void>;
+    item?: Inventory
 }
 
-export function ProductModal ({ 
+export function InventoryModal ({ 
     isOpen,
     onClose,
     onSave,
-    product
-}: ProductModalProps) {
-    const [formData, setFormData] = useState<Omit<Product, "id">>(() => ({
-        name: product?.name || "",
-        category: product?.category || "",
-        price: product?.price || 0,
-        quantity: product?.quantity || 0,
-        minStock: product?.minStock || 0,
+    item
+}: InventoryModalProps) {
+    const [formData, setFormData] = useState<Omit<Inventory, "id">>(() => ({
+        name: item?.name || "",
+        category: item?.category || "",
+        price: item?.price || 0,
+        quantity: item?.quantity || 0,
+        minStock: item?.minStock || 0,
     }));
 
     useEffect(() => {
         setFormData({
-            name: product?.name || "",
-            category: product?.category || "",
-            price: product?.price || 0,
-            quantity: product?.quantity || 0,
-            minStock: product?.minStock || 0,
+            name: item?.name || "",
+            category: item?.category || "",
+            price: item?.price || 0,
+            quantity: item?.quantity || 0,
+            minStock: item?.minStock || 0,
         });
-    }, [product]);
-    const [isCustomCategory, setIsCustomCategory] = useState(false);
+    }, [item]);
 
+    const [isCustomCategory, setIsCustomCategory] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
             await onSave({
-                id: product?.id || "",
+                id: item?.id || "",
                 ...formData,
                 price: isNaN(formData.price) ? 0 : formData.price,
                 quantity: isNaN(formData.quantity) ? 0 : formData.quantity,
@@ -52,7 +50,7 @@ export function ProductModal ({
             });
             onClose();
         } catch (err) {
-            console.error("Failed to save product:", err);
+            console.error("Failed to save inventory item:", err);
         }
     };
 
@@ -62,17 +60,17 @@ export function ProductModal ({
         <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title={ product ? "Edit Product" : "Add New Product"}
+        title={ item ? "Edit Inventory" : "Add New Inventory"}
         >
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <InputField
                 type="text"
                 required
-                label="Product Name"
+                label="Item Name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="py-2"
-                placeholder="Enter product name"
+                placeholder="Enter item name"
               />
               <DropdownField
                 required
@@ -100,13 +98,12 @@ export function ProductModal ({
                 <option value="OTHER">+ Add New Category</option>
               </DropdownField>
 
-
               {isCustomCategory && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
                   <InputField
                   type="text"
                   required
-                  label="Category"
+                  label="Category Name"
                   value={formData.category}
                   onChange={(e) => setFormData({...formData, category: e.target.value})}
                   placeholder="e.g. Hardware"
@@ -139,7 +136,7 @@ export function ProductModal ({
                 type="number"
                 required
                 min={0}
-                label="Quantity"
+                label="Current Quantity"
                 value={isNaN(formData.quantity) ? "" : formData.quantity}
                 onFocus={(e) => e.target.select()}
                 onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value, 10) || 0 })}
@@ -171,7 +168,7 @@ export function ProductModal ({
                   type="submit"
                   className="flex-1"
                   >
-                    Save Product
+                    Save Inventory
                   </Button>
                 </div>
             </form>

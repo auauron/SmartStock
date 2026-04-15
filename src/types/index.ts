@@ -1,6 +1,6 @@
 // ─── Domain Types ────────────────────────────────────────────────────────────
 
-export interface Product {
+export interface Inventory {
   id: string;
   name: string;
   category: string;
@@ -12,7 +12,7 @@ export interface Product {
 export type {
   CreateRestockInput,
   RestockEntry,
-  RestockProductOption,
+  RestockInventoryOption,
 } from "./restock";
 
 // ─── Auth / User Types ────────────────────────────────────────────────────────

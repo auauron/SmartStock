@@ -26,15 +26,15 @@ test.describe('Inventory End-to-End Flow', () => {
         await page.waitForLoadState('networkidle')
     });
 
-    test('should add a new product with a custom category', async ({ page }) => {
-        const productName = `Test-Product-${Date.now()}`;
+    test('should add a new inventory item with a custom category', async ({ page }) => {
+        const itemName = `Test-Item-${Date.now()}`;
         const customCategory = 'Hardware';
 
-        await page.click('button:has-text("Add Product")');
+        await page.click('button:has-text("Add Item")');
 
         const modal = page.locator('form');
 
-        await modal.getByPlaceholder('Enter product name').fill(productName);
+        await modal.getByPlaceholder('Enter item name').fill(itemName);
 
         await modal.getByRole('button', { name: 'Select a category' }).click();
         await modal.getByRole('option', { name: '+ Add New Category' }).click();
@@ -47,36 +47,36 @@ test.describe('Inventory End-to-End Flow', () => {
         await modal.locator('input[type="number"]').nth(1).fill('50');
         await modal.locator('input[type="number"]').nth(2).fill('10');
 
-        await modal.getByRole('button', { name: 'Save Product'}).click();
+        await modal.getByRole('button', { name: 'Save Item'}).click();
 
-        await expect(page.locator('table')).toContainText(productName);
+        await expect(page.locator('table')).toContainText(itemName);
         await expect(page.locator('table')).toContainText(customCategory);
     });
 
-    test('should show the custom Delete Confirmation Modal and delete a product', async ({ page }) => {
-        // Seed a test-specific product so the test is hermetic
-        const testProductName = `Delete-Test-${Date.now()}`;
+    test('should show the custom Delete Confirmation Modal and delete an item', async ({ page }) => {
+        // Seed a test-specific item so the test is hermetic
+        const testItemName = `Delete-Test-${Date.now()}`;
 
-        await page.click('button:has-text("Add Product")');
+        await page.click('button:has-text("Add Item")');
         const modal = page.locator('form');
-        await modal.getByPlaceholder('Enter product name').fill(testProductName);
+        await modal.getByPlaceholder('Enter item name').fill(testItemName);
         await modal.locator('select').selectOption('Electronics');
         await modal.locator('input[type="number"]').nth(0).fill('10');
         await modal.locator('input[type="number"]').nth(1).fill('1');
         await modal.locator('input[type="number"]').nth(2).fill('1');
-        await modal.getByRole('button', { name: 'Save Product' }).click();
-        await expect(page.locator('table')).toContainText(testProductName);
+        await modal.getByRole('button', { name: 'Save Item' }).click();
+        await expect(page.locator('table')).toContainText(testItemName);
 
-        // Find the row for our seeded product and click its delete button
-        const row = page.locator('tr', { hasText: testProductName });
-        await row.getByTestId('delete-product-button').click();
+        // Find the row for our seeded item and click its delete button
+        const row = page.locator('tr', { hasText: testItemName });
+        await row.getByTestId('delete-item-button').click();
 
-        const deleteModal = page.locator('text=Delete Product');
+        const deleteModal = page.locator('text=Delete Inventory Item');
         await expect(deleteModal).toBeVisible();
-        await expect(page.locator('text=Are you sure you want to delete this product?')).toBeVisible();
+        await expect(page.locator('text=Are you sure you want to delete this inventory item?')).toBeVisible();
 
         await page.click('button:has-text("Delete")');
 
-        await expect(page.locator('table')).not.toContainText(testProductName);
+        await expect(page.locator('table')).not.toContainText(testItemName);
     })
-})
+})

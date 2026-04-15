@@ -2,7 +2,7 @@ import { supabase } from "../lib/supabaseClient";
 import type {
   CreateRestockInput,
   RestockEntry,
-  RestockProductOption,
+  RestockInventoryOption,
 } from "../types";
 
 interface RestockRow {
@@ -10,12 +10,12 @@ interface RestockRow {
   quantity_added: number;
   notes: string | null;
   restocked_at: string;
-  products: { name: string } | { name: string }[] | null;
+  inventory: { name: string } | { name: string }[] | null;
 }
 
 interface CreateRestockRpcRow {
   id: string;
-  product_name: string;
+  inventory_name: string;
   quantity_added: number;
   notes: string;
   restocked_at: string;
@@ -34,9 +34,9 @@ async function requireUserId(): Promise<string> {
   return user.id;
 }
 
-function getJoinedProductName(
-  joined: RestockRow["products"],
-  fallback = "Unknown Product",
+function getJoinedInventoryName(
+  joined: RestockRow["inventory"],
+  fallback = "Unknown Item",
 ): string {
   if (!joined) return fallback;
   if (Array.isArray(joined)) {
@@ -45,11 +45,11 @@ function getJoinedProductName(
   return joined.name;
 }
 
-export async function getRestockProducts(): Promise<RestockProductOption[]> {
+export async function getRestockInventory(): Promise<RestockInventoryOption[]> {
   const userId = await requireUserId();
 
   const { data, error } = await supabase
-    .from("products")
+    .from("inventory")
     .select("id, name")
     .eq("user_id", userId)
     .order("name", { ascending: true });
@@ -61,7 +61,7 @@ export async function getRestockProducts(): Promise<RestockProductOption[]> {
   return (data ?? []).map((row) => ({
     id: row.id,
     name: row.name,
-  })) as RestockProductOption[];
+  })) as RestockInventoryOption[];
 }
 
 export async function getRestockHistory(): Promise<RestockEntry[]> {
@@ -69,7 +69,7 @@ export async function getRestockHistory(): Promise<RestockEntry[]> {
 
   const { data, error } = await supabase
     .from("restocks")
-    .select("id, quantity_added, notes, restocked_at, products(name)")
+    .select("id, quantity_added, notes, restocked_at, inventory(name)")
     .eq("user_id", userId)
     .order("restocked_at", { ascending: false });
 
@@ -77,9 +77,9 @@ export async function getRestockHistory(): Promise<RestockEntry[]> {
     throw new Error(error.message);
   }
 
-  return ((data ?? []) as RestockRow[]).map((row) => ({
+  return ((data ?? []) as unknown as RestockRow[]).map((row) => ({
     id: row.id,
-    productName: getJoinedProductName(row.products),
+    inventoryName: getJoinedInventoryName(row.inventory),
     quantityAdded: row.quantity_added,
     date: row.restocked_at,
     notes: row.notes ?? "",
@@ -92,7 +92,7 @@ export async function createRestock(
   await requireUserId();
 
   const { data, error } = await supabase.rpc("create_restock_transaction", {
-    p_product_id: input.productId,
+    p_inventory_id: input.inventoryId,
     p_quantity_added: input.quantityAdded,
     p_notes: input.notes,
   });
@@ -108,7 +108,7 @@ export async function createRestock(
 
   return {
     id: restockData.id,
-    productName: restockData.product_name,
+    inventoryName: restockData.inventory_name,
     quantityAdded: restockData.quantity_added,
     date: restockData.restocked_at,
     notes: restockData.notes ?? "",

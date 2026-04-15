@@ -2,17 +2,17 @@ import { useCallback, useEffect, useState } from "react";
 import type {
   CreateRestockInput,
   RestockEntry,
-  RestockProductOption,
+  RestockInventoryOption,
 } from "../types";
 import {
   createRestock,
   getRestockHistory,
-  getRestockProducts,
+  getRestockInventory,
 } from "../services/restockService";
 
 export function useRestocks() {
   const [history, setHistory] = useState<RestockEntry[]>([]);
-  const [products, setProducts] = useState<RestockProductOption[]>([]);
+  const [inventory, setInventory] = useState<RestockInventoryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,11 +22,11 @@ export function useRestocks() {
     setError(null);
 
     try {
-      const [productOptions, restockHistory] = await Promise.all([
-        getRestockProducts(),
+      const [inventoryOptions, restockHistory] = await Promise.all([
+        getRestockInventory(),
         getRestockHistory(),
       ]);
-      setProducts(productOptions);
+      setInventory(inventoryOptions);
       setHistory(restockHistory);
     } catch (loadError) {
       const message =
@@ -64,7 +64,7 @@ export function useRestocks() {
 
   return {
     history,
-    products,
+    inventory, // renamed from products for consistency
     loading,
     submitting,
     error,

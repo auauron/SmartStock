@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { ProductFactory } from '../factories/productFactory';
+import { InventoryFactory } from '../factories/inventoryFactory';
 
-describe('ProductFactory', () => {
-    it('should transform database row to frontend product correctly', () => {
+describe('InventoryFactory', () => {
+    it('should transform database row to frontend inventory item correctly', () => {
         const mockDbRow = {
-            id: 'prod_123',
+            id: 'inv_123',
             name: 'Mechanical Keyboard',
             category: 'Electronics',
             price: 150.50,
@@ -13,9 +13,9 @@ describe('ProductFactory', () => {
             user_id: 'user_99'
         };
 
-        const result = ProductFactory.createFromDb(mockDbRow);
+        const result = InventoryFactory.createFromDb(mockDbRow);
 
-        expect(result.id).toBe('prod_123');
+        expect(result.id).toBe('inv_123');
         expect(result.name).toBe('Mechanical Keyboard')
         expect(result.category).toBe('Electronics')
         expect(result.price).toBe(150.50)
@@ -24,7 +24,7 @@ describe('ProductFactory', () => {
     })
 
     it('should prepare data for the database correctly', () => {
-        const frontendProduct = {
+        const frontendItem = {
             name: 'Gaming Mouse',
             category: 'Accessories',
             price: 50,
@@ -33,7 +33,7 @@ describe('ProductFactory', () => {
         };
 
         const userId = 'user_001';
-        const dbRow = ProductFactory.toDb(frontendProduct, userId)
+        const dbRow = InventoryFactory.toDb(frontendItem, userId)
 
         expect(dbRow.name).toBe('Gaming Mouse')
         expect(dbRow.category).toBe('Accessories')
