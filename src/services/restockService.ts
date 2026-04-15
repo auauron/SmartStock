@@ -10,7 +10,7 @@ interface RestockRow {
   quantity_added: number;
   notes: string | null;
   restocked_at: string;
-  inventory: { name: string } | { name: string }[] | null;
+  inventories: { name: string } | { name: string }[] | null;
 }
 
 interface CreateRestockRpcRow {
@@ -49,7 +49,7 @@ export async function getRestockInventory(): Promise<RestockInventoryOption[]> {
   const userId = await requireUserId();
 
   const { data, error } = await supabase
-    .from("inventory")
+    .from("inventories")
     .select("id, name")
     .eq("user_id", userId)
     .order("name", { ascending: true });
@@ -69,7 +69,7 @@ export async function getRestockHistory(): Promise<RestockEntry[]> {
 
   const { data, error } = await supabase
     .from("restocks")
-    .select("id, quantity_added, notes, restocked_at, inventory(name)")
+    .select("id, quantity_added, notes, restocked_at, inventories(name)")
     .eq("user_id", userId)
     .order("restocked_at", { ascending: false });
 
@@ -79,7 +79,7 @@ export async function getRestockHistory(): Promise<RestockEntry[]> {
 
   return ((data ?? []) as unknown as RestockRow[]).map((row) => ({
     id: row.id,
-    inventoryName: getJoinedInventoryName(row.inventory),
+    inventoryName: getJoinedInventoryName(row.inventories),
     quantityAdded: row.quantity_added,
     date: row.restocked_at,
     notes: row.notes ?? "",

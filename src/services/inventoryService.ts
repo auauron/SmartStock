@@ -11,7 +11,7 @@ export interface IInventoryService {
 class InventoryService {
     async getInventory(userId: string): Promise<Inventory[]> {
         const { data, error } = await supabase
-            .from("inventory")
+            .from("inventories")
             .select("*")
             .eq("user_id", userId);
 
@@ -21,13 +21,13 @@ class InventoryService {
 
     async saveInventory(item: Omit<Inventory, "id"> & {id?: string}, userId: string): Promise<void> {
         const dbData = InventoryFactory.toDb(item, userId);
-        const { error } = await supabase.from("inventory").upsert(dbData);
+        const { error } = await supabase.from("inventories").upsert(dbData);
         if (error) throw error;
     }
 
     async deleteInventory(id: string, userId: string): Promise<void> {
         const { error } = await supabase
-            .from("inventory")
+            .from("inventories")
             .delete()
             .eq("id", id)
             .eq("user_id", userId);

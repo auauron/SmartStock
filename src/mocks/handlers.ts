@@ -16,7 +16,7 @@ export const handlers = [
         })
     }),
 
-    http.get('*/rest/v1/inventory*', () => {
+    http.get('*/rest/v1/inventories*', () => {
         return HttpResponse.json([
             {
                 id: 'msw-123',
@@ -29,11 +29,11 @@ export const handlers = [
         ]);
     }),
 
-    http.post('*/rest/v1/inventory*', () => {
+    http.post('*/rest/v1/inventories*', () => {
         return HttpResponse.json({ message: 'Success'}, {status: 201})
     }),
 
-    http.delete('*/rest/v1/inventory*', () => {
+    http.delete('*/rest/v1/inventories*', () => {
         return new HttpResponse(null, {status: 204})
     })
 ];

@@ -66,7 +66,7 @@ The proposed solution implements a **Pattern-Driven Architecture** to ensure lon
 ## 6. Goals and Objectives
 
 1. **Architectural Integrity:** Implement at least three design patterns (Singleton, Decorator, and Factory Method) where each pattern solves a distinct architectural bottleneck.
-2. **Operational Efficiency:** Enable inventory updates to be completed in under 10 seconds per item through a optimized UI/UX design.
+2. **Operational Efficiency:** Enable inventory updates to be completed in under 10 seconds per item through an optimized UI/UX design.
 3. **Data Consistency:** Maintain 100% synchronization between local device state and the cloud database using synchronous client instance management.
 4. **User Adoption:** Design an interface that requires zero training for inventory personnel familiar with basic spreadsheet concepts.
 
@@ -98,10 +98,10 @@ The proposed solution implements a **Pattern-Driven Architecture** to ensure lon
 
 - **Pattern Name:** Factory Method Pattern
 - **Category:** Creational
-- **Location in Code:** `src/factories/entityFactory.ts` (Target implementation)
-- **Problem Without the Pattern:** Creating new products or restock entries currently occurs in fragmented locations (modals and pages). This leads to inconsistent data structures, where some products might miss essential fields or fail validation checks, causing runtime errors in the dashboard.
+- **Location in Code:** `src/factories/inventoryFactory.ts`
+- **Problem Without the Pattern:** Creating new inventory or restock entries currently occurs in fragmented locations (modals and pages). This leads to inconsistent data structures, where some items might miss essential fields or fail validation checks, causing runtime errors in the dashboard.
 - **Proposed Solution:** Move all object creation into a specialized Factory class that handles default value assignment and normalization.
-- **How the Pattern Solves It:** The Factory acts as a gateway; the UI components simply request a "New Product" object, and the Factory returns a perfectly structured entity. This decouples the "How to build a product" logic from the "Where to display a product" logic.
+- **How the Pattern Solves It:** The Factory acts as a gateway; the UI components simply request a "New Inventory" object, and the Factory returns a perfectly structured entity. This decouples the "How to build an inventory item" logic from the "Where to display an inventory item" logic.
 - **Design Principle Upheld:** **Dependency Inversion Principle (DIP)**. High-level UI components no longer depend on low-level constructor logic; they depend on the Factory abstraction.
 
 ---
@@ -130,7 +130,7 @@ graph TD
 
 ## 9. Features
 
-- **Real-time Inventory Dashboard:** Searchable, filterable list of all warehouse products.
+- **Real-time Inventory Dashboard:** Searchable, filterable list of all warehouse inventory.
 - **Stock Level Indicators:** Color-coded status badges driven by business logic (Out of Stock < Low Stock).
 - **Restock History Management:** Audit trail of when and how many items were added to inventory.
 - **Auth-Protected Access:** Row-Level Security (RLS) ensures members only see their group's data.

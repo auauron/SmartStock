@@ -77,7 +77,7 @@ describe("restockService", () => {
         { id: "1", name: "Item A" },
         { id: "2", name: "Item B" },
       ]);
-      expect(mockFrom).toHaveBeenCalledWith("inventory");
+      expect(mockFrom).toHaveBeenCalledWith("inventories");
     });
   });
 
@@ -105,14 +105,14 @@ describe("restockService", () => {
           quantity_added: 10,
           notes: "Test notes",
           restocked_at: "2026-04-03T00:00:00.000Z",
-          inventory: { name: "Item Foo" },
+          inventories: { name: "Item Foo" },
         },
         {
           id: "2",
           quantity_added: 5,
           notes: null,
           restocked_at: "2026-04-02T00:00:00.000Z",
-          inventory: [{ name: "Item Bar" }],
+          inventories: [{ name: "Item Bar" }],
         },
       ];
 
