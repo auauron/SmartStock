@@ -66,7 +66,7 @@ export function InventoryModal ({
         <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title={ item ? "Edit Inventory" : "Add New Inventory"}
+        title={ item ? "Edit Item" : "Add New Item"}
         >
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <InputField
@@ -175,7 +175,7 @@ export function InventoryModal ({
                   type="submit"
                   className="flex-1"
                   >
-                    Save Inventory
+                    Save Item
                   </Button>
                 </div>
             </form>

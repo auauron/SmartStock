@@ -47,7 +47,7 @@ test.describe('Inventory End-to-End Flow', () => {
         await modal.locator('input[type="number"]').nth(1).fill('50');
         await modal.locator('input[type="number"]').nth(2).fill('10');
 
-        await modal.getByRole('button', { name: 'Save Item'}).click();
+        await modal.getByRole('button', { name: 'Save Item' }).click();
 
         await expect(page.locator('table')).toContainText(itemName);
         await expect(page.locator('table')).toContainText(customCategory);
@@ -60,7 +60,12 @@ test.describe('Inventory End-to-End Flow', () => {
         await page.click('button:has-text("Add Item")');
         const modal = page.locator('form');
         await modal.getByPlaceholder('Enter item name').fill(testItemName);
-        await modal.locator('select').selectOption('Electronics');
+        
+        // Select custom category
+        await modal.getByRole('button', { name: 'Select a category' }).click();
+        await modal.getByRole('option', { name: '+ Add New Category' }).click();
+        await modal.getByPlaceholder('e.g. Hardware').fill('Electronics');
+
         await modal.locator('input[type="number"]').nth(0).fill('10');
         await modal.locator('input[type="number"]').nth(1).fill('1');
         await modal.locator('input[type="number"]').nth(2).fill('1');
@@ -71,9 +76,9 @@ test.describe('Inventory End-to-End Flow', () => {
         const row = page.locator('tr', { hasText: testItemName });
         await row.getByTestId('delete-item-button').click();
 
-        const deleteModal = page.locator('text=Delete Inventory Item');
+        const deleteModal = page.locator('text=Delete Item');
         await expect(deleteModal).toBeVisible();
-        await expect(page.locator('text=Are you sure you want to delete this inventory item?')).toBeVisible();
+        await expect(page.locator('text=Are you sure you want to delete this item?')).toBeVisible();
 
         await page.click('button:has-text("Delete")');
 

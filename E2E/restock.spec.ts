@@ -40,7 +40,12 @@ async function seedItem(page: import('@playwright/test').Page, name: string) {
   await expect(modal).toBeVisible()
 
   await modal.getByPlaceholder('Enter item name').fill(name)
-  await modal.locator('select').selectOption('Electronics')
+  
+  // New category flow
+  await modal.getByRole('button', { name: 'Select a category' }).click();
+  await modal.getByRole('option', { name: '+ Add New Category' }).click();
+  await modal.getByPlaceholder('e.g. Hardware').fill('Electronics');
+
   await modal.locator('input[type="number"]').nth(0).fill('100') // price
   await modal.locator('input[type="number"]').nth(1).fill('5')   // quantity
   await modal.locator('input[type="number"]').nth(2).fill('2')   // min stock

@@ -244,8 +244,8 @@ export function Inventory() {
       isOpen={isDeleteModalOpen}
       onClose={() => setIsDeleteModalOpen(false)}
       onConfirm={confirmDelete}
-      title="Delete Inventory Item"
-      message="Are you sure you want to delete this inventory item?"
+      title="Delete Item"
+      message="Are you sure you want to delete this item?"
       />
     </div>
   )

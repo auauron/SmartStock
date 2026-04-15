@@ -19,20 +19,44 @@ describe('InventoryServiceProxy', () => {
     vi.clearAllMocks(); 
     });
 
-    it('Should THROW an error if the price is negative', async () => {
+    it('Should THROW an error if the price is invalid or negative', async () => {
         const service = new InventoryServiceProxy()
 
-        const badItem = {
+        const badPrice = {
             name: 'Illegal Item',
             category: 'Accessories',
             price: -50,
             quantity: 5,
             minStock: 1,
         }
-
-        await expect(service.saveInventory(badItem))
+        await expect(service.saveInventory(badPrice))
             .rejects
-            .toThrow('Price cannot be negative');
+            .toThrow('Price must be a valid non-negative number');
+
+        const nanPrice = { ...badPrice, price: NaN };
+        await expect(service.saveInventory(nanPrice))
+            .rejects
+            .toThrow('Price must be a valid non-negative number');
+    });
+
+    it('Should THROW an error if quantity or minStock is invalid', async () => {
+        const service = new InventoryServiceProxy();
+        
+        const badQuantity = {
+            name: 'Illegal Item',
+            category: 'Accessories',
+            price: 10,
+            quantity: -1,
+            minStock: 1,
+        }
+        await expect(service.saveInventory(badQuantity))
+            .rejects
+            .toThrow('Quantity must be a valid non-negative number');
+
+        const badMinStock = { ...badQuantity, quantity: 10, minStock: -5 };
+        await expect(service.saveInventory(badMinStock))
+            .rejects
+            .toThrow('Minimum stock must be a valid non-negative number');
     });
 
     it('should log a message to the console when saving', async () => {
