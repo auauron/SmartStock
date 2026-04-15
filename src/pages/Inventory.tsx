@@ -47,10 +47,10 @@ export function Inventory() {
     if (itemToDelete) {
       try {
         await deleteInventory(itemToDelete);
+        setIsDeleteModalOpen(false);
+        setItemToDelete(null);
       } catch (err) {
         console.error("Delete failed:", err);
-      } finally {
-        setItemToDelete(null);
       }
     }
   }
@@ -237,6 +237,7 @@ export function Inventory() {
       onClose={() => { setIsModalOpen(false); setEditingItem(undefined); }}
       onSave={handleSave}
       item={editingItem}
+      existingCategories={categories}
       />
 
       <DeleteConfirmationModal

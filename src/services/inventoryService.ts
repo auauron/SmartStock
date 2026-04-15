@@ -16,7 +16,7 @@ class InventoryService {
             .eq("user_id", userId);
 
         if (error) throw error;
-        return data.map(InventoryFactory.createFromDb);
+        return (data || []).map(InventoryFactory.createFromDb);
     }
 
     async saveInventory(item: Omit<Inventory, "id"> & {id?: string}, userId: string): Promise<void> {
@@ -51,9 +51,9 @@ export class InventoryServiceProxy implements IInventoryService {
 
     async saveInventory(item: Omit<Inventory, "id"> & { id?: string;}) {
         const userId = await this.getUserId();
-        if (item.price < 0) throw new Error("Price cannot be negative");
-        if (item.quantity < 0) throw new Error("Quantity cannot be negative");
-        if (item.minStock < 0) throw new Error("minStock cannot be negative");
+        if (!Number.isFinite(item.price) || item.price < 0) throw new Error("Price must be a valid non-negative number");
+        if (!Number.isFinite(item.quantity) || item.quantity < 0) throw new Error("Quantity must be a valid non-negative number");
+        if (!Number.isFinite(item.minStock) || item.minStock < 0) throw new Error("Minimum stock must be a valid non-negative number");
 
         console.log(`[Proxy] Logging activity: Saving inventory item ${item.name}`);
         return this.service.saveInventory(item, userId);

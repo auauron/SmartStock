@@ -9,14 +9,16 @@ interface InventoryModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (item: Omit<Inventory, "id"> & { id: string }) => Promise<void>;
-    item?: Inventory
+    item?: Inventory;
+    existingCategories: string[];
 }
 
 export function InventoryModal ({ 
     isOpen,
     onClose,
     onSave,
-    item
+    item,
+    existingCategories
 }: InventoryModalProps) {
     const [formData, setFormData] = useState<Omit<Inventory, "id">>(() => ({
         name: item?.name || "",
@@ -26,6 +28,8 @@ export function InventoryModal ({
         minStock: item?.minStock || 0,
     }));
 
+    const [isCustomCategory, setIsCustomCategory] = useState(false);
+
     useEffect(() => {
         setFormData({
             name: item?.name || "",
@@ -34,9 +38,11 @@ export function InventoryModal ({
             quantity: item?.quantity || 0,
             minStock: item?.minStock || 0,
         });
+        
+        // Reset custom category flag. If item has a category that's NOT in the list (unlikely but possible), 
+        // we could set it to true, but usually it's false on load.
+        setIsCustomCategory(false);
     }, [item]);
-
-    const [isCustomCategory, setIsCustomCategory] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -77,42 +83,43 @@ export function InventoryModal ({
                 label="Category"
                 value={isCustomCategory ? "OTHER" : formData.category}
                 onChange={(e) => {
-                  const val = e.target.value
+                  const val = e.target.value;
                   if (val === "OTHER") {
-                  setIsCustomCategory(true);
-                  setFormData({ ...formData, category: ""})
+                    setIsCustomCategory(true);
+                    setFormData({ ...formData, category: "" });
                   } else {
                     setIsCustomCategory(false);
-                    setFormData({...formData, category: val})
+                    setFormData({ ...formData, category: val });
                   }
-                }
-              } 
+                }}
                 className="py-2"
               >
                 <option value="">Select a category</option>
-                <option value="Electronics">Electronics</option>
-                <option value="Furniture">Furniture</option>
-                <option value="Stationery">Stationery</option>
-                <option value="Accessories">Accessories</option>
-                <option value="Office Supplies">Office Supplies</option>
+                {existingCategories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
                 <option value="OTHER">+ Add New Category</option>
               </DropdownField>
 
               {isCustomCategory && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
                   <InputField
-                  type="text"
-                  required
-                  label="Category Name"
-                  value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  placeholder="e.g. Hardware"
-                  className="py-2"
+                    type="text"
+                    required
+                    label="New Category Name"
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                    placeholder="e.g. Hardware"
+                    className="py-2"
                   />
                   <button
-                  type="button"
-                  onClick={() => setIsCustomCategory(false)}
-                  className="text-xs text-emerald-600 hover:text-emerald-700 underline"
+                    type="button"
+                    onClick={() => setIsCustomCategory(false)}
+                    className="text-xs text-emerald-600 hover:text-emerald-700 underline"
                   >
                     Back to List
                   </button>

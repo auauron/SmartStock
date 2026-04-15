@@ -16,13 +16,19 @@ export function useInventory() {
             const data = await service.getInventory();
             setInventory(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load inventory");
+            const message = err instanceof Error ? err.message : "Failed to load inventory";
+            setError(message);
+            throw err;
         } finally {
             setLoading(false);
         }
     }, []);
 
-    useEffect(() => { load(); }, [load]);
+    useEffect(() => { 
+        load().catch(() => {
+            // Error state is already handled inside load's catch block
+        }); 
+    }, [load]);
 
     const saveInventory = async (item: Omit<Inventory, "id"> & { id?: string }) => {
         try {
