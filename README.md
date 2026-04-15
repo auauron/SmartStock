@@ -11,7 +11,7 @@ Many small retail stores, mini groceries, and supply shops still rely on manual 
 - Log restock transactions (with an atomic server-side RPC) and browse a paginated restock history with product and date-range filters
 - View summary stats: total products, low stock count, recently restocked items, and total inventory value
 - Manage their account profile and notification preferences
-- Install the app on any device as a Progressive Web App (PWA) for offline-capable, native-like access
+- Install the app on any device for a native-like experience and quick access
 
 ## Tech Stack
 
@@ -24,7 +24,6 @@ Many small retail stores, mini groceries, and supply shops still rely on manual 
 | Backend / Auth | Supabase (PostgreSQL + Auth + RLS)        |
 | Icons          | Lucide React                              |
 | Notifications  | Sonner                                    |
-| PWA            | vite-plugin-pwa (Workbox)                 |
 | Utilities      | tailwind-merge, tw-animate-css            |
 
 ## Project Structure
@@ -59,7 +58,6 @@ smart-stock/
 │   │   ├── auth/               # AuthShell, DisplayProfile
 │   │   ├── dashboard/          # (planned dashboard widgets)
 │   │   ├── inventory/          # ProductModal, DeleteConfirmationModal
-│   │   ├── pwa/                # InstallPrompt (A2HS banner)
 │   │   ├── restock/            # (planned restock sub-components)
 │   │   └── ui/                 # Reusable UI primitives
 │   │       ├── Button.tsx
@@ -153,15 +151,6 @@ The Supabase PostgreSQL schema contains:
 - Automatic `updated_at` triggers on mutable tables
 - Indexed columns for `user_id`, `name`, `category`, and `restocked_at`
 
-## Progressive Web App (PWA)
-
-SmartStock is installable as a PWA with:
-
-- Auto-updating service worker (Workbox via `vite-plugin-pwa`)
-- Offline caching of app shell, static assets, and Google Fonts
-- NetworkFirst caching strategy for Supabase API responses (5-minute expiry)
-- Native install prompt with iOS fallback instructions
-- Standalone display mode with custom theme color
 
 ## Testing
 

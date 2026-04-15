@@ -1,18 +1,18 @@
 export interface RestockEntry {
   id: string;
-  productName: string;
+  inventoryName: string;
   quantityAdded: number;
   date: string;
   notes: string;
 }
 
-export interface RestockProductOption {
+export interface RestockInventoryOption {
   id: string;
   name: string;
 }
 
 export interface CreateRestockInput {
-  productId: string;
+  inventoryId: string;
   quantityAdded: number;
   notes: string;
 }

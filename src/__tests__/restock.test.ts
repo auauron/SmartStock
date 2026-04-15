@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import {
-  getRestockProducts,
+  getRestockInventory,
   getRestockHistory,
   createRestock,
 } from "../services/restockService";
@@ -30,18 +30,18 @@ describe("restockService", () => {
     });
   });
 
-  describe("getRestockProducts", () => {
+  describe("getRestockInventory", () => {
     it("should throw an error if user is not signed in", async () => {
       (supabase.auth.getUser as any).mockResolvedValue({
         data: { user: null },
         error: new Error("Not auth"),
       });
-      await expect(getRestockProducts()).rejects.toThrow(
+      await expect(getRestockInventory()).rejects.toThrow(
         "You must be signed in to manage restocks."
       );
     });
 
-    it("should throw an error if supabase from() product fetch fails", async () => {
+    it("should throw an error if supabase from() inventory fetch fails", async () => {
       const mockFrom = vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
@@ -54,13 +54,13 @@ describe("restockService", () => {
       });
       (supabase as any).from = mockFrom;
 
-      await expect(getRestockProducts()).rejects.toThrow("Db error");
+      await expect(getRestockInventory()).rejects.toThrow("Db error");
     });
 
-    it("should return mapped products successfully", async () => {
+    it("should return mapped inventory successfully", async () => {
       const mockData = [
-        { id: "1", name: "Product A" },
-        { id: "2", name: "Product B" },
+        { id: "1", name: "Item A" },
+        { id: "2", name: "Item B" },
       ];
 
       const mockFrom = vi.fn().mockReturnValue({
@@ -72,12 +72,12 @@ describe("restockService", () => {
       });
       (supabase as any).from = mockFrom;
 
-      const result = await getRestockProducts();
+      const result = await getRestockInventory();
       expect(result).toEqual([
-        { id: "1", name: "Product A" },
-        { id: "2", name: "Product B" },
+        { id: "1", name: "Item A" },
+        { id: "2", name: "Item B" },
       ]);
-      expect(mockFrom).toHaveBeenCalledWith("products");
+      expect(mockFrom).toHaveBeenCalledWith("inventories");
     });
   });
 
@@ -105,14 +105,14 @@ describe("restockService", () => {
           quantity_added: 10,
           notes: "Test notes",
           restocked_at: "2026-04-03T00:00:00.000Z",
-          products: { name: "Product Foo" },
+          inventories: { name: "Item Foo" },
         },
         {
           id: "2",
           quantity_added: 5,
           notes: null,
           restocked_at: "2026-04-02T00:00:00.000Z",
-          products: [{ name: "Product Bar" }],
+          inventories: [{ name: "Item Bar" }],
         },
       ];
 
@@ -129,14 +129,14 @@ describe("restockService", () => {
       expect(result).toEqual([
         {
           id: "1",
-          productName: "Product Foo",
+          inventoryName: "Item Foo",
           quantityAdded: 10,
           date: "2026-04-03T00:00:00.000Z",
           notes: "Test notes",
         },
         {
           id: "2",
-          productName: "Product Bar",
+          inventoryName: "Item Bar",
           quantityAdded: 5,
           date: "2026-04-02T00:00:00.000Z",
           notes: "",
@@ -154,7 +154,7 @@ describe("restockService", () => {
       });
 
       await expect(
-        createRestock({ productId: "1", quantityAdded: 10, notes: "err notes" })
+        createRestock({ inventoryId: "1", quantityAdded: 10, notes: "err notes" })
       ).rejects.toThrow("RPC error");
     });
 
@@ -164,7 +164,7 @@ describe("restockService", () => {
         .mockResolvedValue({ data: [], error: null });
 
       await expect(
-        createRestock({ productId: "1", quantityAdded: 10, notes: "err notes" })
+        createRestock({ inventoryId: "1", quantityAdded: 10, notes: "err notes" })
       ).rejects.toThrow("Failed to create restock entry.");
     });
 
@@ -172,7 +172,7 @@ describe("restockService", () => {
       const mockRpcData = [
         {
           id: "10",
-          product_name: "Product Baz",
+          inventory_name: "Item Baz",
           quantity_added: 20,
           notes: "some notes",
           restocked_at: "2026-04-03T12:00:00.000Z",
@@ -185,21 +185,21 @@ describe("restockService", () => {
       (supabase as any).rpc = mockRpc;
 
       const input = {
-        productId: "99",
+        inventoryId: "99",
         quantityAdded: 20,
         notes: "some notes",
       };
       const result = await createRestock(input);
 
       expect(mockRpc).toHaveBeenCalledWith("create_restock_transaction", {
-        p_product_id: "99",
+        p_inventory_id: "99",
         p_quantity_added: 20,
         p_notes: "some notes",
       });
 
       expect(result).toEqual({
         id: "10",
-        productName: "Product Baz",
+        inventoryName: "Item Baz",
         quantityAdded: 20,
         date: "2026-04-03T12:00:00.000Z",
         notes: "some notes",
