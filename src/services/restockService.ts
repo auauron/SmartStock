@@ -35,7 +35,7 @@ async function requireUserId(): Promise<string> {
 }
 
 function getJoinedInventoryName(
-  joined: RestockRow["inventory"],
+  joined: RestockRow["inventories"],
   fallback = "Unknown Item",
 ): string {
   if (!joined) return fallback;
