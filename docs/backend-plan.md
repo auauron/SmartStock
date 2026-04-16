@@ -13,7 +13,7 @@ What is already in place:
 
 What is not yet implemented:
 
-- Database-backed product management
+- Database-backed inventory management
 - Database-backed restock history
 - Backend data validation and ownership rules
 - Low-stock email alerts
@@ -31,8 +31,8 @@ Do this before email alerts, report generation, or other utility features.
 
 Reason:
 
-- Products and restocks are the core business data of the app
-- Alerts and reports depend on accurate product and restock data
+- Inventory and restocks are the core business data of the app
+- Alerts and reports depend on accurate inventory and restock data
 - A stable schema makes frontend integration and testing much easier
 - It avoids rewriting the backend twice
 
@@ -45,19 +45,19 @@ Reason:
 3. Add Row Level Security policies so users can only access their own data.
 4. Define TypeScript types for backend entities.
 
-### Phase 2: Core Product Backend
+### Phase 2: Core Inventory Backend
 
-1. Implement product read and write functions.
+1. Implement inventory read and write functions.
 2. Connect the Inventory page to live Supabase data.
-3. Replace local product arrays with backend reads and writes.
+3. Replace local inventory arrays with backend reads and writes.
 4. Handle create, edit, delete, search, and filtering against stored data.
 
 ### Phase 3: Core Restock Backend
 
 1. Implement restock creation and restock history retrieval.
-2. Update product quantity when a restock is added.
+2. Update inventory quantity when a restock is added.
 3. Connect the Restock page to the database.
-4. Keep restock history tied to product records.
+4. Keep restock history tied to inventory records.
 
 ### Phase 4: Account and Preference Data
 
@@ -97,7 +97,7 @@ Suggested fields:
 - `created_at`
 - `updated_at`
 
-### `products`
+### `inventories`
 
 Purpose:
 
@@ -125,12 +125,12 @@ Suggested rules:
 
 Purpose:
 
-- Track each restock event for a product
+- Track each restock event for an item
 
 Suggested fields:
 
 - `id`
-- `product_id`
+- `inventory_id`
 - `user_id`
 - `quantity_added`
 - `notes`
@@ -140,7 +140,7 @@ Suggested fields:
 Suggested rules:
 
 - `quantity_added > 0`
-- foreign key from `product_id` to `products.id`
+- foreign key from `inventory_id` to `inventories.id`
 
 ### `notification_preferences`
 
@@ -162,10 +162,10 @@ Use Supabase Row Level Security from the beginning.
 
 Minimum policy direction:
 
-- users can only read their own products
-- users can only insert products for themselves
-- users can only update their own products
-- users can only delete their own products
+- users can only read their own inventory
+- users can only insert items for themselves
+- users can only update their own inventory
+- users can only delete their own inventory
 - users can only read and create their own restock history
 - users can only manage their own preferences
 
@@ -188,11 +188,11 @@ src/
   lib/
     supabaseClient.ts
   services/
-    productsService.ts
+    inventoryService.ts
     restocksService.ts
     settingsService.ts
   factories/
-    createProduct.ts
+    inventoryFactory.ts
     createRestockEntry.ts
 
 server/
@@ -215,7 +215,7 @@ Current recommendation:
 Reason:
 
 - They are still valid planned backend features
-- They will make more sense after products and restocks are connected to real data
+- They will make more sense after inventory and restocks are connected to real data
 - Removing them now does not improve the project in a meaningful way
 
 If the structure starts to feel confusing later, it is reasonable to move or rename them once the real backend flow is in place.
@@ -229,7 +229,7 @@ Planned testing strategy for backend-related work:
 - Unit testing with Vitest for factories, validation helpers, and data transformation logic
 - API testing with Vitest and MSW for service-layer calls to Supabase-backed flows
 - Storybook coverage for reusable components involved in data entry and backend-connected UI
-- Playwright for end-to-end flows such as sign in, create product, edit product, delete product, and add restock
+- Playwright for end-to-end flows such as sign in, create item, edit item, delete item, and add restock
 
 ### Components Subject
 
@@ -243,24 +243,24 @@ Use `src/lib/supabaseClient.ts` as the shared application-wide client.
 
 Add typed factory functions for backend-facing entity creation, such as:
 
-- `createProduct`
+- `inventoryFactory`
 - `createRestockEntry`
 
 These functions should centralize defaults, shaping, and validation before data is stored or sent.
 
 #### Decorator Pattern
 
-Use reusable UI wrappers around base fields and interactive inputs, especially in forms used for product and restock data entry.
+Use reusable UI wrappers around base fields and interactive inputs, especially in forms used for inventory and restock data entry.
 
 ## First Backend Coding Session Checklist
 
 Use this as the first practical session plan:
 
-1. Create the Supabase tables for `products` and `restocks`.
+1. Create the Supabase tables for `inventories` and `restocks`.
 2. Add constraints and relationships.
 3. Add Row Level Security policies.
-4. Create shared TypeScript types for product and restock records.
-5. Add `productsService.ts` with fetch, create, update, and delete functions.
+4. Create shared TypeScript types for inventory and restock records.
+5. Add `inventoryService.ts` with fetch, create, update, and delete functions.
 6. Connect the Inventory page to those functions.
 
 If there is still time after that:

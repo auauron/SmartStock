@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document covers all tests implemented for the SmartStock restock feature, including the test setup, what each test verifies, and how the testing infrastructure is organized.
+This document covers all tests implemented for the SmartStock inventory and restock features, including the test setup, what each test verifies, and how the testing infrastructure is organized.
 
 ---
 
@@ -21,13 +21,15 @@ This document covers all tests implemented for the SmartStock restock feature, i
 
 ```
 src/__tests__/
-├── restock.test.ts              # Unit tests (no DB, fully mocked)
-├── restock.integration.test.ts  # API integration tests (real test DB)
+├── inventoryFactory.test.ts     # Unit tests for data normalization
+├── inventoryService.test.ts     # Proxy and service unit tests
+├── restock.test.ts              # Unit tests for restock logic
+├── inventoryIntegration.test.ts # API integration tests (real test DB)
 └── utils/
     └── db.ts                    # Shared test DB client and clearDatabase utility
 
 .env.test                        # Test environment variables (SmartStock-test DB)
-vite.config.ts                   # Vitest project config (unit + storybook)
+vite.config.ts                   # Vitest project config
 .github/workflows/test.yml       # GitHub Actions CI (runs unit tests on PR)
 ```
 
@@ -59,18 +61,17 @@ export const clearDatabase = async () => { ... }
 | Export | Purpose |
 |--------|---------|
 | `testClient` | Supabase JS client pointed at the SmartStock-test DB |
-| `clearDatabase()` | Wipes `restocks` then `products` in FK-safe order |
+| `clearDatabase()` | Wipes `restocks` then `inventories` in FK-safe order |
 
 `clearDatabase()` is called in `beforeAll` and `afterAll` to guarantee every test run starts and ends with a clean slate.
 
 ---
 
-## 1. Unit Tests — `restock.test.ts`
+## 1. Unit Tests
 
 **Type:** Unit  
-**Total tests:** 8  
 **Database used:** None (fully mocked)  
-**Command:** `npx vitest run --project unit`
+**Command:** `npx vitest run`
 
 ### How it works
 
@@ -86,38 +87,15 @@ vi.mock("../lib/supabaseClient", () => ({
 }));
 ```
 
-No network calls are made. Tests verify the **logic inside `restockService.ts`** — mapping, error handling, and data transformation.
-
-### Test Cases
-
-#### `getRestockProducts`
-| # | Test | What it checks |
-|---|------|----------------|
-| 1 | User not signed in | Throws `"You must be signed in to manage restocks."` |
-| 2 | DB fetch fails | Propagates the Supabase error message |
-| 3 | Success | Returns correctly mapped `{ id, name }[]` array |
-
-#### `getRestockHistory`
-| # | Test | What it checks |
-|---|------|----------------|
-| 4 | DB fetch fails | Propagates the Supabase error message |
-| 5 | Success | Maps both object and array `products` join shapes, defaults `notes` to `""` |
-
-#### `createRestock`
-| # | Test | What it checks |
-|---|------|----------------|
-| 6 | RPC fails | Propagates the Supabase RPC error |
-| 7 | RPC returns empty array | Throws `"Failed to create restock entry."` |
-| 8 | Success | Calls `create_restock_transaction` with correct params, returns mapped entry |
+No network calls are made. Tests verify the **domain logic** — mapping, proxy behavior, and data transformation.
 
 ---
 
-## 2. API Integration Tests — `restock.integration.test.ts`
+## 2. API Integration Tests
 
 **Type:** API Integration  
-**Total tests:** 4  
 **Database used:** `SmartStock-test` (real Supabase DB)  
-**Command:** `npx vitest run src/__tests__/restock.integration.test.ts --project unit`
+**Command:** `npx vitest run src/__tests__/inventoryIntegration.test.ts`
 
 ### How it works
 
@@ -125,40 +103,31 @@ Unlike unit tests, these tests connect to a real database over the network. The 
 
 **Lifecycle:**
 ```
-beforeAll → clearDatabase() → seed test product (FK required for restocks)
+beforeAll → clearDatabase() → seed test inventory (FK required for restocks)
   ↓
 tests run in order (POST → GET by ID → GET all → DELETE)
   ↓
 afterAll  → clearDatabase()
 ```
 
-A dummy user (`TEST_USER_ID = "11111111-1111-1111-1111-111111111111"`) must exist in `auth.users` on the test DB (created via the seed SQL in `docs/supabase-schema-rls.sql`).
-
-### Test Cases
-
-| # | Test | What it checks |
-|---|------|----------------|
-| 1 | `POST restocks` | Creates a restock row, confirms `quantity_added`, `notes`, and `product_id` |
-| 2 | `GET restocks by ID` | Fetches the created row by UUID, confirms data integrity |
-| 3 | `GET restocks` (list) | Confirms response is a non-empty array |
-| 4 | `DELETE restocks` | Deletes the row, then verifies it no longer exists |
+A dummy user (`TEST_USER_ID = "11111111-1111-1111-1111-111111111111"`) must exist in `auth.users` on the test DB.
 
 ### Why a separate test DB?
 
-`clearDatabase()` deletes all rows from `restocks` and `products` on every run. Running this against the main database would permanently erase all real user data.
+`clearDatabase()` deletes all rows from `restocks` and `inventories` on every run. Running this against the main database would permanently erase all real user data.
 
 ---
 
 ## CI — GitHub Actions
 
 **File:** `.github/workflows/test.yml`  
-**Trigger:** Every pull request targeting `main` or `develop`  
-**What runs:** Unit tests only (`--project unit`)
+**Trigger:** Every pull request targeting `main`  
+**What runs:** Unit tests only
 
 Unit tests are used in CI because:
 - They require no database credentials or secrets
 - They run entirely in memory (no network)
-- They complete in under 1 second
+- They complete in under 2 seconds
 
 Integration tests are run locally before pushing, since they require a live database connection.
 
@@ -167,15 +136,9 @@ Integration tests are run locally before pushing, since they require a live data
 ## Running Tests
 
 ```bash
-# Run all tests (unit + storybook)
+# Run all tests
 npm test
 
-# Run unit tests only (fast, no DB)
-npx vitest run --project unit
-
-# Run integration tests only (requires SmartStock-test DB)
-npx vitest run src/__tests__/restock.integration.test.ts --project unit
-
 # Run a specific test file
-npx vitest run src/__tests__/restock.test.ts --project unit
+npx vitest src/__tests__/inventoryIntegration.test.ts
 ```

@@ -2,6 +2,11 @@
 
 Course: Software Component Design (BSSE 2, 2nd Semester, A.Y. 2025-2026)
 
+> [!IMPORTANT]
+> **Key Project Files:**
+> - [Assignment Rubric & Instructions](file:///c:/projects/smart-stock/docs/REFERENCE_INSTRUCTIONS.md)
+> - [DRAFT Final Documentation Paper](file:///c:/projects/smart-stock/docs/SMARTSTOCK_FINAL_PROJECT.md)
+
 This guide converts your SCD final-project instructions and rubric into a project-specific implementation and documentation checklist for SmartStock.
 
 ## 1) Repository Reality Check (Current State)
@@ -13,18 +18,14 @@ Use this section to avoid overclaiming in the paper and presentation.
 - Running React + TypeScript + Vite application structure
 - Supabase authentication setup and shared client instance
 - Login/Signup flow with mapped auth error messages
-- Inventory and Restock screens with local/mock state CRUD-style flows
+- Inventory and Restock screens with real database-backed CRUD-style flows
 - Reusable UI component set in `src/components/ui`
 - Storybook scaffolding exists in `src/stories`
-- Vitest script exists in `package.json`
+- Vitest suite with passing unit and integration tests
 
 ### Partial / placeholder now
 
-- `src/factories` exists but is currently empty
-- `src/hooks/useProducts.ts` and `src/hooks/useRestocks.ts` exist but are currently empty
-- `src/__tests__/.test.ts` exists but is currently empty
 - Server utility/function files for report and low-stock alert are present but empty
-- Dashboard/Inventory/Restock still rely on mock or local data in page files
 
 ### Why this matters
 
@@ -32,7 +33,7 @@ Rubric penalties happen when documented claims do not match demonstrable code. K
 
 ## 2) Design Pattern Plan Required by SCD
 
-Minimum requirement is 2 patterns. Recommended target is 3 patterns. SmartStock should use 3.
+Minimum requirement is 2 patterns. Recommended target is 3 patterns. SmartStock uses 3.
 
 ### Pattern A: Singleton (Creational) - Implemented
 
@@ -71,18 +72,17 @@ Design principles reinforced:
 - OCP (add optional behavior through props/composition without rewriting each consumer)
 - SRP (field layout behavior centralized per component)
 
-### Pattern C: Factory Method (Creational) - Required next implementation
+### Pattern C: Factory Method (Creational) - Implemented
 
 - Pattern name: Factory Method Pattern
 - Category: Creational
-- Current status: Planned but not implemented yet
-- Required code target:
-  - Add typed creation functions in `src/factories` (for product and restock entities)
-  - Refactor creation points in `src/pages/Inventory.tsx`, `src/pages/Restock.tsx`, and `src/components/inventory/ProductModal.tsx` to use factories
+- Code location:
+  - `src/factories/inventoryFactory.ts`
+- Key role in system: Handles construction and normalization of database rows into strongly-typed domain entities.
 
 Problem without pattern:
 
-- Object creation is duplicated in pages/components, making validation/defaulting inconsistent and increasing bug risk.
+- Object creation/normalization is duplicated in pages/components, making validation/defaulting inconsistent and increasing bug risk across different database integration points.
 
 Design principles reinforced:
 
@@ -121,8 +121,8 @@ For section 7 (Design Patterns Used), include for each pattern:
 ### Rubric A: System/Application
 
 - Design Pattern Implementation (40):
-  - Keep Singleton and Decorator demonstrable in current code
-  - Implement Factory Method in `src/factories` and route object creation through it
+  - Singleton and Decorator are clearly demonstrable in `lib` and `ui` folders
+  - Factory Method is implemented in `src/factories` and used by service layers
 - System Functionality (30):
   - Ensure all declared core features run in demo without critical runtime errors
   - Pattern behavior must be triggerable in live demo, not just present in files
@@ -154,14 +154,10 @@ Although SCD grading emphasizes patterns and architecture, testing evidence supp
 
 Required testing coverage plan for SmartStock:
 
-- Unit tests (Vitest): factories, utility logic, store behavior
-- API tests (Vitest + MSW): service-layer and Supabase interaction boundaries
+- Unit tests (Vitest): factories, utility logic
+- API integration tests (Vitest + MSW): service-layer and Supabase interaction boundaries
 - Component coverage (Storybook): reusable UI components used across pages
-- E2E tests (Playwright): sign up/sign in, inventory CRUD, restock flow
-
-Current status note:
-
-- Test tooling is present in dependencies/scripts, but real test suites still need to be added.
+- E2E tests (Playwright): sign in flow, inventory CRUD, and restock tracking
 
 ## 6) Demo Readiness Checklist (Before Final Presentation)
 
@@ -171,7 +167,7 @@ Current status note:
 4. Restock add/history flow is demonstrable
 5. Singleton usage can be pointed to quickly in code
 6. Decorator usage can be shown through reusable field wrappers
-7. Factory methods are implemented and used by UI creation handlers
+7. Factory methods are implemented and used by service handlers
 8. Documentation section for each pattern includes why-needed and what-breaks-without-it
 9. Git history shows distributed, descriptive team commits
 10. Architecture diagram and timeline are ready and consistent with code
@@ -180,7 +176,7 @@ Current status note:
 
 Use descriptive pattern/test-focused messages, for example:
 
-- `Implement createProduct factory and refactor inventory add flow`
-- `Refactor restock entry construction to factory method`
-- `Add Vitest unit tests for product and restock factories`
-- `Document Singleton and Decorator rationale for SCD paper`
+- `feat(inventory): implement inventoryFactory and refactor data normalization`
+- `refactor(restock): update service layer to use the inventories table`
+- `test(inventory): add integration tests for inventory CRUD logic`
+- `docs: update design patterns rationale for the SCD project defense`
