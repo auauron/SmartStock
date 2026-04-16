@@ -5,13 +5,11 @@ import {
   Package,
   RefreshCw,
   Settings,
-  Search,
   Bell,
   Menu,
   X,
   User,
 } from "lucide-react";
-import { InputField } from "./ui/InputField";
 import type { UserProfile, LayoutOutletContext } from "../types";
 import { supabase } from "../lib/supabaseClient";
 import {
@@ -101,15 +99,27 @@ export function Layout() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <div className="flex items-center">
-              <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 flex items-center justify-center shrink-0 overflow-hidden">
                 <img
                   src="/smartstock.png"
                   alt="Smart Stock logo"
                   className="w-8 h-8 object-contain scale-110"
                 />
               </div>
-              <span className="font-semibold text-gray-900">Smart Stock</span>
+              <div className="flex flex-col min-w-0 justify-center">
+                <span 
+                  className="font-semibold text-gray-900 truncate leading-tight"
+                  title={profile.businessName || "Smart Stock"}
+                >
+                  {profile.businessName || "Smart Stock"}
+                </span>
+                {profile.businessName && (
+                  <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider leading-none mt-0.5">
+                    SMART STOCK
+                  </span>
+                )}
+              </div>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -152,6 +162,11 @@ export function Layout() {
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {profile.fullName || "No name"}
                 </p>
+                {profile.businessName && (
+                  <p className="text-xs font-medium text-emerald-600 truncate">
+                    {profile.businessName}
+                  </p>
+                )}
                 <p className="text-xs text-gray-500 truncate">
                   {profile.email || "No email"}
                 </p>
@@ -173,14 +188,7 @@ export function Layout() {
               <Menu className="w-6 h-6" />
             </button>
 
-            <div className="flex-1 max-w-lg mx-4">
-              <InputField
-                type="text"
-                placeholder="Search products..."
-                icon={Search}
-                className="py-2"
-              />
-            </div>
+            <div className="flex-1" />
 
             <div className="flex items-center gap-4">
               <button className="relative p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-50">

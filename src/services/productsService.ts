@@ -71,6 +71,5 @@ export class ProductServiceProxy implements IProductService {
         const userId = await this.getUserId()
 
         return this.service.deleteProduct(id, userId); 
-        
     }
 }

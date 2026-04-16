@@ -44,6 +44,7 @@ export function Dashboard() {
 
     const allActivity = [...restockLogs, ...newProductLogs, ...updatedProductLogs]
       .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, 5)
 
     const statsData = [
       {
@@ -106,9 +107,11 @@ export function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">
+          {profile.businessName ? `${profile.businessName} Dashboard` : "Dashboard"}
+        </h1>
         <p className="text-gray-600 mt-1">
-          Welcome back {firstName}! Here's what's happening with your inventory.
+          Welcome back, {firstName}! Here's what's happening with your inventory.
         </p>
       </div>
 

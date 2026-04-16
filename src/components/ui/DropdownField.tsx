@@ -20,6 +20,7 @@ interface DropdownFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   icon?: LucideIcon;
   wrapperClassName?: string;
   labelClassName?: string;
+  searchable?: boolean;
 }
 
 interface DropdownOption {
@@ -55,6 +56,7 @@ export function DropdownField({
   label,
   wrapperClassName,
   labelClassName,
+  searchable,
   value,
   defaultValue,
   disabled,
@@ -66,6 +68,7 @@ export function DropdownField({
 }: DropdownFieldProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [uncontrolledValue, setUncontrolledValue] = useState(
     defaultValue !== undefined ? String(defaultValue) : "",
   );
@@ -101,8 +104,16 @@ export function DropdownField({
   const selectedOption =
     options.find((option) => option.value === currentValue) ?? options[0];
 
+  const filteredOptions = useMemo(() => {
+    if (!searchable || !searchQuery) return options;
+    return options.filter((option) =>
+      option.label.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [options, searchable, searchQuery]);
+
   useEffect(() => {
     if (!isOpen) {
+      setSearchQuery("");
       return;
     }
 
@@ -178,7 +189,7 @@ export function DropdownField({
           onBlur={handleTriggerBlur}
           className={cn(
             "flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white py-2.5 text-left text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500",
-            Icon ? "pl-10 pr-10" : "px-3 pr-3",
+            Icon ? "pl-10 pr-3" : "px-3",
             className,
           )}
           disabled={disabled}
@@ -208,40 +219,64 @@ export function DropdownField({
         />
 
         {isOpen ? (
-          <div className="absolute z-50 mt-2 max-h-64 w-full overflow-auto rounded-xl border border-gray-200 bg-white p-1.5 shadow-[0_18px_45px_-18px_rgba(15,23,42,0.45)]">
-            <ul role="listbox" className="space-y-1">
-              {options.map((option) => {
-                const isSelected = option.value === currentValue;
+          <div className="absolute z-50 mt-2 max-h-64 w-full flex flex-col rounded-xl border border-gray-200 bg-white p-1.5 shadow-[0_18px_45px_-18px_rgba(15,23,42,0.45)]">
+            {searchable ? (
+              <div className="mb-1.5 px-1 py-1 shrink-0">
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                    }
+                  }}
+                  className="w-full rounded-md border border-gray-300 py-1.5 px-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                />
+              </div>
+            ) : null}
+            <ul role="listbox" className="space-y-1 overflow-auto">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => {
+                  const isSelected = option.value === currentValue;
 
-                return (
-                  <li key={`${name ?? id ?? "dropdown"}-${option.value}`}>
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={isSelected}
-                      disabled={option.disabled}
-                      onClick={() => handleSelect(option.value)}
-                      className={cn(
-                        "flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors",
-                        isSelected
-                          ? "bg-emerald-50 text-emerald-800"
-                          : "text-gray-700 hover:bg-gray-100",
-                        option.disabled
-                          ? "cursor-not-allowed opacity-50 hover:bg-transparent"
-                          : "cursor-pointer",
-                      )}
-                    >
-                      <span className="truncate">{option.label}</span>
-                      {isSelected ? (
-                        <Check
-                          className="ml-2 h-4 w-4 shrink-0"
-                          aria-hidden="true"
-                        />
-                      ) : null}
-                    </button>
-                  </li>
-                );
-              })}
+                  return (
+                    <li key={`${name ?? id ?? "dropdown"}-${option.value}`}>
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={isSelected}
+                        disabled={option.disabled}
+                        onClick={() => handleSelect(option.value)}
+                        className={cn(
+                          "flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors",
+                          isSelected
+                            ? "bg-emerald-50 text-emerald-800"
+                            : "text-gray-700 hover:bg-gray-100",
+                          option.disabled
+                            ? "cursor-not-allowed opacity-50 hover:bg-transparent"
+                            : "cursor-pointer",
+                        )}
+                      >
+                        <span className="truncate">{option.label}</span>
+                        {isSelected ? (
+                          <Check
+                            className="ml-2 h-4 w-4 shrink-0"
+                            aria-hidden="true"
+                          />
+                        ) : null}
+                      </button>
+                    </li>
+                  );
+                })
+              ) : (
+                <li className="py-3 text-center text-sm text-gray-500 pointer-events-none">
+                  No results found
+                </li>
+              )}
             </ul>
           </div>
         ) : null}
@@ -251,9 +286,7 @@ export function DropdownField({
           tabIndex={-1}
           className="sr-only"
           value={currentValue}
-          onChange={() => {
-            // Keeps parity with native select semantics for forms without exposing browser UI.
-          }}
+          onChange={(e) => handleSelect(e.target.value)}
           aria-hidden="true"
           disabled={disabled}
           {...props}

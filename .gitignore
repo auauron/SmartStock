@@ -41,3 +41,6 @@ storybook-static
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# PWA Dev artifacts
+dev-dist
