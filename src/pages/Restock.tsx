@@ -9,11 +9,7 @@ import { useRestocks } from "../hooks/useRestocks";
 export function Restock() {
     const {
         history,
-<<<<<<< HEAD
-        products,
-=======
         inventory, // renamed from products in hook (will update hook next)
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
         loading,
         submitting,
         error,
@@ -22,22 +18,14 @@ export function Restock() {
     } = useRestocks();
 
     const [formData, setFormData] = useState({
-<<<<<<< HEAD
-        productId: "",
-=======
         inventoryId: "",
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
         quantity: "",
         notes: "",
     });
     const [formKey, setFormKey ] = useState(0);
     const [validationError, setValidationError] = useState("");
     
-<<<<<<< HEAD
-    const [historyProductFilter, setHistoryProductFilter] = useState("");
-=======
     const [historyInventoryFilter, setHistoryInventoryFilter] = useState("");
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
     const [historyDateFilter, setHistoryDateFilter] = useState("");
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -45,21 +33,12 @@ export function Restock() {
     
     React.useEffect(() => {
         setCurrentPage(1);
-<<<<<<< HEAD
-    }, [historyProductFilter, historyDateFilter]);
-
-    const filteredHistory = React.useMemo(() => {
-        let result = history;
-        if (historyProductFilter) {
-            result = result.filter(entry => entry.productName === historyProductFilter);
-=======
     }, [historyInventoryFilter, historyDateFilter]);
 
     const filteredHistory = React.useMemo(() => {
         let result = history;
         if (historyInventoryFilter) {
             result = result.filter(entry => entry.inventoryName === historyInventoryFilter);
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
         }
         if (historyDateFilter !== "all" && historyDateFilter !== "") {
             const now = new Date();
@@ -72,11 +51,7 @@ export function Restock() {
             result = result.filter(entry => new Date(entry.date) >= past);
         }
         return result;
-<<<<<<< HEAD
-    }, [history, historyProductFilter, historyDateFilter]);
-=======
     }, [history, historyInventoryFilter, historyDateFilter]);
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
 
     const totalItems = filteredHistory.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -90,13 +65,8 @@ export function Restock() {
         e.preventDefault();   
         setValidationError("");
 
-<<<<<<< HEAD
-        if (!formData.productId) {
-            setValidationError("Please select a product before adding a restock entry.");
-=======
         if (!formData.inventoryId) {
             setValidationError("Please select an item before adding a restock entry.");
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
             return;
         }
 
@@ -111,16 +81,6 @@ export function Restock() {
         
         try {
             await addRestock({
-<<<<<<< HEAD
-                productId: formData.productId,
-                quantityAdded: quantityValue,
-                notes: formData.notes,
-            });
-            setFormData({ productId: "", quantity: "", notes: ""})
-            setFormKey((k) => k + 1)
-        } catch { 
-
-=======
                 inventoryId: formData.inventoryId,
                 quantityAdded: quantityValue,
                 notes: formData.notes,
@@ -129,7 +89,6 @@ export function Restock() {
             setFormKey((k) => k + 1)
         } catch { 
             // Error is handled by the hook
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
         }
     }
 
@@ -143,11 +102,7 @@ return (
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-<<<<<<< HEAD
-            <h2 className="text-lg font-semibvold text-gray-900 mb-4">
-=======
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
                 Add restock
             </h2>
             {error || validationError ? (
@@ -172,29 +127,6 @@ return (
                     <DropdownField
                         required
                         searchable
-<<<<<<< HEAD
-                        label="Product Name"
-                        value={formData.productId}
-                        onChange={(e) => {
-                            setFormData({ ...formData, productId: e.target.value});
-                            if (validationError) setValidationError("");
-                        }}
-                        disabled={loading || submitting || products.length == 0}
-                        className="py-2"
-                        >
-                            {loading ? (
-                                <option value="">Loading products... </option>
-                            ) : products.length === 0 ? (
-                                <option value="">No products available</option>
-                            ) : (
-                                <option value="" disabled>
-                                    Select a product
-                                </option>
-                            )}
-                            {products.map((product) =>
-                                <option key={product.id} value={product.id}>
-                                    {product.name}
-=======
                         label="Item Name"
                         value={formData.inventoryId}
                         onChange={(e) => {
@@ -216,7 +148,6 @@ return (
                             {inventory.map((item) =>
                                 <option key={item.id} value={item.id}>
                                     {item.name}
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
                                 </option>
                                 )}
                         </DropdownField>
@@ -251,7 +182,7 @@ return (
                 <Button
                     type="submit"
                     disabled={submitting || loading}
-                   ><Plus className="w-5 h-5" />
+                    ><Plus className="w-5 h-5" />
                     {submitting ? "Adding..." : "Add Restock Entry"}
                 </Button>
             </form>
@@ -282,17 +213,6 @@ return (
                     </DropdownField>
                     <DropdownField
                         icon={Filter}
-<<<<<<< HEAD
-                        value={historyProductFilter}
-                        onChange={(e) => setHistoryProductFilter(e.target.value)}
-                        className="py-1.5 text-sm"
-                        wrapperClassName="w-full sm:w-48"
-                    >
-                        <option value="">All Products</option>
-                        {products.map((p) => (
-                            <option key={`filter-${p.id}`} value={p.name}>
-                                {p.name}
-=======
                         value={historyInventoryFilter}
                         onChange={(e) => setHistoryInventoryFilter(e.target.value)}
                         className="py-1.5 text-sm"
@@ -302,7 +222,6 @@ return (
                         {inventory.map((item) => (
                             <option key={`filter-${item.id}`} value={item.name}>
                                 {item.name}
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
                             </option>
                         ))}
                     </DropdownField>
@@ -326,11 +245,7 @@ return (
                 <table className="w-full">
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-<<<<<<< HEAD
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Product Name</th>
-=======
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Item Name</th>
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Quantity Added</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Date</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Notes</th>
@@ -341,11 +256,7 @@ return (
                             <tr key={entry.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className="font-medium text-gray-900">
-<<<<<<< HEAD
-                                        {entry.productName}
-=======
                                         {entry.inventoryName}
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
@@ -360,7 +271,7 @@ return (
                                         day: "numeric",
                                     })}
                                 </td>
-                                <td className="px-6 py-4 text-gray-600 whitespace-normal break-words max-w-xs sm:max-w-sm md:max-w-md">
+                                <td className="px-6 py-4 text-gray-600 whitespace-normal wrap-break-words max-w-xs sm:max-w-sm md:max-w-md">
                                     {entry.notes || (
                                         <span className="text-gray-400 italic">No notes</span>
                                     )}
@@ -370,41 +281,6 @@ return (
                     </tbody>
                 </table>
             </div>
-<<<<<<< HEAD
-             )}
-
-             {!loading && totalItems > 0 && (
-                <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between text-sm bg-gray-50/50">
-                    <span className="text-gray-500 font-medium">
-                        Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} transactions
-                    </span>
-                    <div className="flex gap-2">
-                        <Button
-                            variant="secondary"
-                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                            disabled={currentPage === 1}
-                            className="px-4 py-1.5 font-bold text-gray-500"
-                        >
-                            PREV
-                        </Button>
-                        <Button
-                            variant="secondary"
-                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                            disabled={currentPage === totalPages}
-                            className="px-4 py-1.5 font-bold text-emerald-600"
-                        >
-                            NEXT
-                        </Button>
-                    </div>
-                </div>
-             )}
-
-             {!loading && filteredHistory.length === 0 && (
-                <div className="text-center py-12">
-                    <p className="text-gray-500">No restock history available</p>
-                </div>
-             )}
-=======
         )}
 
         {!loading && totalItems > 0 && (
@@ -438,7 +314,6 @@ return (
                 <p className="text-gray-500">No restock history available</p>
             </div>
         )}
->>>>>>> abff2b146a3bf8f3e78f3795b077795efbb350ba
         </div>
     </div>
   )

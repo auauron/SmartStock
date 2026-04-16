@@ -5,10 +5,12 @@ import { Modal } from "../ui/Modal";
 import { InputField } from "../ui/InputField";
 import { DropdownField } from "../ui/DropdownField";
 
-interface InventoryModalProps {
+
+
+interface ProductModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (item: Omit<Inventory, "id"> & { id: string }) => Promise<void>;
+    onSave: (product: Omit<Inventory, "id"> & { id: string }) => void;
     item?: Inventory;
     existingCategories: string[];
 }
@@ -18,19 +20,21 @@ export function InventoryModal ({
     onClose,
     onSave,
     item,
-    existingCategories
-}: InventoryModalProps) {
-    const [formData, setFormData] = useState<Omit<Inventory, "id">>(() => ({
-        name: item?.name || "",
-        category: item?.category || "",
-        price: item?.price || 0,
-        quantity: item?.quantity || 0,
-        minStock: item?.minStock || 0,
-    }));
-
+    existingCategories = []
+}: ProductModalProps) {
+    const [formData, setFormData] = useState<Omit<Inventory, "id">>({
+      name: item?.name || "",
+      category: item?.category || "",
+      price: item?.price || 0,
+      quantity: item?.quantity || 0,
+      minStock: item?.minStock || 0,
+    });
     const [isCustomCategory, setIsCustomCategory] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setIsSubmitting(true)
         try {
             await onSave({
                 id: item?.id || "",
@@ -42,7 +46,8 @@ export function InventoryModal ({
             setIsCustomCategory(false);
             onClose();
         } catch (err) {
-            console.error("Failed to save inventory item:", err);
+            console.error("Failed to save product:", err);
+            setIsSubmitting(false);
         }
     };
 
@@ -52,17 +57,17 @@ export function InventoryModal ({
         <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title={ item ? "Edit Item" : "Add New Item"}
+        title={ item ? "Edit Product" : "Add New Product"}
         >
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <InputField
                 type="text"
                 required
-                label="Item Name"
+                label="Product Name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="py-2"
-                placeholder="Enter item name"
+                placeholder="Enter product name"
               />
 
               {!isCustomCategory ? (
@@ -71,43 +76,46 @@ export function InventoryModal ({
                 label="Category"
                 value={formData.category}
                 onChange={(e) => {
-                  const val = e.target.value;
+                  const val = e.target.value
                   if (val === "OTHER") {
-                    setIsCustomCategory(true);
-                    setFormData({ ...formData, category: "" });
+                  setIsCustomCategory(true);
+                  setFormData({ ...formData, category: ""})
                   } else {
-                    setIsCustomCategory(false);
-                    setFormData({ ...formData, category: val });
+                    setFormData({ ...formData, category: val});
                   }
                 }}
                 className="py-2"
-              >
-                <option value="">Select a category</option>
-                {existingCategories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
+                >
+                  <option value="">Select a category</option>
+                  {existingCategories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                  <option value="OTHER" className="font-bold text-emerald-600">
+                    + Add New Category
                   </option>
-                ))}
-                <option value="OTHER">+ Add New Category</option>
-              </DropdownField>
-
-              {isCustomCategory && (
+                </DropdownField>
+              ) : (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
                   <InputField
-                    type="text"
-                    required
-                    label="New Category Name"
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
-                    }
-                    placeholder="e.g. Hardware"
-                    className="py-2"
+                  type="text"
+                  required
+                  label="New Category"
+                  value={formData.category}
+                  onChange={(e) => 
+                    setFormData({ ...formData, category: e.target.value })
+                  }
+                  placeholder="e.g. Accessories"
+                  className="py-2"
                   />
                   <button
-                    type="button"
-                    onClick={() => setIsCustomCategory(false)}
-                    className="text-xs text-emerald-600 hover:text-emerald-700 underline"
+                  type="button"
+                  onClick={() => {
+                    setIsCustomCategory(false);
+                    setFormData({...formData, category: ""});
+                  }}
+                  className="text-xs text-emerald-600 hover:text-emerald-700 underline"
                   >
                     Back to existing categories
                   </button>
@@ -131,10 +139,10 @@ export function InventoryModal ({
                 type="number"
                 required
                 min={0}
-                label="Current Quantity"
+                label="Quantity"
                 value={isNaN(formData.quantity) ? "" : formData.quantity}
                 onFocus={(e) => e.target.select()}
-                onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value, 10) })}
+                onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value, 10) || 0 })}
                 className="py-2"
                 placeholder="0"
                 />
@@ -145,7 +153,7 @@ export function InventoryModal ({
                 label="Minimum Stock Level"
                 value={isNaN(formData.minStock) ? "" : formData.minStock}
                 onFocus={(e) => e.target.select()}
-                onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value, 10) })}
+                onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value, 10) || 0 })}
                 className="py-2"
                 placeholder="0"
                 />
@@ -162,8 +170,9 @@ export function InventoryModal ({
                   <Button
                   type="submit"
                   className="flex-1"
+                  disabled={isSubmitting}
                   >
-                    {item ? "Update Product" : "Save Product"}
+                    {isSubmitting ? "Saving..." : (item ? "Update Product" : "Save Product")}
                   </Button>
                 </div>
             </form>

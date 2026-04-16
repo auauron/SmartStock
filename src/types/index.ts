@@ -17,6 +17,23 @@ export type {
   RestockInventoryOption,
 } from "./restock";
 
+// ─── Audit Logs ────────────────────────────────────────────────────────
+
+export interface AuditLogChanges {
+    [key: string]: {from: string | number | null; to: string | number | null};
+}
+
+export interface AuditLog {
+    id: string;
+    userId: string;
+    itemName: string;
+    action: 'INSERT' | 'UPDATE' | 'DELETE';
+    changes: AuditLogChanges | null;
+    createdAt: Date;
+}
+
+export type AuditLogKey = 'name' | 'category' | 'price' | 'quantity' | 'minStock';
+
 // ─── Auth / User Types ────────────────────────────────────────────────────────
 
 export interface UserProfile {

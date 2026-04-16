@@ -1,48 +1,57 @@
 import { useOutletContext } from "react-router-dom";
 import { LayoutOutletContext } from "../types";
-import { useInventory } from "../hooks/useProducts";
+import { useInventory } from "../hooks/useInventory";
 import { useMemo } from "react";
-import { AlertTriangle, Loader2, Package, PhilippinePeso, RefreshCw } from "lucide-react";
+import { AlertTriangle, Package, PhilippinePeso, RefreshCw } from "lucide-react";
 import { StatsCard } from "../components/ui/StatsCard";
 import { useRestocks } from "../hooks/useRestocks";
 import { getRelativeTime } from "../utils/date";
+import { useAuditLogs } from "../hooks/useAuditLog";
 
 export function Dashboard() {
   const { profile } = useOutletContext<LayoutOutletContext>();
-  const { products, loading, error, clearError } = useInventory();
-  const { history, loading: restockLoading } = useRestocks();
+  const { inventory, error, clearError } = useInventory();
+  const { history } = useRestocks();
+  const { logs } = useAuditLogs();
 
   const { stats, lowStockItems, recentActivity } = useMemo(() => {
-    const totalProducts = products.length;
-    const lowStock = products.filter((p) => p.quantity < p.minStock);
-    const value = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
+    const totalProducts = inventory.length;
+    const lowStock = inventory.filter((p) => p.quantity < p.minStock);
+    const value = inventory.reduce((sum, p) => sum + p.price * p.quantity, 0);
+
+    const auditLogs = logs.map(log => {
+      let detailMessage = 'Action performed';
+        if (log.action === 'DELETE') {
+          detailMessage = 'Item removed from system';
+        } else if (log.action === 'INSERT') {
+          const quantity = log.changes?.quantity?.to ?? 0;
+          detailMessage = `+${quantity} units`;
+        } else if (log.action === 'UPDATE') {
+          detailMessage = Object.entries(log.changes ?? {})
+          .map(([key, value]) => {
+            const label = key.replace(/([A-Z])/g, ' $1').toLowerCase();
+            return `${label}: ${value.from} → ${value.to}`
+          })
+          .join(', ');
+        }
+
+        return {
+          product: log.itemName,
+          action: log.action,
+          detail: detailMessage,
+          timestamp: log.createdAt instanceof Date ? log.createdAt.getTime() : new Date(log.createdAt).getTime()
+        };
+    });
 
     const restockLogs = history.map(h => ({
-      product: h.productName,
-      action: "Restocked",
+      product: h.inventoryName,
+      action: "RESTOCK",
       detail: `+${h.quantityAdded} units`,
       timestamp: new Date(h.date).getTime()
     }))
 
-    const newProductLogs = products
-    .filter(p => p.createdAt)
-    .map(p => ({
-      product: p.name,
-      action: "New Product",
-      detail:  `${p.quantity} units`,
-      timestamp: new Date(p.createdAt!).getTime()
-    }))
 
-    const updatedProductLogs = products
-      .filter(p => p.updatedAt && p.updatedAt !== p.createdAt)
-      .map(p => ({
-        product: p.name,
-        action: 'Updated',
-        detail: 'Details modified',
-        timestamp: new Date(p.updatedAt!).getTime()
-      }))
-
-    const allActivity = [...restockLogs, ...newProductLogs, ...updatedProductLogs]
+    const allActivity = [...restockLogs,  ...auditLogs]
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, 5)
 
@@ -81,17 +90,9 @@ export function Dashboard() {
       },
     ];
     return { stats: statsData, lowStockItems: lowStock, recentActivity: allActivity };
-  }, [products, history]);
+  }, [inventory, history, logs]);
 
   const firstName = profile.fullName.trim().split(/\s+/)[0] || "there";
-
-  if (loading || restockLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -161,8 +162,14 @@ export function Dashboard() {
                 <div key={i} className="flex justify-between items-center border-b pb-2 last:border-0">
                   <div>
                     <p className="font-medium">{act.product}</p>
-                    <span className="text-xs font-semibold py-0.5 text-gray-400">
-                      {act.action}
+                    <span className={`text-xs font-semibold py-0.5  rounded${
+                      act.action === 'INSERT' ? 'bg-green-100 text-green-700' :
+                      act.action === 'DELETE' ? 'bg-red-100 text-red-700' :
+                      act.action === 'UPDATE' ? 'bg-blue-100 text-blue-700' :
+                      act.action === 'RESTOCK' ? 'bg-emerald-100 text-emerald-700' :
+                      'bg-gray-100 text-gray-400'
+                      }`}>
+                      {act.action === 'INSERT' ? 'NEW PRODUCT' : act.action}
                     </span>
                   </div>
                   <div className="text-right">

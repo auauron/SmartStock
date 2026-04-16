@@ -1,6 +1,5 @@
 import { Inventory } from "../types";
-
-export interface InventoryRow {
+export interface ProductRow {
     id: string;
     name: string;
     category: string;
@@ -8,29 +7,34 @@ export interface InventoryRow {
     quantity: number;
     min_stock: number;
     user_id: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export class InventoryFactory {
-    static createFromDb(row: InventoryRow): Inventory {
-        return {
-            id: row.id,
-            name: row.name,
-            category: row.category,
-            price: row.price,
-            quantity: row.quantity,
-            minStock: row.min_stock, 
-        };
-    }
 
-    static toDb(inventory: Omit<Inventory, "id"> & { id?: string }, userId: string): Partial<InventoryRow> {
-        return {
-            ...(inventory.id && { id: inventory.id }),
-            name: inventory.name,
-            category: inventory.category,
-            price: inventory.price,
-            quantity: inventory.quantity,
-            min_stock: inventory.minStock,
-            user_id: userId,
+static createFromDb(row: ProductRow): Inventory {
+    return {
+        id: row.id,
+        name: row.name,
+        category: row.category,
+        price: row.price,
+        quantity: row.quantity,
+        minStock: row.min_stock, 
+        createdAt: new Date(row.created_at),
+        updatedAt: new Date(row.updated_at),
+    };
+}
+
+static toDb(product: Omit<Inventory, "id"> & { id?: string }, userId: string): Partial<ProductRow> {
+    return {
+        ...(product.id && { id: product.id }),
+        name: product.name,
+        category: product.category,
+        price: product.price,
+        quantity: product.quantity,
+        min_stock: product.minStock,
+        user_id: userId,
         };
     }
 }
