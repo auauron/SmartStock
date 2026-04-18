@@ -5,6 +5,7 @@ import { InputField } from "../components/ui/InputField";
 import { DropdownField } from "../components/ui/DropdownField";
 import { TextAreaField } from "../components/ui/TextAreaField";
 import { useRestocks } from "../hooks/useRestocks";
+import { Pagination } from "../components/ui/Pagination";
 
 export function Restock() {
     const {
@@ -288,24 +289,11 @@ return (
                 <span className="text-gray-500 font-medium">
                     Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} transactions
                 </span>
-                <div className="flex gap-2">
-                    <Button
-                        variant="secondary"
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className="px-4 py-1.5 font-bold text-gray-500"
-                    >
-                        PREV
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={currentPage === totalPages}
-                        className="px-4 py-1.5 font-bold text-emerald-600"
-                    >
-                        NEXT
-                    </Button>
-                </div>
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
             </div>
         )}
 
