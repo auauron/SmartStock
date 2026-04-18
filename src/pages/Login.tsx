@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useNavigate } from "react-router";
 import { Mail, Lock } from "lucide-react";
-import { SignupDashboardShowcase } from "../components/auth/AuthDashboardShowcase";
+import { LoginOpsShowcase } from "../components/auth/LoginOpsShowcase";
 import { Button } from "../components/ui/Button";
 import { CheckboxField } from "../components/ui/CheckboxField";
 import { InputField } from "../components/ui/InputField";
@@ -121,7 +121,7 @@ export function Login() {
         </div>
       </div>
 
-      <SignupDashboardShowcase />
+      <LoginOpsShowcase />
     </div>
   );
 }
