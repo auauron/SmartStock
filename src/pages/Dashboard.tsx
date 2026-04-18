@@ -1,5 +1,5 @@
 import { useOutletContext } from "react-router-dom";
-import { AuditLog, Inventory, LayoutOutletContext, RestockEntry } from "../types";
+import { AuditLog, LayoutOutletContext, RestockEntry } from "../types";
 import { useInventory } from "../hooks/useInventory";
 import { useMemo } from "react";
 import { AlertTriangle, Package, PhilippinePeso, RefreshCw } from "lucide-react";

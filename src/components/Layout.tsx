@@ -18,6 +18,7 @@ import {
   readCachedProfile,
   writeCachedProfile,
 } from "../hooks/useProfileCache";
+import { clearCachedLogs } from "../hooks/useAuditLog";
 
 export type { LayoutOutletContext };
 
@@ -75,6 +76,7 @@ export function Layout() {
         } else {
           setProfile(emptyProfile);
           clearCachedProfile();
+          clearCachedLogs();
         }
       }
     });
