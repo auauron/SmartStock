@@ -9,8 +9,10 @@ Many small retail stores, mini groceries, and supply shops still rely on manual 
 - Add, edit, categorize, and delete products with details such as name, price, quantity, category, and minimum stock threshold
 - Automatically detect and flag low stock and out-of-stock items via status badges
 - Log restock transactions (with an atomic server-side RPC) and browse a paginated restock history with product and date-range filters
-- View summary stats: total products, low stock count, recently restocked items, and total inventory value
-- Manage their account profile and notification preferences
+- View live summary stats: total inventory, stock alerts, weekly restocks, and total inventory value
+- Use Smart Analytics panels for restock trends, category distribution, and restock intelligence recommendations
+- Manage account profile, security/data settings, and persisted notification preferences
+- Use a top-bar notification center with unread tracking, clear actions, and preference-aware alerts
 - Install the app on any device for a native-like experience and quick access
 
 ## Tech Stack
@@ -47,9 +49,9 @@ smart-stock/
 │       └── emailService.ts
 ├── src/
 │   ├── __tests__/              # Unit & integration tests (Vitest)
-│   │   ├── productFactory.test.ts
-│   │   ├── productsService.test.ts
-│   │   ├── productsIntegration.test.ts
+│   │   ├── inventoryFactory.test.ts
+│   │   ├── inventoryService.test.ts
+│   │   ├── inventory.integration.test.ts
 │   │   ├── restock.test.ts
 │   │   ├── restock.integration.test.ts
 │   │   └── setup.ts            # MSW-based test setup
@@ -57,9 +59,10 @@ smart-stock/
 │   │   ├── Layout.tsx          # App shell: sidebar, top bar, outlet
 │   │   ├── RouteErrorBoundary.tsx
 │   │   ├── auth/               # AuthShell, DisplayProfile
-│   │   ├── dashboard/          # (planned dashboard widgets)
+│   │   ├── dashboard/          # SmartAnalytics, charts, modals
 │   │   ├── inventory/          # ProductModal, DeleteConfirmationModal
-│   │   ├── restock/            # (planned restock sub-components)
+│   │   ├── restock/            # Restock form and history UI blocks
+│   │   ├── settings/           # Profile, notifications, security, data tabs
 │   │   └── ui/                 # Reusable UI primitives
 │   │       ├── Button.tsx
 │   │       ├── CheckboxField.tsx
@@ -69,12 +72,17 @@ smart-stock/
 │   │       ├── Modal.tsx
 │   │       ├── StatsCard.tsx
 │   │       ├── TextAreaField.tsx
-│   │       └── ToggleSwitch.tsx
+│   │       ├── ToggleSwitch.tsx
+│   │       ├── ActionMenu.tsx
+│   │       └── Pagination.tsx
 │   ├── factories/
-│   │   └── productFactory.ts   # DB ↔ domain mapping (Factory pattern)
+│   │   ├── inventoryFactory.ts # DB ↔ domain mapping (Factory pattern)
+│   │   └── auditLogFactory.ts
 │   ├── hooks/
-│   │   ├── useProducts.ts      # Inventory CRUD hook
+│   │   ├── useInventory.ts     # Inventory CRUD hook
 │   │   ├── useProfileCache.ts  # localStorage profile cache (10-min TTL)
+│   │   ├── useNotifications.ts # Notification fetch + read state
+│   │   ├── useAuditLog.ts
 │   │   └── useRestocks.ts      # Restock data & submission hook
 │   ├── lib/
 │   │   ├── cn.ts               # tailwind-merge helper
@@ -82,18 +90,20 @@ smart-stock/
 │   ├── mocks/
 │   │   └── handlers.ts         # MSW request handlers for testing
 │   ├── pages/
-│   │   ├── Dashboard.tsx       # Stats overview (mock data)
+│   │   ├── Dashboard.tsx       # Live stats + smart analytics
 │   │   ├── Inventory.tsx       # Full CRUD, search, filter, sort
 │   │   ├── Landing.tsx         # Public marketing page
 │   │   ├── Login.tsx
 │   │   ├── Signup.tsx
 │   │   ├── Restock.tsx         # Restock form + paginated history
-│   │   ├── Settings.tsx        # Profile editor, notification toggles
+│   │   ├── Settings.tsx        # Multi-tab account/settings management
 │   │   └── NotFound.tsx        # 404 fallback
 │   ├── router/
 │   │   └── index.ts            # Route definitions, error boundaries
 │   ├── services/
-│   │   ├── productsService.ts  # Supabase CRUD + Proxy pattern
+│   │   ├── inventoryService.ts # Supabase CRUD + Proxy pattern
+│   │   ├── notificationService.ts
+│   │   ├── notificationObserver.ts
 │   │   └── restockService.ts   # Restock queries & atomic RPC
 │   ├── stores/
 │   │   └── authStore.ts        # useSyncExternalStore auth state
@@ -102,10 +112,10 @@ smart-stock/
 │   │   ├── tailwind.css
 │   │   └── theme.css           # Design tokens & custom properties
 │   └── types/
-│       ├── index.ts            # Product, UserProfile, SignUpPayload
+│       ├── index.ts            # Inventory, UserProfile, auth types
 │       └── restock.ts          # RestockEntry, CreateRestockInput
 ├── .github/workflows/
-│   ├── test.yml                # CI: unit & integration tests
+│   ├── test.yml                # CI: Vitest workflow
 │   └── playwright.yml          # CI: E2E tests
 ├── .storybook/                 # Storybook configuration
 ├── playwright.config.ts
@@ -116,15 +126,15 @@ smart-stock/
 
 ## Pages & Features
 
-| Page           | Status | Description                                                                            |
-| -------------- | ------ | -------------------------------------------------------------------------------------- |
-| Landing        | Done   | Public marketing/entry page                                                            |
-| Login / Signup | Done   | Supabase Auth with email confirmation and user-friendly error mapping                  |
-| Dashboard      | UI Done | Stats overview with low-stock alerts and recent activity panels (currently mock data)  |
-| Inventory      | Done   | Full CRUD via Supabase, search, category filter, multi-column sort, delete confirmation |
-| Restock        | Done   | Restock form with searchable product dropdown, paginated history, date/product filters  |
-| Settings       | UI Done | Profile info editor and notification toggles (UI complete, backend pending)            |
-| Not Found      | Done   | 404 fallback page with route error boundary                                            |
+| Page           | Status | Description                                                                                     |
+| -------------- | ------ | ----------------------------------------------------------------------------------------------- |
+| Landing        | Done   | Public marketing/entry page                                                                     |
+| Login / Signup | Done   | Supabase Auth with email confirmation and user-friendly error mapping                           |
+| Dashboard      | Done   | Live stats, low-stock and activity modals, and Smart Analytics driven by inventory/restock data |
+| Inventory      | Done   | Full CRUD via Supabase, search, category filter, multi-column sort, delete confirmation         |
+| Restock        | Done   | Restock form with searchable product dropdown, paginated history, date/product filters          |
+| Settings       | Done   | Profile, notifications (persisted to Supabase), security, and data tabs                         |
+| Not Found      | Done   | 404 fallback page with route error boundary                                                     |
 
 ## Authentication
 
@@ -139,14 +149,15 @@ smart-stock/
 
 The Supabase PostgreSQL schema contains:
 
-| Table                        | Purpose                                           |
-| ---------------------------- | ------------------------------------------------- |
-| `profiles`                   | User profile data (linked to `auth.users`)        |
-| `products`                   | Inventory items with price, quantity, min_stock    |
-| `restocks`                   | Restock transaction log with quantity and notes    |
-| `notification_preferences`   | Per-user notification toggles                     |
+| Table                      | Purpose                                         |
+| -------------------------- | ----------------------------------------------- |
+| `profiles`                 | User profile data (linked to `auth.users`)      |
+| `inventories`              | Inventory items with price, quantity, min_stock |
+| `restocks`                 | Restock transaction log with quantity and notes |
+| `notification_preferences` | Per-user notification toggles                   |
 
 **Key features:**
+
 - Row Level Security (RLS) on all tables — users can only access their own data
 - `create_restock_transaction` — atomic RPC that updates product quantity and inserts a restock record in a single transaction, preventing lost updates
 - Automatic `updated_at` triggers on mutable tables
@@ -154,66 +165,63 @@ The Supabase PostgreSQL schema contains:
 
 ## Testing
 
-| Type              | Tool                               | Scope                                                                          | Status |
-| ----------------- | ---------------------------------- | ------------------------------------------------------------------------------ | ------ |
-| Unit Testing      | Vitest + MSW                       | `productFactory`, `productsService`, `restockService`, store logic             | Done   |
-| Integration Tests | Vitest (no mocks)                  | Real Supabase HTTP calls for products and restocks                             | Done   |
-| Component Testing | Storybook 10 + Chromatic           | `Button`, `InputField`, `CheckboxField`, `DropdownField`, `ProductModal`       | Done   |
-| E2E Testing       | Playwright (Chromium, Firefox, WebKit) | Inventory CRUD flows, restock submission and history verification           | Done   |
+| Type                    | Tool                                   | Scope                                                                      | Status                                             |
+| ----------------------- | -------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------- |
+| Unit Testing            | Vitest + MSW                           | `inventoryFactory`, `inventoryService`, `restockService`, related hooks   | Done                                               |
+| Integration Tests       | Vitest + Supabase                      | `*.integration.test.ts` suites in `src/__tests__`                          | In Progress (excluded by current root Vitest config) |
+| Component Documentation | Storybook 10 + Chromatic               | Reusable UI, dashboard, and settings stories in `src/stories`              | Done                                               |
+| E2E Testing             | Playwright (Chromium, Firefox, WebKit) | Inventory CRUD flows and restock page end-to-end verification              | Done                                               |
 
 **Test commands:**
 
 ```bash
-# Unit tests (with MSW mocking)
-npm test -- --project unit
+# Unit tests (current working command)
+npx vitest run
 
-# Integration tests (real Supabase)
+# Integration tests (currently not discovered by vitest.config.ts exclude rules)
 npm run test:integration
 
-# Storybook component tests
-npm test -- --project storybook
+# Storybook docs
+npm run storybook
 
 # E2E tests
 npx playwright test
 
-# All tests
-npm test
+# Build Storybook
+npm run build-storybook
 ```
 
 ## CI/CD
 
-- **Unit & Integration tests** — GitHub Actions workflow (`.github/workflows/test.yml`)
+- **Vitest workflow** — GitHub Actions workflow (`.github/workflows/test.yml`)
 - **E2E tests** — GitHub Actions workflow (`.github/workflows/playwright.yml`)
 - **Visual regression** — Chromatic integration via Storybook
+
+CI note:
+- The current Vitest workflow uses `--project unit`, but the active root `vitest.config.ts` does not define named projects. Validate this alignment before relying on CI status.
 
 ## Design Patterns (SCD-Aligned)
 
 This section is aligned to the SCD final-project requirements by showing pattern category, implementation status, code location, and system-specific justification.
 
-| Pattern        | Category   | Status      | SmartStock Usage                                                                                                              | Code Location                                                                                                  | Problem Without Pattern                                                                                         |
-| -------------- | ---------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Singleton      | Creational | Implemented | One shared Supabase client used across auth, services, and layout code                                                        | `src/lib/supabaseClient.ts`                                                                                    | Repeated client setup, inconsistent configuration, and higher risk of auth/session behavior drift               |
-| Factory Method | Creational | Implemented | `ProductFactory` maps between Supabase DB rows (`snake_case`) and domain models (`camelCase`) with centralized field defaults  | `src/factories/productFactory.ts`, used in `src/services/productsService.ts`                                   | Scattered object-construction logic in UI handlers, inconsistent defaults/validation, and tighter page coupling |
-| Proxy          | Structural | Implemented | `ProductServiceProxy` wraps `ProductService` to enforce auth checks and input validation before every Supabase operation      | `src/services/productsService.ts`                                                                              | Auth verification scattered across pages, duplicated validation logic, and harder-to-test service boundaries    |
+| Pattern        | Category   | Status      | SmartStock Usage                                                                                                              | Code Location                                                                                                    | Problem Without Pattern                                                                                         |
+| -------------- | ---------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Singleton      | Creational | Implemented | One shared Supabase client used across auth, services, and layout code                                                        | `src/lib/supabaseClient.ts`                                                                                      | Repeated client setup, inconsistent configuration, and higher risk of auth/session behavior drift               |
+| Factory Method | Creational | Implemented | `InventoryFactory` maps Supabase DB rows (`snake_case`) and app models (`camelCase`) with centralized field defaults         | `src/factories/inventoryFactory.ts`, used in `src/services/inventoryService.ts`                                 | Scattered object-construction logic in UI handlers, inconsistent defaults/validation, and tighter page coupling |
+| Proxy          | Structural | Implemented | `InventoryServiceProxy` wraps `InventoryService` to enforce auth checks and input validation before every Supabase operation  | `src/services/inventoryService.ts`                                                                               | Auth verification scattered across pages, duplicated validation logic, and harder-to-test service boundaries    |
 | Decorator      | Structural | Implemented | Reusable form-field wrappers add labels, icon/adornment support, and consistent UI behavior around base input/select/textarea | `src/components/ui/InputField.tsx`, `src/components/ui/DropdownField.tsx`, `src/components/ui/TextAreaField.tsx` | Repeated form UI logic across pages, inconsistent field behavior, and harder maintenance                        |
+| Observer       | Behavioral | Implemented | Notification updates are broadcast through a shared subject after inventory/preference changes and consumed by notification UI | `src/services/notificationObserver.ts`, `src/hooks/useNotifications.ts`, `src/hooks/useInventory.ts`, `src/hooks/useRestocks.ts` | Polling-only updates and tight coupling between settings, inventory actions, and notification consumers         |
 
 ### Pattern Demonstration Notes (for SCD panel)
 
 - **Singleton** can be demonstrated by tracing all Supabase usage back to one exported client instance in `supabaseClient.ts`.
-- **Factory Method** can be demonstrated by stepping through `ProductFactory.createFromDb()` and `ProductFactory.toDb()` to show the mapping boundary.
-- **Proxy** can be demonstrated by comparing `ProductService` (plain Supabase calls) vs `ProductServiceProxy` (auth + validation wrapper).
+- **Factory Method** can be demonstrated by stepping through `InventoryFactory.createFromDb()` and `InventoryFactory.toDb()` to show the mapping boundary.
+- **Proxy** can be demonstrated by comparing `InventoryService` (plain Supabase calls) vs `InventoryServiceProxy` (auth + validation wrapper).
 - **Decorator** can be demonstrated by showing multiple forms that reuse the same field wrappers with different props.
+- **Observer** can be demonstrated by showing `notificationSubject.notify(...)` after inventory/prefs updates and `useNotifications` reacting via subscriptions.
 
 ## Planned / In Progress
 
-- [ ] **Smart Analysis — Inventory Insights Dashboard**
-  - Restock frequency analysis (which products are restocked most often)
-  - Low stock predictions based on historical restock intervals
-  - Category breakdown (total value, product count, average stock per category)
-  - Spending trends over time (weekly/monthly restock volume)
-  - Stock health score (% in stock vs low vs out-of-stock)
-- [ ] Connect Dashboard page to live Supabase data (replace mock stats/low-stock/activity)
-- [ ] Wire up Settings page to persist notification preferences to `notification_preferences` table
 - [ ] Implement `generateReport` server function for downloadable inventory reports
 - [ ] Implement `sendLowStockAlert` email notifications via the `emailService` utility
 - [ ] Real-time stock updates using Supabase subscriptions
