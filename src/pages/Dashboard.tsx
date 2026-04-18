@@ -14,6 +14,8 @@ import { getRelativeTime } from "../utils/date";
 import { useAuditLogs } from "../hooks/useAuditLog";
 import { transformAuditLogs, transformRestockLogs } from "../utils/activity";
 import { ActivityModal } from "../components/dashboard/ActivityModal";
+import { SmartAnalytics } from "../components/dashboard/SmartAnalytics";
+import { LowStockModal } from "../components/dashboard/LowStockModal";
 
 
 export function Dashboard() {
@@ -22,6 +24,7 @@ export function Dashboard() {
   const { history, loading: restockLoading } = useRestocks();
   const { logs, loading: logsLoading } = useAuditLogs();
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
+  const [isLowStockModalOpen, setIsLowStockModalOpen] = useState(false);
 
   const { stats, lowStockItems, recentActivity, allActivity } = useMemo(() => {
     const now = Date.now();
@@ -150,15 +153,31 @@ export function Dashboard() {
         <StatsCard {...stats[3]} loading={inventoryLoading} />
       </div>
 
+      <SmartAnalytics
+        inventory={inventory}
+        history={history}
+        loading={inventoryLoading || restockLoading}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Low Stock Alert
-            </h2>
-            <p className="text-sm text-gray-600">
-              Items that need restocking soon
-            </p>
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Low Stock Alert
+              </h2>
+              <p className="text-sm text-gray-600">
+                Items that need restocking soon
+              </p>
+            </div>
+            {lowStockItems.length > 0 && (
+              <button
+                onClick={() => setIsLowStockModalOpen(true)}
+                className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors px-3 py-1.5 rounded-md hover:bg-emerald-50 border border-transparent hover:border-emerald-100"
+              >
+                View All
+              </button>
+            )}
           </div>
           <div className="p-6">
             {inventoryLoading ? (
@@ -182,7 +201,7 @@ export function Dashboard() {
               </p>
             ) : (
               <div className="space-y-4">
-                {lowStockItems.map((item) => (
+                {lowStockItems.slice(0, 4).map((item) => (
                   <div
                     key={item.id}
                     className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0 last:pb-0"
@@ -285,6 +304,12 @@ export function Dashboard() {
         isOpen={isActivityModalOpen}
         onClose={() => setIsActivityModalOpen(false)}
         activities={allActivity}
+      />
+
+      <LowStockModal
+        isOpen={isLowStockModalOpen}
+        onClose={() => setIsLowStockModalOpen(false)}
+        items={lowStockItems}
       />
     </div>
   );
