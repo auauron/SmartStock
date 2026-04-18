@@ -21,6 +21,8 @@ interface DropdownFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   wrapperClassName?: string;
   labelClassName?: string;
   searchable?: boolean;
+  /** When set, the option with this value is pinned at the bottom of the dropdown, outside the scrollable list, and excluded from search filtering. */
+  stickyOptionValue?: string;
 }
 
 interface DropdownOption {
@@ -57,6 +59,7 @@ export function DropdownField({
   wrapperClassName,
   labelClassName,
   searchable,
+  stickyOptionValue,
   value,
   defaultValue,
   disabled,
@@ -104,12 +107,28 @@ export function DropdownField({
   const selectedOption =
     options.find((option) => option.value === currentValue) ?? options[0];
 
+  const stickyOption = useMemo(
+    () =>
+      stickyOptionValue !== undefined
+        ? options.find((o) => o.value === stickyOptionValue)
+        : undefined,
+    [options, stickyOptionValue],
+  );
+
+  const listOptions = useMemo(
+    () =>
+      stickyOptionValue !== undefined
+        ? options.filter((o) => o.value !== stickyOptionValue)
+        : options,
+    [options, stickyOptionValue],
+  );
+
   const filteredOptions = useMemo(() => {
-    if (!searchable || !searchQuery) return options;
-    return options.filter((option) =>
+    if (!searchable || !searchQuery) return listOptions;
+    return listOptions.filter((option) =>
       option.label.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [options, searchable, searchQuery]);
+  }, [listOptions, searchable, searchQuery]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -278,6 +297,20 @@ export function DropdownField({
                 </li>
               )}
             </ul>
+
+            {stickyOption ? (
+              <div className="shrink-0 border-t border-gray-200 px-1 pt-1.5 mt-1">
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={stickyOption.value === currentValue}
+                  onClick={() => handleSelect(stickyOption.value)}
+                  className="flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-emerald-600 transition-colors hover:bg-emerald-50 cursor-pointer"
+                >
+                  {stickyOption.label}
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : null}
 
