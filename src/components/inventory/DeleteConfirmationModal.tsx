@@ -9,6 +9,7 @@ interface DeleteConfirmationModalProps {
     onConfirm: () => void | Promise<void>;
     title: string;
     message: string;
+    itemName?: string;
 }
 
 export function DeleteConfirmationModal({
@@ -17,6 +18,7 @@ export function DeleteConfirmationModal({
     onConfirm,
     title,
     message,
+    itemName,
 }: DeleteConfirmationModalProps) {
     const [isDeleting, setIsDeleting] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -62,7 +64,13 @@ export function DeleteConfirmationModal({
 
                 <div className="text-center space-y-1.5">
                     <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">{message}</p>
+                    <p className="text-sm text-gray-500 leading-relaxed">
+                        {itemName ? (
+                            <>Are you sure you want to delete <span className="font-semibold text-gray-700">"{itemName}"</span>?</>
+                        ) : (
+                            message
+                        )}
+                    </p>
                 </div>
 
                 <div className="border-t border-gray-100" />

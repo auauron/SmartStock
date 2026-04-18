@@ -5,6 +5,10 @@ import { Modal } from "../ui/Modal";
 import { InputField } from "../ui/InputField";
 import { DropdownField } from "../ui/DropdownField";
 
+function capitalizeWords(str: string): string {
+  return str.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 
 
 interface ProductModalProps {
@@ -53,6 +57,8 @@ export function InventoryModal ({
             await onSave({
                 id: item?.id || "",
                 ...formData,
+                name: capitalizeWords(formData.name.trim()),
+                category: capitalizeWords(formData.category.trim()),
                 price: isNaN(formData.price) ? 0 : formData.price,
                 quantity: isNaN(formData.quantity) ? 0 : formData.quantity,
                 minStock: isNaN(formData.minStock) ? 0 : formData.minStock,
@@ -60,7 +66,7 @@ export function InventoryModal ({
             setIsCustomCategory(false);
             onClose();
         } catch (err) {
-            console.error("Failed to save product:", err);
+            console.error("Failed to save item:", err);
             setIsSubmitting(false);
         }
     };
@@ -71,22 +77,24 @@ export function InventoryModal ({
         <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title={ item ? "Edit Product" : "Add New Product"}
+        title={ item ? "Edit Item" : "Add New Item"}
         >
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <InputField
                 type="text"
                 required
-                label="Product Name"
+                label="Item Name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="py-2"
-                placeholder="Enter product name"
+                placeholder="Enter item name"
               />
 
               {!isCustomCategory ? (
                 <DropdownField
                 required
+                searchable
+                stickyOptionValue="OTHER"
                 label="Category"
                 value={formData.category}
                 onChange={(e) => {
@@ -186,7 +194,7 @@ export function InventoryModal ({
                   className="flex-1"
                   disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Saving..." : (item ? "Update Product" : "Save Product")}
+                    {isSubmitting ? "Saving..." : (item ? "Update Item" : "Save Item")}
                   </Button>
                 </div>
             </form>

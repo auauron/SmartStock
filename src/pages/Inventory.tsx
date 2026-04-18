@@ -1,11 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import {
   Plus,
   Edit2,
   Trash2,
   Search,
   Filter,
-  Loader2,
   ArrowUpDown,
 } from "lucide-react";
 import { InventoryModal } from "../components/inventory/InventoryModal";
@@ -15,7 +14,11 @@ import { InputField } from "../components/ui/InputField";
 import { DropdownField } from "../components/ui/DropdownField";
 import { useInventory } from "../hooks/useInventory";
 import { DeleteConfirmationModal } from "../components/inventory/DeleteConfirmationModal";
+import { InventorySkeleton } from "../components/inventory/InventorySkeleton";
+import { ToastContainer, useToast } from "../components/ui/Toast";
 import { useAuditLogs } from "../hooks/useAuditLog";
+
+const UNDO_DELAY_MS = 5000;
 
 export function Inventory() {
   const {
@@ -33,16 +36,15 @@ export function Inventory() {
   const [filterCategory, setFilterCategory] = useState("");
   const [sortBy, setSortBy] = useState("latest");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<Inventory | null>(null);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(
+    new Set()
+  );
+  const pendingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map()
+  );
   const { refresh: refreshLogs } = useAuditLogs();
-
-  const getStatus = (item: Inventory) => {
-    if (item.quantity === 0)
-      return { label: "Out of Stock", color: "bg-red-100 text-red-700" };
-    if (item.quantity < item.minStock)
-      return { label: "Low Stock", color: "bg-yellow-100 text-yellow-700" };
-    return { label: "In Stock", color: "bg-green-100 text-green-700" };
-  };
+  const { toasts, addToast, dismissToast } = useToast();
 
   const handleSave = async (itemData: Inventory): Promise<void> => {
     try {
@@ -56,26 +58,69 @@ export function Inventory() {
     }
   };
 
-  const openDeleteConfirm = (id: string) => {
-    setItemToDelete(id);
+  const openDeleteConfirm = (item: Inventory) => {
+    setItemToDelete(item);
     setIsDeleteModalOpen(true);
   };
 
+  const undoDelete = useCallback(
+    (id: string) => {
+      const timer = pendingTimers.current.get(id);
+      if (timer) {
+        clearTimeout(timer);
+        pendingTimers.current.delete(id);
+      }
+      setPendingDeleteIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    },
+    []
+  );
+
   const confirmDelete = async () => {
-    if (itemToDelete) {
+    if (!itemToDelete) return;
+
+    const item = itemToDelete;
+    setIsDeleteModalOpen(false);
+    setItemToDelete(null);
+
+    setPendingDeleteIds((prev) => new Set(prev).add(item.id));
+
+    const toastId = addToast({
+      message: `"${item.name}" deleted.`,
+      durationMs: UNDO_DELAY_MS,
+      onUndo: () => undoDelete(item.id),
+    });
+
+    const timer = setTimeout(async () => {
+      pendingTimers.current.delete(item.id);
       try {
-        await deleteInventory(itemToDelete);
+        await deleteInventory(item.id);
         await refreshLogs();
-        setIsDeleteModalOpen(false);
-        setItemToDelete(null);
       } catch (err) {
         console.error("Delete failed:", err);
+        undoDelete(item.id);
       }
-    }
+      setPendingDeleteIds((prev) => {
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
+      dismissToast(toastId);
+    }, UNDO_DELAY_MS);
+
+    pendingTimers.current.set(item.id, timer);
   };
 
+  const visibleItems = useMemo(
+    () => inventory.filter((item) => !pendingDeleteIds.has(item.id)),
+    [inventory, pendingDeleteIds]
+  );
+
   const filteredItems = useMemo(() => {
-    const result = [...inventory].filter((item) => {
+    const result = [...visibleItems].filter((item) => {
       const matchesSearch = item.name
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
@@ -106,20 +151,12 @@ export function Inventory() {
     }
 
     return result;
-  }, [inventory, searchQuery, filterCategory, sortBy]);
+  }, [visibleItems, searchQuery, filterCategory, sortBy]);
 
   const categories = useMemo(
     () => Array.from(new Set(inventory.map((p) => p.category))),
     [inventory]
   );
-
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -225,7 +262,9 @@ export function Inventory() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredItems.length === 0 ? (
+              {loading ? (
+                <InventorySkeleton rows={5} />
+              ) : filteredItems.length === 0 ? (
                 <tr>
                   <td
                     colSpan={6}
@@ -239,10 +278,10 @@ export function Inventory() {
                   const status = getStatus(item);
                   return (
                     <tr key={item.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900 capitalize">
                         {item.name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-600 capitalize">
                         {item.category}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-gray-900">
@@ -273,7 +312,7 @@ export function Inventory() {
                           <button
                             aria-label={`Delete item ${item.name}`}
                             data-testid="delete-item-button"
-                            onClick={() => openDeleteConfirm(item.id)}
+                            onClick={() => openDeleteConfirm(item)}
                             className="p-1.5 text-red-600 hover:bg-red-50 rounded"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -307,7 +346,18 @@ export function Inventory() {
         onConfirm={confirmDelete}
         title="Delete Item"
         message="Are you sure you want to delete this item?"
+        itemName={itemToDelete?.name}
       />
+
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
+}
+
+function getStatus(item: Inventory) {
+  if (item.quantity === 0)
+    return { label: "Out of Stock", color: "bg-red-100 text-red-700" };
+  if (item.quantity < item.minStock)
+    return { label: "Low Stock", color: "bg-yellow-100 text-yellow-700" };
+  return { label: "In Stock", color: "bg-green-100 text-green-700" };
 }
