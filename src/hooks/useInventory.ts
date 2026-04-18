@@ -6,9 +6,13 @@ const service = new InventoryServiceProxy();
 
 let cache: Inventory[] | null = null;
 
+export const clearInventoryCache = () => {
+    cache = null;
+};
+
 export function useInventory() {
     const [inventory, setInventory] = useState<Inventory[]>(cache ?? []);
-    const [loading, setLoading] = useState(!cache);
+    const [loading, setLoading] = useState(cache === null);
     const [error, setError] = useState<string | null>(null); 
 
     const load = useCallback(async (force = false) => {
@@ -18,7 +22,7 @@ export function useInventory() {
         setError(null);
         try {
             const data = await service.getInventory();
-            cache = data
+            cache = data;
             setInventory(data);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to load inventory");
@@ -28,35 +32,35 @@ export function useInventory() {
     }, []);
 
     useEffect(() => { 
-        load()
+        load();
     }, [load]);
 
     const saveInventory = async (item: Omit<Inventory, "id"> & { id?: string }) => {
-        if (!Number.isFinite(item.price) || item.price < 0) throw new Error("Price must be a valid non-negative number");
-        if (!Number.isFinite(item.quantity) || item.quantity < 0) throw new Error("Quantity must be a valid non-negative number");
-        if (!Number.isFinite(item.minStock) || item.minStock < 0) throw new Error("Minimum stock must be a valid non-negative number");
-
-        await service.saveInventory(item)
+        const savedId = await service.saveInventory(item);
         
         setInventory((prev) => {
             const exists = prev.find((i) => i.id === item.id);
-            const updated = exists
-            ? prev.map((i) => (i.id === item.id ? { ...i, ...item } : i))
-            : [...prev, { ...item, id: crypto.randomUUID() }];
+            let updated: Inventory[];
+            
+            if (exists) {
+                updated = prev.map((i) => (i.id === item.id ? { ...i, ...item } : i));
+            } else {
+                updated = [...prev, { ...item, id: savedId as string }];
+            }
 
             cache = updated;
             return updated;
-        })
+        });
     };
 
     const deleteInventory = async (id: string) => {
-            await service.deleteInventory(id);
+        await service.deleteInventory(id);
 
-            setInventory((prev) => {
-                const updated = prev.filter((item) => item.id !== id);
-                cache = updated;
-                return updated
-            })
+        setInventory((prev) => {
+            const updated = prev.filter((item) => item.id !== id);
+            cache = updated;
+            return updated;
+        });
     };
 
     return { 
@@ -65,7 +69,7 @@ export function useInventory() {
         error,
         saveInventory, 
         deleteInventory, 
-        refresh: load,
+        refresh: () => load(true),
         clearError: () => setError(null) 
     };
 }

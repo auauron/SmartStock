@@ -47,7 +47,7 @@ export function Inventory() {
   const handleSave = async (itemData: Inventory): Promise<void> => {
     try {
       await saveInventory(itemData);
-      refreshLogs();
+      await refreshLogs();
       setIsModalOpen(false);
       setEditingItem(undefined);
     } catch (err) {
@@ -65,7 +65,7 @@ export function Inventory() {
     if (itemToDelete) {
       try {
         await deleteInventory(itemToDelete);
-        refreshLogs();
+        await refreshLogs();
         setIsDeleteModalOpen(false);
         setItemToDelete(null);
       } catch (err) {

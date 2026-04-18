@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/Button";
 import type { Inventory } from "../../types"
 import { Modal } from "../ui/Modal";
@@ -10,7 +10,7 @@ import { DropdownField } from "../ui/DropdownField";
 interface ProductModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (product: Omit<Inventory, "id"> & { id: string }) => void;
+    onSave: (product: Omit<Inventory, "id"> & { id: string }) => Promise<void>;
     item?: Inventory;
     existingCategories: string[];
 }
@@ -29,6 +29,20 @@ export function InventoryModal ({
       quantity: item?.quantity || 0,
       minStock: item?.minStock || 0,
     });
+    
+    useEffect(() => {
+        if (isOpen) {
+            setFormData({
+                name: item?.name || "",
+                category: item?.category || "",
+                price: item?.price || 0,
+                quantity: item?.quantity || 0,
+                minStock: item?.minStock || 0,
+            });
+            setIsCustomCategory(false);
+        }
+    }, [item, isOpen]);
+
     const [isCustomCategory, setIsCustomCategory] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 

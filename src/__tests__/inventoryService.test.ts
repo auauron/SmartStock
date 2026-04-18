@@ -8,15 +8,18 @@ vi.mock('../lib/supabaseClient', () => ({
     },
     from: vi.fn().mockReturnThis(),
     select: vi.fn().mockReturnThis(),
-    upsert: vi.fn().mockResolvedValue({ error: null }),
+    upsert: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    single: vi.fn().mockImplementation(async () => ({ data: { id: 'mock-id' }, error: null })),
+    maybeSingle: vi.fn().mockImplementation(async () => ({ data: { id: 'mock-id' }, error: null })),
   },
 }));
 
 describe('InventoryServiceProxy', () => {
     beforeEach(() => {
-    vi.clearAllMocks(); 
+        vi.clearAllMocks(); 
     });
 
     it('Should THROW an error if the price is invalid or negative', async () => {
@@ -71,13 +74,12 @@ describe('InventoryServiceProxy', () => {
             minStock: 15,
         }
 
-        try {
-            await service.saveInventory(goodItem);
-        } finally {
-            expect(consoleSpy).toHaveBeenCalledWith(
-                expect.stringContaining('[Proxy] Logging activity')
-            );
-            consoleSpy.mockRestore();
-        }
+        await service.saveInventory(goodItem);
+        
+        expect(consoleSpy).toHaveBeenCalledWith(
+            expect.stringContaining('[Proxy] Logging activity')
+        );
+        
+        consoleSpy.mockRestore();
     })
 })

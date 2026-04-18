@@ -7,7 +7,7 @@ import { AuditLogFactory } from "../factories/auditLogFactory";
 
 export interface IInventoryService {
     getInventory(): Promise<Inventory[]>;
-    saveInventory(item: Omit<Inventory, "id"> & { id?: string }): Promise<void>;
+    saveInventory(item: Omit<Inventory, "id"> & { id?: string }): Promise<string | undefined>;
     deleteInventory(id: string): Promise<void>;
     logActivity(userId: string, itemName: string, action: 'INSERT' | 'UPDATE' | 'DELETE', change?: AuditLogChanges | null): Promise<void>;
     getAuditLogs(): Promise<AuditLog[]>;
@@ -25,14 +25,27 @@ class InventoryService {
     }
 
     async getInventoryById(id: string, userId: string): Promise<Inventory | null> {
-        const { data } = await supabase.from('inventories').select('*').eq('id', id).eq('user_id', userId).single();
+        const { data, error } = await supabase
+            .from('inventories')
+            .select('*')
+            .eq('id', id)
+            .eq('user_id', userId)
+            .maybeSingle();
+            
+        if (error) throw error;
         return data ? InventoryFactory.createFromDb(data as ProductRow) : null;
     }
 
-    async saveInventory(item: Omit<Inventory, "id"> & { id?: string }, userId: string): Promise<void> {
+    async saveInventory(item: Omit<Inventory, "id"> & { id?: string }, userId: string): Promise<string> {
         const dbData = InventoryFactory.toDb(item, userId);
-        const { error } = await supabase.from("inventories").upsert(dbData);
+        const { data, error } = await supabase
+            .from("inventories")
+            .upsert(dbData)
+            .select('id')
+            .single();
+            
         if (error) throw error;
+        return data.id;
     }
 
     async deleteInventory(id: string, userId: string): Promise<void> {
@@ -91,7 +104,11 @@ export class InventoryServiceProxy implements IInventoryService {
     }
 
 
-    async saveInventory(item: Omit<Inventory, "id"> & { id?: string }) {
+    async saveInventory(item: Omit<Inventory, "id"> & { id?: string }): Promise<string | undefined> {
+        if (!Number.isFinite(item.price) || item.price < 0) throw new Error("Price must be a valid non-negative number");
+        if (!Number.isFinite(item.quantity) || item.quantity < 0) throw new Error("Quantity must be a valid non-negative number");
+        if (!Number.isFinite(item.minStock) || item.minStock < 0) throw new Error("Minimum stock must be a valid non-negative number");
+
         const userId = await this.getUserId();
 
         let oldItem: Inventory | null = null;
@@ -104,7 +121,7 @@ export class InventoryServiceProxy implements IInventoryService {
             }
         } 
 
-        await this.service.saveInventory(item, userId);
+        const savedId = await this.service.saveInventory(item, userId);
 
         try {
             const changes: AuditLogChanges = {};
@@ -128,11 +145,13 @@ export class InventoryServiceProxy implements IInventoryService {
             const action = oldItem ? 'UPDATE' : 'INSERT';
             
             if (!oldItem || Object.keys(changes).length > 0) {
+                console.log(`[Proxy] Logging activity: ${action} ${item.name}`);
                 await this.service.logActivity(userId, item.name, action, changes);
             }
         } catch (logError) {
             console.error("Audit Log Error (Inventory saved successfully):", logError);
         }
+        return savedId;
     }
 
 async deleteInventory(id: string) {
@@ -144,6 +163,7 @@ async deleteInventory(id: string) {
     await this.service.deleteInventory(id, userId);
     
     try {
+        console.log(`[Proxy] Logging activity: DELETE ${item.name}`);
         await this.service.logActivity(userId, item.name, 'DELETE');
     } catch (logError) {
         console.error("Delete Log Error:", logError);

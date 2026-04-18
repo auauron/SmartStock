@@ -1,5 +1,5 @@
 import { useOutletContext } from "react-router-dom";
-import { LayoutOutletContext } from "../types";
+import { AuditLog, Inventory, LayoutOutletContext, RestockEntry } from "../types";
 import { useInventory } from "../hooks/useInventory";
 import { useMemo } from "react";
 import { AlertTriangle, Package, PhilippinePeso, RefreshCw } from "lucide-react";
@@ -7,6 +7,48 @@ import { StatsCard } from "../components/ui/StatsCard";
 import { useRestocks } from "../hooks/useRestocks";
 import { getRelativeTime } from "../utils/date";
 import { useAuditLogs } from "../hooks/useAuditLog";
+
+interface ActivityItem {
+    product: string;
+    action: string;
+    detail: string;
+    timestamp: number;
+}
+
+function transformAuditLogs(logs: AuditLog[]): ActivityItem[] {
+    return logs.map(log => {
+        let detailMessage = 'Action performed';
+        if (log.action === 'DELETE') {
+            detailMessage = 'Item removed from system';
+        } else if (log.action === 'INSERT') {
+            const quantity = log.changes?.quantity?.to ?? 0;
+            detailMessage = `+${quantity} units`;
+        } else if (log.action === 'UPDATE') {
+            detailMessage = Object.entries(log.changes ?? {})
+                .map(([key, value]) => {
+                    const label = key.replace(/([A-Z])/g, ' $1').toLowerCase();
+                    return `${label}: ${value.from} → ${value.to}`
+                })
+                .join(', ');
+        }
+
+        return {
+            product: log.itemName,
+            action: log.action,
+            detail: detailMessage,
+            timestamp: log.createdAt instanceof Date ? log.createdAt.getTime() : new Date(log.createdAt).getTime()
+        };
+    });
+}
+
+function transformRestockLogs(history: RestockEntry[]): ActivityItem[] {
+    return history.map(h => ({
+        product: h.inventoryName,
+        action: "RESTOCK",
+        detail: `+${h.quantityAdded} units`,
+        timestamp: new Date(h.date).getTime()
+    }));
+}
 
 export function Dashboard() {
   const { profile } = useOutletContext<LayoutOutletContext>();
@@ -19,39 +61,10 @@ export function Dashboard() {
     const lowStock = inventory.filter((p) => p.quantity < p.minStock);
     const value = inventory.reduce((sum, p) => sum + p.price * p.quantity, 0);
 
-    const auditLogs = logs.map(log => {
-      let detailMessage = 'Action performed';
-        if (log.action === 'DELETE') {
-          detailMessage = 'Item removed from system';
-        } else if (log.action === 'INSERT') {
-          const quantity = log.changes?.quantity?.to ?? 0;
-          detailMessage = `+${quantity} units`;
-        } else if (log.action === 'UPDATE') {
-          detailMessage = Object.entries(log.changes ?? {})
-          .map(([key, value]) => {
-            const label = key.replace(/([A-Z])/g, ' $1').toLowerCase();
-            return `${label}: ${value.from} → ${value.to}`
-          })
-          .join(', ');
-        }
+    const auditItems = transformAuditLogs(logs);
+    const restockItems = transformRestockLogs(history);
 
-        return {
-          product: log.itemName,
-          action: log.action,
-          detail: detailMessage,
-          timestamp: log.createdAt instanceof Date ? log.createdAt.getTime() : new Date(log.createdAt).getTime()
-        };
-    });
-
-    const restockLogs = history.map(h => ({
-      product: h.inventoryName,
-      action: "RESTOCK",
-      detail: `+${h.quantityAdded} units`,
-      timestamp: new Date(h.date).getTime()
-    }))
-
-
-    const allActivity = [...restockLogs,  ...auditLogs]
+    const allActivity = [...restockItems, ...auditItems]
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, 5)
 
@@ -89,6 +102,7 @@ export function Dashboard() {
         iconColor: 'text-purple-700'
       },
     ];
+
     return { stats: statsData, lowStockItems: lowStock, recentActivity: allActivity };
   }, [inventory, history, logs]);
 
@@ -158,11 +172,11 @@ export function Dashboard() {
               <p className="text-sm text-gray-500">Latest updates to your inventory</p>
             </div>
             <div className="p-6 space-y-4">
-              {recentActivity.map((act, i) => (
-                <div key={i} className="flex justify-between items-center border-b pb-2 last:border-0">
+              {recentActivity.map((act) => (
+                <div key={`${act.timestamp}-${act.product}-${act.action}`} className="flex justify-between items-center border-b pb-2 last:border-0">
                   <div>
                     <p className="font-medium">{act.product}</p>
-                    <span className={`text-xs font-semibold py-0.5  rounded${
+                    <span className={`text-xs font-semibold py-0.5 px-2 rounded ${
                       act.action === 'INSERT' ? 'bg-green-100 text-green-700' :
                       act.action === 'DELETE' ? 'bg-red-100 text-red-700' :
                       act.action === 'UPDATE' ? 'bg-blue-100 text-blue-700' :

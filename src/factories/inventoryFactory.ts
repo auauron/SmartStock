@@ -14,6 +14,7 @@ export interface ProductRow {
 export class InventoryFactory {
 
 static createFromDb(row: ProductRow): Inventory {
+    const defaultDate = new Date().toISOString();
     return {
         id: row.id,
         name: row.name,
@@ -21,8 +22,8 @@ static createFromDb(row: ProductRow): Inventory {
         price: row.price,
         quantity: row.quantity,
         minStock: row.min_stock, 
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at),
+        createdAt: new Date(row.created_at || defaultDate),
+        updatedAt: new Date(row.updated_at || defaultDate),
     };
 }
 

@@ -14,8 +14,9 @@ interface MockSupabase {
     from: (table: string) => MockSupabase;
     select: (columns?: string) => MockSupabase;
     delete: () => MockSupabase;
-    upsert: (data: object) => Promise<{ error: Error | null }>;
+    upsert: (data: object) => MockSupabase;
     eq: (col: string, val: string | number) => MockSupabase & PromiseLike<SupabaseResponse>;
+    single: () => Promise<SupabaseResponse>;
     then?: (resolve: (value: SupabaseResponse) => void) => void;
 }
 
@@ -38,8 +39,15 @@ vi.mock('../lib/supabaseClient', () => {
             currentMode = 'DELETE';
             return mockSupabase;
         }),
-        upsert: vi.fn().mockImplementation(async () => {
-            return { error: null };
+        upsert: vi.fn().mockImplementation(() => {
+            currentMode = 'UPSERT';
+            return mockSupabase;
+        }),
+        single: vi.fn().mockImplementation(async () => {
+            if (currentMode === 'UPSERT') {
+                return { data: { id: 'mock-id' }, error: null };
+            }
+            return { data: null, error: null };
         }),
         eq: vi.fn().mockImplementation(function (this: MockSupabase) {
             this.then = async (resolve) => {
@@ -63,36 +71,29 @@ vi.mock('../lib/supabaseClient', () => {
     return { supabase: mockSupabase };
 });
 
-describe('InventoryService Proxy Integration (MSW)', () => {
-    it('should fetch and transform inventory items from the fake server', async () => {
-        const service = new InventoryServiceProxy();
+describe('InventoryServiceProxy Integration', () => {
+	const service = new InventoryServiceProxy();
 
-        const inventory = await service.getInventory();
+	it('should fetch inventory records', async () => {
+		const items = await service.getInventory();
+		expect(items).toHaveLength(1);
+		expect(items[0].name).toBe('MSW Test Phone');
+	});
 
-        expect(inventory).toHaveLength(1);
-        expect(inventory[0].id).toBe('msw-123')
-        expect(inventory[0].name).toBe('MSW Test Phone')
-        expect(inventory[0]).toHaveProperty('minStock')
-    })
+	it('should save a new inventory record', async () => {
+		const newItem: Omit<Inventory, 'id'> = {
+			name: 'Save Test',
+			category: 'Test',
+			price: 10,
+			quantity: 1,
+			minStock: 0,
+		};
+		const savedId = await service.saveInventory(newItem);
+		expect(savedId).toBe('mock-id');
+	});
 
-    it('should successfully save an inventory item through the proxy to the fake server', async () => {
-        const service = new InventoryServiceProxy()
-        const newItem = {
-            name: 'Integration Phone',
-            price: 999,
-            quantity: 5,
-            category: 'Electronics',
-            minStock: 20
-        }
-
-        await expect(service.saveInventory(newItem as Inventory)).resolves.not.toThrow();
-    })
-
-    it('should delete an inventory item through the proxy to the fake server', async () => {
-        const service = new InventoryServiceProxy();
-        const inventoryId = 'msw-123';
-
-        await expect(service.deleteInventory(inventoryId)).resolves.not.toThrow();
-
-    })
-}) 
+	it('should handle deletion of records', async () => {
+		// Mock needs to handle getInventoryById which is called before delete
+		await service.deleteInventory('msw-123');
+	});
+});

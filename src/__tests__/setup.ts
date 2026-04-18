@@ -11,7 +11,7 @@ global.Headers = Headers;
 
 export const server = setupServer(...handlers);
 
-beforeAll(() => server.listen({ onUnhandledRequest: 'bypass'}));
+beforeAll(() => server.listen({ onUnhandledRequest: 'warn'}));
 
 afterAll(() => server.close())
 

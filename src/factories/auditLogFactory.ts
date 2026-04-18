@@ -1,13 +1,4 @@
-import { AuditLogChanges } from "../types";
-
-export interface AuditLog {
-    id: string;
-    userId: string;
-    itemName: string;
-    action: 'INSERT' | 'UPDATE' | 'DELETE';
-    changes: AuditLogChanges | null;
-    createdAt: Date;
-}
+import { AuditLog, AuditLogChanges } from "../types";
 
 export interface AuditLogRow {
     id: string,

@@ -10,6 +10,7 @@ const meta: Meta<typeof InventoryModal> = {
     onSave: async (data) => {
       console.log("Saved inventory data:", data);
     },
+    existingCategories: ["Electronics", "Furniture", "Office Supplies"],
   },
 };
 
