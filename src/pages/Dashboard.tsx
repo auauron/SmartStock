@@ -30,12 +30,17 @@ function transformAuditLogs(logs: AuditLog[]): ActivityItem[] {
       const quantity = log.changes?.quantity?.to ?? 0;
       detailMessage = `+${quantity} units`;
     } else if (log.action === "UPDATE") {
-      detailMessage = Object.entries(log.changes ?? {})
-        .map(([key, value]) => {
-          const label = key.replace(/([A-Z])/g, " $1").toLowerCase();
-          return `${label}: ${value.from} → ${value.to}`;
-        })
-        .join(", ");
+      const entries = Object.entries(log.changes ?? {});
+      if (entries.length === 0) {
+        detailMessage = "Updated";
+      } else {
+        detailMessage = entries
+          .map(([key, value]) => {
+            const label = key.replace(/([A-Z])/g, " $1").toLowerCase();
+            return `${label}: ${value.from} → ${value.to}`;
+          })
+          .join(", ");
+      }
     }
 
     return {
@@ -64,8 +69,6 @@ export function Dashboard() {
   const { inventory, loading: inventoryLoading, error, clearError } = useInventory();
   const { history, loading: restockLoading } = useRestocks();
   const { logs, loading: logsLoading } = useAuditLogs();
-
-  const isLoading = inventoryLoading || restockLoading || logsLoading;
 
   const { stats, lowStockItems, recentActivity } = useMemo(() => {
     const totalProducts = inventory.length;
@@ -157,9 +160,10 @@ export function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <StatsCard key={index} {...stat} loading={isLoading} />
-        ))}
+        <StatsCard {...stats[0]} loading={inventoryLoading} />
+        <StatsCard {...stats[1]} loading={inventoryLoading} />
+        <StatsCard {...stats[2]} loading={restockLoading} />
+        <StatsCard {...stats[3]} loading={inventoryLoading} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -173,7 +177,7 @@ export function Dashboard() {
             </p>
           </div>
           <div className="p-6">
-            {isLoading ? (
+            {inventoryLoading ? (
               <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0 last:pb-0">
@@ -226,7 +230,7 @@ export function Dashboard() {
             </p>
           </div>
           <div className="p-6 space-y-4">
-            {isLoading ? (
+            {logsLoading || restockLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="flex justify-between items-center border-b pb-2 last:border-0">
                   <div className="space-y-2">

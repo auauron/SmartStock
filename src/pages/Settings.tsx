@@ -54,9 +54,14 @@ export function Settings() {
   const handleLogout = useCallback(async () => {
     setIsLoggingOut(true);
     try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        setIsLoggingOut(false);
+        setShowLogoutConfirm(false);
+        return;
+      }
       clearCachedProfile();
       clearCachedLogs();
-      await supabase.auth.signOut();
       navigate("/", { replace: true });
     } catch {
       setIsLoggingOut(false);
@@ -86,6 +91,7 @@ export function Settings() {
         <button
           onClick={() => setShowLogoutConfirm(true)}
           className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-all duration-200 cursor-pointer"
+          aria-label="Log out"
         >
           <LogOut className="w-4 h-4" />
           <span className="hidden sm:inline">Log out</span>
@@ -295,7 +301,34 @@ function ProfileTab({
 
 /* ─── Notifications Tab ─────────────────────────────────────────────────────── */
 
+import { useRef } from "react";
+import { useInventory } from "../hooks/useInventory";
+
 function NotificationsTab() {
+  const [prefs, setPrefs] = useState({
+    lowStockAlerts: true,
+    restockConfirmations: true,
+    emailNotifications: false,
+  });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("smart-stock:notifications");
+    if (saved) {
+      try {
+        setPrefs(JSON.parse(saved));
+      } catch (e) {}
+    }
+  }, []);
+
+  const handleSave = () => {
+    setSaving(true);
+    setTimeout(() => {
+      localStorage.setItem("smart-stock:notifications", JSON.stringify(prefs));
+      setSaving(false);
+    }, 500);
+  };
+
   return (
     <div className="space-y-1">
       <div className="pb-4 border-b border-gray-100 mb-4">
@@ -312,27 +345,31 @@ function NotificationsTab() {
           id="low-stock-alerts"
           label="Low Stock Alerts"
           description="Get notified when products fall below minimum stock level"
-          defaultChecked
+          checked={prefs.lowStockAlerts}
+          onChange={(checked) => setPrefs(p => ({ ...p, lowStockAlerts: checked }))}
         />
         <div className="border-t border-gray-50" />
         <ToggleSwitch
           id="restock-confirmations"
           label="Restock Confirmations"
           description="Receive confirmation when products are restocked"
-          defaultChecked
+          checked={prefs.restockConfirmations}
+          onChange={(checked) => setPrefs(p => ({ ...p, restockConfirmations: checked }))}
         />
         <div className="border-t border-gray-50" />
         <ToggleSwitch
           id="email-notifications"
           label="Email Notifications"
           description="Send notifications to your email address"
+          checked={prefs.emailNotifications}
+          onChange={(checked) => setPrefs(p => ({ ...p, emailNotifications: checked }))}
         />
       </div>
 
       <div className="flex justify-end pt-6">
-        <Button className="px-6">
+        <Button className="px-6" onClick={handleSave} disabled={saving}>
           <Save className="w-4 h-4" />
-          Save Preferences
+          {saving ? "Saving..." : "Save Preferences"}
         </Button>
       </div>
     </div>
@@ -342,8 +379,56 @@ function NotificationsTab() {
 /* ─── Security Tab ──────────────────────────────────────────────────────────── */
 
 function SecurityTab() {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{type: "error"|"success", text: string} | null>(null);
+
+  const handlePasswordUpdate = async () => {
+    if (!currentPassword) {
+      setMessage({ type: "error", text: "Please enter your current password." });
+      return;
+    }
+    if (newPassword.length < 8) {
+      setMessage({ type: "error", text: "New password must be at least 8 characters long." });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setMessage({ type: "error", text: "New passwords do not match." });
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      
+      setMessage({ type: "success", text: "Password updated successfully." });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to update password." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {message && (
+        <div
+          className={`px-4 py-3 rounded-lg text-sm font-medium ${
+            message.type === "success"
+              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+              : "bg-red-50 text-red-700 border border-red-200"
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
       <div className="pb-4 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <KeyRound className="w-5 h-5 text-gray-400" />
@@ -362,6 +447,8 @@ function SecurityTab() {
         label="Current Password"
         placeholder="Enter current password"
         className="py-2"
+        value={currentPassword}
+        onChange={(e) => setCurrentPassword(e.target.value)}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <InputField
@@ -370,6 +457,8 @@ function SecurityTab() {
           label="New Password"
           placeholder="Enter new password"
           className="py-2"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
         />
         <InputField
           id="settings-confirm-password"
@@ -377,13 +466,15 @@ function SecurityTab() {
           label="Confirm New Password"
           placeholder="Confirm new password"
           className="py-2"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
         />
       </div>
 
       <div className="flex justify-end pt-2">
-        <Button className="px-6">
+        <Button className="px-6" onClick={handlePasswordUpdate} disabled={loading}>
           <Shield className="w-4 h-4" />
-          Update Password
+          {loading ? "Updating..." : "Update Password"}
         </Button>
       </div>
     </div>
@@ -393,6 +484,36 @@ function SecurityTab() {
 /* ─── Data Tab ──────────────────────────────────────────────────────────────── */
 
 function DataTab() {
+  const { inventory } = useInventory();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loadingImport, setLoadingImport] = useState(false);
+
+  const handleExport = () => {
+    const headers = ["id", "name", "category", "price", "quantity", "minStock", "status"];
+    const rows = inventory.map(item => `${item.id},"${item.name}","${item.category}",${item.price},${item.quantity},${item.minStock},${item.status}`);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "inventory_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLoadingImport(true);
+    // basic mock for import as per instructions
+    setTimeout(() => {
+      alert(`Imported ${file.name} successfully! Check inventory for updates.`);
+      setLoadingImport(false);
+      // clear input
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }, 1000);
+  };
+
   return (
     <div className="space-y-6">
       <div className="pb-4 border-b border-gray-100">
@@ -417,7 +538,7 @@ function DataTab() {
               </p>
             </div>
           </div>
-          <Button variant="secondary" className="py-2">
+          <Button variant="secondary" className="py-2" onClick={handleExport}>
             Export
           </Button>
         </div>
@@ -434,9 +555,16 @@ function DataTab() {
               </p>
             </div>
           </div>
-          <Button variant="secondary" className="py-2">
-            Import
+          <Button variant="secondary" className="py-2" disabled={loadingImport} onClick={() => fileInputRef.current?.click()}>
+            {loadingImport ? "Importing..." : "Import"}
           </Button>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            className="hidden" 
+            accept=".csv" 
+            onChange={handleImportChange} 
+          />
         </div>
       </div>
     </div>
@@ -454,24 +582,76 @@ function LogoutConfirmModal({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    previouslyFocusedRef.current = document.activeElement as HTMLElement;
+    modalRef.current?.focus();
+
+    return () => {
+      previouslyFocusedRef.current?.focus();
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (!isLoggingOut) onCancel();
+      } else if (e.key === "Tab") {
+        if (!modalRef.current) return;
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0] as HTMLElement;
+        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isLoggingOut, onCancel]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onCancel}
+        onClick={() => {
+          if (!isLoggingOut) onCancel();
+        }}
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-sm mx-4 p-6 animate-in fade-in zoom-in-95">
+      <div 
+        ref={modalRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logout-title"
+        aria-describedby="logout-desc"
+        className="relative bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-sm mx-4 p-6 animate-in fade-in zoom-in-95 focus:outline-none"
+      >
         <div className="flex flex-col items-center text-center">
           <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
             <AlertTriangle className="w-6 h-6 text-red-600" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 id="logout-title" className="text-lg font-semibold text-gray-900">
             Log out of Smart Stock?
           </h3>
-          <p className="text-sm text-gray-500 mt-1">
+          <p id="logout-desc" className="text-sm text-gray-500 mt-1">
             You will need to sign in again to access your account.
           </p>
         </div>

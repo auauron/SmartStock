@@ -78,9 +78,7 @@ export function Layout() {
           setProfile(emptyProfile);
           clearCachedProfile();
           clearCachedLogs();
-          if (typeof clearInventoryCache === 'function') {
-             clearInventoryCache();
-          }
+          clearInventoryCache();
         }
       }
     });
