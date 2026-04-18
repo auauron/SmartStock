@@ -8,6 +8,9 @@ export interface StatsCardProps {
   iconBgColor?: string;
   iconColor?: string;
   loading?: boolean;
+  actionLabel?: string;
+  onAction?: () => void;
+  actionDisabled?: boolean;
   trend?: {
     value: number | string;
     label: string;
@@ -23,6 +26,9 @@ export function StatsCard({
   iconBgColor = "bg-emerald-100",
   iconColor = "text-emerald-700",
   loading = false,
+  actionLabel,
+  onAction,
+  actionDisabled = false,
   trend,
 }: StatsCardProps) {
   return (
@@ -33,9 +39,11 @@ export function StatsCard({
           {loading ? (
             <div className="h-9 w-24 bg-gray-200 rounded animate-pulse mb-2" />
           ) : (
-            <p className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">{value}</p>
+            <p className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
+              {value}
+            </p>
           )}
-          
+
           <div className="flex flex-col gap-1">
             {trend && !loading && (
               <div className="flex items-center gap-1.5 mb-1">
@@ -44,28 +52,48 @@ export function StatsCard({
                     trend.direction === "up"
                       ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
                       : trend.direction === "down"
-                      ? "bg-red-50 text-red-700 border border-red-100"
-                      : "bg-gray-50 text-gray-600 border border-gray-100"
+                        ? "bg-red-50 text-red-700 border border-red-100"
+                        : "bg-gray-50 text-gray-600 border border-gray-100"
                   }`}
                 >
-                  {trend.direction === "up" && <TrendingUp className="w-3 h-3" />}
-                  {trend.direction === "down" && <TrendingDown className="w-3 h-3" />}
-                  {trend.direction === "neutral" && <Minus className="w-3 h-3" />}
-                  {trend.value}{typeof trend.value === 'number' ? '%' : ''}
+                  {trend.direction === "up" && (
+                    <TrendingUp className="w-3 h-3" />
+                  )}
+                  {trend.direction === "down" && (
+                    <TrendingDown className="w-3 h-3" />
+                  )}
+                  {trend.direction === "neutral" && (
+                    <Minus className="w-3 h-3" />
+                  )}
+                  {trend.value}
+                  {typeof trend.value === "number" ? "%" : ""}
                 </span>
-                <span className="text-[10px] text-gray-400 font-medium">
+                <span className="text-[10px] text-gray-600 font-medium">
                   {trend.label}
                 </span>
               </div>
             )}
-            <p className="text-xs text-gray-400 font-medium">{subtitle}</p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs text-gray-600 font-medium">{subtitle}</p>
+              {actionLabel && onAction && !loading ? (
+                <button
+                  type="button"
+                  onClick={onAction}
+                  disabled={actionDisabled}
+                  className="text-[11px] font-semibold text-emerald-700 transition-colors hover:text-emerald-800 disabled:cursor-not-allowed disabled:text-gray-400"
+                >
+                  {actionLabel}
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
-        <div className={`${iconBgColor} rounded-xl p-3 transform transition-transform group-hover:scale-110 duration-200`}>
+        <div
+          className={`${iconBgColor} rounded-xl p-3 transform transition-transform group-hover:scale-110 duration-200`}
+        >
           <Icon className={`w-6 h-6 ${iconColor}`} />
         </div>
       </div>
     </div>
   );
 }
-

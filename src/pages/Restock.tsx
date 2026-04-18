@@ -96,16 +96,6 @@ export function Restock() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">
-          {" "}
-          Restock Management
-        </h1>
-        <p className="text-gray-600 mt-1">
-          Add new stock and track restock history
-        </p>
-      </div>
-
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           Add restock

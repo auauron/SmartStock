@@ -17,10 +17,14 @@ import { ActivityModal } from "../components/dashboard/ActivityModal";
 import { SmartAnalytics } from "../components/dashboard/SmartAnalytics";
 import { LowStockModal } from "../components/dashboard/LowStockModal";
 
-
 export function Dashboard() {
   const { profile } = useOutletContext<LayoutOutletContext>();
-  const { inventory, loading: inventoryLoading, error, clearError } = useInventory();
+  const {
+    inventory,
+    loading: inventoryLoading,
+    error,
+    clearError,
+  } = useInventory();
   const { history, loading: restockLoading } = useRestocks();
   const { logs, loading: logsLoading } = useAuditLogs();
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
@@ -37,28 +41,43 @@ export function Dashboard() {
     const value = inventory.reduce((sum, p) => sum + p.price * p.quantity, 0);
 
     // Calculate restock trends
-    const thisWeekRestocks = history.filter(h => new Date(h.date).getTime() >= sevenDaysAgo);
-    const lastWeekRestocks = history.filter(h => {
+    const thisWeekRestocks = history.filter(
+      (h) => new Date(h.date).getTime() >= sevenDaysAgo,
+    );
+    const lastWeekRestocks = history.filter((h) => {
       const time = new Date(h.date).getTime();
       return time >= fourteenDaysAgo && time < sevenDaysAgo;
     });
 
-    const thisWeekTotal = thisWeekRestocks.reduce((sum, h) => sum + h.quantityAdded, 0);
-    const lastWeekTotal = lastWeekRestocks.reduce((sum, h) => sum + h.quantityAdded, 0);
+    const thisWeekTotal = thisWeekRestocks.reduce(
+      (sum, h) => sum + h.quantityAdded,
+      0,
+    );
+    const lastWeekTotal = lastWeekRestocks.reduce(
+      (sum, h) => sum + h.quantityAdded,
+      0,
+    );
 
-    const restockTrend = lastWeekTotal === 0 
-      ? "—"
-      : Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100);
+    const restockTrend =
+      lastWeekTotal === 0
+        ? "—"
+        : Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100);
 
     // Calculate inventory item growth
-    const newItemsThisWeek = inventory.filter(p => p.createdAt && new Date(p.createdAt).getTime() >= sevenDaysAgo).length;
-    const itemGrowthTrend = totalProducts === 0 ? 0 : Math.round((newItemsThisWeek / (totalProducts || 1)) * 100);
+    const newItemsThisWeek = inventory.filter(
+      (p) => p.createdAt && new Date(p.createdAt).getTime() >= sevenDaysAgo,
+    ).length;
+    const itemGrowthTrend =
+      totalProducts === 0
+        ? 0
+        : Math.round((newItemsThisWeek / (totalProducts || 1)) * 100);
 
     const auditItems = transformAuditLogs(logs);
     const restockItems = transformRestockLogs(history);
 
-    const allUnifiedActivity = [...restockItems, ...auditItems]
-      .sort((a, b) => b.timestamp - a.timestamp);
+    const allUnifiedActivity = [...restockItems, ...auditItems].sort(
+      (a, b) => b.timestamp - a.timestamp,
+    );
 
     const statsData: StatsCardProps[] = [
       {
@@ -72,7 +91,7 @@ export function Dashboard() {
           value: itemGrowthTrend,
           label: "vs last week",
           direction: itemGrowthTrend > 0 ? "up" : "neutral",
-        }
+        },
       },
       {
         title: "Stock Alerts",
@@ -81,6 +100,9 @@ export function Dashboard() {
         icon: AlertTriangle,
         iconBgColor: "bg-amber-50",
         iconColor: "text-amber-600",
+        actionLabel: "View alerts",
+        onAction: () => setIsLowStockModalOpen(true),
+        actionDisabled: lowStock.length === 0,
       },
       {
         title: "Weekly Restocks",
@@ -92,8 +114,15 @@ export function Dashboard() {
         trend: {
           value: restockTrend === "—" ? "—" : Math.abs(restockTrend as number),
           label: "vs last week",
-          direction: restockTrend === "—" ? "neutral" : (restockTrend as number) > 0 ? "up" : (restockTrend as number) < 0 ? "down" : "neutral",
-        }
+          direction:
+            restockTrend === "—"
+              ? "neutral"
+              : (restockTrend as number) > 0
+                ? "up"
+                : (restockTrend as number) < 0
+                  ? "down"
+                  : "neutral",
+        },
       },
       {
         title: "Inventory Value",
@@ -135,12 +164,7 @@ export function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">
-          {profile.businessName
-            ? `${profile.businessName} Dashboard`
-            : "Dashboard"}
-        </h1>
-        <p className="text-gray-600 mt-1">
+        <p className="text-gray-600 -mt-4">
           Welcome back, {firstName}! Here's what's happening with your
           inventory.
         </p>
@@ -183,7 +207,10 @@ export function Dashboard() {
             {inventoryLoading ? (
               <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                  <div
+                    key={i}
+                    className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0 last:pb-0"
+                  >
                     <div className="space-y-2">
                       <div className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
                       <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
@@ -245,7 +272,10 @@ export function Dashboard() {
           <div className="p-6 space-y-4">
             {logsLoading || restockLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="flex justify-between items-center border-b pb-2 last:border-0">
+                <div
+                  key={i}
+                  className="flex justify-between items-center border-b pb-2 last:border-0"
+                >
                   <div className="space-y-2">
                     <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
                     <div className="h-5 w-20 bg-gray-200 rounded animate-pulse" />
@@ -259,43 +289,48 @@ export function Dashboard() {
             ) : recentActivity.length === 0 ? (
               <p className="text-gray-500 text-sm">No recent activity</p>
             ) : (
-            recentActivity.map((act) => (
-              <div
-                key={`${act.timestamp}-${act.itemName}-${act.action}`}
-                className="flex justify-between items-center border-b pb-2 last:border-0"
-              >
-                <div>
-                  <p className="font-medium">{act.itemName}</p>
-                  <span
-                    className={`text-[10px] font-bold py-0.5 px-2 rounded tracking-wider ${
-                      act.action === "INSERT"
-                        ? "bg-green-100 text-green-700"
-                        : act.action === "DELETE"
-                          ? "bg-red-100 text-red-700"
-                          : act.action === "UPDATE"
-                            ? "bg-blue-100 text-blue-700"
+              recentActivity.map((act) => (
+                <div
+                  key={`${act.timestamp}-${act.itemName}-${act.action}`}
+                  className="flex justify-between items-center border-b pb-2 last:border-0"
+                >
+                  <div>
+                    <p className="font-medium">{act.itemName}</p>
+                    <span
+                      className={`text-[10px] font-bold py-0.5 px-2 rounded tracking-wider ${
+                        act.action === "INSERT"
+                          ? "bg-green-100 text-green-700"
+                          : act.action === "DELETE"
+                            ? "bg-red-100 text-red-700"
+                            : act.action === "UPDATE"
+                              ? "bg-blue-100 text-blue-700"
+                              : act.action === "RESTOCK"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-gray-100 text-gray-400"
+                      }`}
+                    >
+                      {act.action === "INSERT"
+                        ? "NEW ITEM"
+                        : act.action === "UPDATE"
+                          ? "UPDATED"
+                          : act.action === "DELETE"
+                            ? "REMOVED"
                             : act.action === "RESTOCK"
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-gray-100 text-gray-400"
-                    }`}
-                  >
-                    {act.action === "INSERT" ? "NEW ITEM" : 
-                     act.action === "UPDATE" ? "UPDATED" :
-                     act.action === "DELETE" ? "REMOVED" :
-                     act.action === "RESTOCK" ? "RESTOCKED" :
-                     act.action}
-                  </span>
+                              ? "RESTOCKED"
+                              : act.action}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-gray-900">
+                      {act.detail}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {getRelativeTime(act.timestamp)}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-gray-900">
-                    {act.detail}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {getRelativeTime(act.timestamp)}
-                  </p>
-                </div>
-              </div>
-            )))}
+              ))
+            )}
           </div>
         </div>
       </div>

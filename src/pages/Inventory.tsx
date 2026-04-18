@@ -1,12 +1,5 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import {
-  Plus,
-  Edit2,
-  Trash2,
-  Search,
-  Filter,
-  ArrowUpDown,
-} from "lucide-react";
+import { Plus, Edit2, Trash2, Search, Filter, ArrowUpDown } from "lucide-react";
 import { InventoryModal } from "../components/inventory/InventoryModal";
 import type { Inventory } from "../types";
 import { Button } from "../components/ui/Button";
@@ -40,10 +33,10 @@ export function Inventory() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Inventory | null>(null);
   const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const pendingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(
-    new Map()
+    new Map(),
   );
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -73,21 +66,18 @@ export function Inventory() {
     setIsDeleteModalOpen(true);
   };
 
-  const undoDelete = useCallback(
-    (id: string) => {
-      const timer = pendingTimers.current.get(id);
-      if (timer) {
-        clearTimeout(timer);
-        pendingTimers.current.delete(id);
-      }
-      setPendingDeleteIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-    },
-    []
-  );
+  const undoDelete = useCallback((id: string) => {
+    const timer = pendingTimers.current.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      pendingTimers.current.delete(id);
+    }
+    setPendingDeleteIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }, []);
 
   const confirmDelete = async () => {
     if (!itemToDelete) return;
@@ -126,7 +116,7 @@ export function Inventory() {
 
   const visibleItems = useMemo(
     () => inventory.filter((item) => !pendingDeleteIds.has(item.id)),
-    [inventory, pendingDeleteIds]
+    [inventory, pendingDeleteIds],
   );
 
   const filteredItems = useMemo(() => {
@@ -163,24 +153,26 @@ export function Inventory() {
     return result;
   }, [visibleItems, searchQuery, filterCategory, sortBy]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredItems.length / ITEMS_PER_PAGE),
+  );
   const paginatedItems = filteredItems.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   const categories = useMemo(
     () => Array.from(new Set(inventory.map((p) => p.category))),
-    [inventory]
+    [inventory],
   );
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Inventory</h1>
-          <p className="text-gray-600 mt-1">Manage your stock inventory</p>
-        </div>
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 sm:px-5">
+        <p className="text-sm text-gray-600">
+          Track stock levels, pricing, and categories in one place.
+        </p>
         <Button
           onClick={() => {
             setEditingItem(undefined);
@@ -345,7 +337,9 @@ export function Inventory() {
         {!loading && filteredItems.length > 0 && (
           <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between text-sm bg-gray-50/50">
             <span className="text-gray-500 font-medium">
-              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredItems.length)} of {filteredItems.length} items
+              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
+              {Math.min(currentPage * ITEMS_PER_PAGE, filteredItems.length)} of{" "}
+              {filteredItems.length} items
             </span>
             <Pagination
               currentPage={currentPage}
