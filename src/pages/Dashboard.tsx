@@ -47,7 +47,7 @@ export function Dashboard() {
     const lastWeekTotal = lastWeekRestocks.reduce((sum, h) => sum + h.quantityAdded, 0);
 
     const restockTrend = lastWeekTotal === 0 
-      ? (thisWeekTotal > 0 ? 100 : 0)
+      ? "—"
       : Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100);
 
     // Calculate inventory item growth
@@ -90,14 +90,14 @@ export function Dashboard() {
         iconBgColor: "bg-emerald-50",
         iconColor: "text-emerald-600",
         trend: {
-          value: Math.abs(restockTrend),
+          value: restockTrend === "—" ? "—" : Math.abs(restockTrend as number),
           label: "vs last week",
-          direction: restockTrend > 0 ? "up" : restockTrend < 0 ? "down" : "neutral",
+          direction: restockTrend === "—" ? "neutral" : (restockTrend as number) > 0 ? "up" : (restockTrend as number) < 0 ? "down" : "neutral",
         }
       },
       {
         title: "Inventory Value",
-        value: new Intl.NumberFormat("en-Ph", {
+        value: new Intl.NumberFormat("en-PH", {
           style: "currency",
           currency: "PHP",
         }).format(value),

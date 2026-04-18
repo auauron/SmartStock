@@ -150,41 +150,41 @@ export function CategoryDistribution({
                   data={chartData}
                   margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
                 >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="#f3f4f6"
-                vertical={false}
-              />
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 11, fill: "#6b7280" }}
-                axisLine={{ stroke: "#e5e7eb" }}
-                tickLine={false}
-                interval={0}
-                tickFormatter={(v: string) => truncate(v, 11)}
-              />
-              <YAxis
-                tick={{ fontSize: 11, fill: "#6b7280" }}
-                axisLine={false}
-                tickLine={false}
-                allowDecimals={false}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar
-                dataKey="totalQuantity"
-                radius={[4, 4, 0, 0]}
-                animationDuration={800}
-                animationBegin={300}
-              >
-                {chartData.map((_, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#f3f4f6"
+                    vertical={false}
                   />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    axisLine={{ stroke: "#e5e7eb" }}
+                    tickLine={false}
+                    interval={0}
+                    tickFormatter={(v: string) => truncate(v, 11)}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    axisLine={false}
+                    tickLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar
+                    dataKey="totalQuantity"
+                    radius={[4, 4, 0, 0]}
+                    animationDuration={800}
+                    animationBegin={300}
+                  >
+                    {chartData.map((_, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
         </div>
       </div>
     )}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { Pagination } from "../../ui/Pagination";
@@ -53,9 +53,10 @@ export function RestockIntelligence({
     const msPerDay = 86_400_000;
 
     const results: ItemForecast[] = inventory.map((item) => {
-      const itemRestocks = history.filter((h) => h.inventoryName === item.name);
+      // Map by ID, fallback to name for legacy entries without inventoryId
+      const itemRestocks = history.filter((h) => h.inventoryId === item.id || (!h.inventoryId && h.inventoryName === item.name));
 
-      let dailyConsumptionRate: number;
+      let dailyRestockRate: number;
 
       if (itemRestocks.length > 0) {
         const totalRestocked = itemRestocks.reduce(
@@ -69,17 +70,18 @@ export function RestockIntelligence({
           1,
           Math.floor((now - earliest) / msPerDay),
         );
-        dailyConsumptionRate = totalRestocked / daysSinceFirst;
+        dailyRestockRate = totalRestocked / daysSinceFirst;
       } else {
-        dailyConsumptionRate = item.minStock / 30;
+        dailyRestockRate = item.minStock / 30;
       }
 
       const surplus = item.quantity - item.minStock;
+      // Note: this assumes future restocking cadence equals historical restocking (not true demand-driven consumption)
       const daysUntilStockout =
         surplus <= 0
           ? 0
-          : dailyConsumptionRate > 0
-            ? Math.floor(surplus / dailyConsumptionRate)
+          : dailyRestockRate > 0
+            ? Math.floor(surplus / dailyRestockRate)
             : 999;
 
       // Target 2× minStock as a comfortable buffer level
@@ -98,7 +100,7 @@ export function RestockIntelligence({
 
       return {
         item,
-        dailyConsumptionRate,
+        dailyConsumptionRate: dailyRestockRate,
         daysUntilStockout,
         suggestedQty,
         urgency,
@@ -126,6 +128,15 @@ export function RestockIntelligence({
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE,
   );
+
+  // Clamp current page if totalPages shrinks below it
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    } else if (totalPages === 0 && currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
 
   if (loading) {
     return (

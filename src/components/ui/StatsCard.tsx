@@ -9,7 +9,7 @@ export interface StatsCardProps {
   iconColor?: string;
   loading?: boolean;
   trend?: {
-    value: number;
+    value: number | string;
     label: string;
     direction: "up" | "down" | "neutral";
   };
@@ -51,7 +51,7 @@ export function StatsCard({
                   {trend.direction === "up" && <TrendingUp className="w-3 h-3" />}
                   {trend.direction === "down" && <TrendingDown className="w-3 h-3" />}
                   {trend.direction === "neutral" && <Minus className="w-3 h-3" />}
-                  {trend.value}%
+                  {trend.value}{typeof trend.value === 'number' ? '%' : ''}
                 </span>
                 <span className="text-[10px] text-gray-400 font-medium">
                   {trend.label}

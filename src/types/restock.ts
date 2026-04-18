@@ -1,5 +1,6 @@
 export interface RestockEntry {
   id: string;
+  inventoryId: string;
   inventoryName: string;
   quantityAdded: number;
   date: string;
