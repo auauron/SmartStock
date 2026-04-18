@@ -15,7 +15,7 @@ import { useAuditLogs } from "../hooks/useAuditLog";
 
 
 interface ActivityItem {
-  product: string;
+  itemName: string;
   action: string;
   detail: string;
   timestamp: number;
@@ -25,26 +25,26 @@ function transformAuditLogs(logs: AuditLog[]): ActivityItem[] {
   return logs.map((log) => {
     let detailMessage = "Action performed";
     if (log.action === "DELETE") {
-      detailMessage = "Item removed from system";
+      detailMessage = "Removed from inventory";
     } else if (log.action === "INSERT") {
       const quantity = log.changes?.quantity?.to ?? 0;
-      detailMessage = `+${quantity} units`;
+      detailMessage = `Added ${quantity} units`;
     } else if (log.action === "UPDATE") {
       const entries = Object.entries(log.changes ?? {});
       if (entries.length === 0) {
-        detailMessage = "Updated";
+        detailMessage = "Modified";
       } else {
         detailMessage = entries
           .map(([key, value]) => {
             const label = key.replace(/([A-Z])/g, " $1").toLowerCase();
-            return `${label}: ${value.from} → ${value.to}`;
+            return `${label.charAt(0).toUpperCase() + label.slice(1)} updated: ${value.from} → ${value.to}`;
           })
           .join(", ");
       }
     }
 
     return {
-      product: log.itemName,
+      itemName: log.itemName,
       action: log.action,
       detail: detailMessage,
       timestamp:
@@ -57,9 +57,9 @@ function transformAuditLogs(logs: AuditLog[]): ActivityItem[] {
 
 function transformRestockLogs(history: RestockEntry[]): ActivityItem[] {
   return history.map((h) => ({
-    product: h.inventoryName,
+    itemName: h.inventoryName,
     action: "RESTOCK",
-    detail: `+${h.quantityAdded} units`,
+    detail: `Added ${h.quantityAdded} units`,
     timestamp: new Date(h.date).getTime(),
   }));
 }
@@ -80,40 +80,40 @@ export function Dashboard() {
 
     const allActivity = [...restockItems, ...auditItems]
       .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 5);
+      .slice(0, 10);
 
     const statsData = [
       {
-        title: "Total Products",
+        title: "Total Inventory",
         value: totalProducts.toString(),
-        subtitle: "Active items in inventory",
+        subtitle: "Active items in system",
         icon: Package,
         iconBgColor: "bg-blue-100",
         iconColor: "text-blue-700",
       },
       {
-        title: "Low Stock Items",
+        title: "Stock Alerts",
         value: lowStock.length.toString(),
-        subtitle: "Products need restocking",
+        subtitle: "Items below minimum level",
         icon: AlertTriangle,
         iconBgColor: "bg-yellow-100",
         iconColor: "text-yellow-700",
       },
       {
-        title: "Recently Restocked",
+        title: "Latest Intake",
         value: history.length > 0 ? history[0].quantityAdded.toString() : "0",
-        subtitle: "Latest restock quantity",
+        subtitle: "Most recent restock quantity",
         icon: RefreshCw,
         iconBgColor: "bg-emerald-100",
         iconColor: "text-emerald-700",
       },
       {
-        title: "Total Inventory Value",
+        title: "Inventory Value",
         value: new Intl.NumberFormat("en-Ph", {
           style: "currency",
           currency: "PHP",
         }).format(value),
-        subtitle: "Current stock value",
+        subtitle: "Current valuation of stock",
         icon: PhilippinePeso,
         iconBgColor: "bg-purple-100",
         iconColor: "text-purple-700",
@@ -248,13 +248,13 @@ export function Dashboard() {
             ) : (
             recentActivity.map((act) => (
               <div
-                key={`${act.timestamp}-${act.product}-${act.action}`}
+                key={`${act.timestamp}-${act.itemName}-${act.action}`}
                 className="flex justify-between items-center border-b pb-2 last:border-0"
               >
                 <div>
-                  <p className="font-medium">{act.product}</p>
+                  <p className="font-medium">{act.itemName}</p>
                   <span
-                    className={`text-xs font-semibold py-0.5 px-2 rounded ${
+                    className={`text-[10px] font-bold py-0.5 px-2 rounded tracking-wider ${
                       act.action === "INSERT"
                         ? "bg-green-100 text-green-700"
                         : act.action === "DELETE"
@@ -266,7 +266,11 @@ export function Dashboard() {
                               : "bg-gray-100 text-gray-400"
                     }`}
                   >
-                    {act.action === "INSERT" ? "NEW ITEM" : act.action}
+                    {act.action === "INSERT" ? "ITEM ADDED" : 
+                     act.action === "UPDATE" ? "MODIFIED" :
+                     act.action === "DELETE" ? "REMOVED" :
+                     act.action === "RESTOCK" ? "STOCK INTAKE" :
+                     act.action}
                   </span>
                 </div>
                 <div className="text-right">
