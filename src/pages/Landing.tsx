@@ -33,38 +33,39 @@ export function Landing() {
 
   const features = [
     {
-      icon: Package,
-      title: "Inventory Tracking",
+      icon: BarChart3,
+      title: "Dashboard + Smart Analytics", 
       description:
-        "Track all your products in one place with real-time updates and status monitoring.",
+        "See your stock value, low-stock items, weekly restocks, and recent activity in one quick view.",
+    },
+    {
+      icon: Package,
+      title: "Inventory Management",
+      description:
+        "Add, update, search, and organize products easily so your inventory stays accurate.",
     },
     {
       icon: Bell,
-      title: "Low Stock Alerts",
+      title: "Restock Tracking",
       description:
-        "Get instant notifications when products fall below minimum stock levels.",
+        "Record every restock and review your history by item and date whenever you need it.",
     },
-    {
-      icon: BarChart3,
-      title: "Smart Analytics",
-      description:
-        "Visualize inventory trends and make data-driven restocking decisions.",
-    },
+
     {
       icon: Shield,
-      title: "Secure & Reliable",
+      title: "Secure Access & Alerts",
       description:
-        "Your data is encrypted and backed up automatically for peace of mind.",
+        "Sign in securely and get alerts for low stock and recent restocks so nothing is missed.",
     },
   ];
 
   const benefits = [
-    "Supabase-backed authentication",
-    "Dashboard with inventory health overview",
-    "Inventory CRUD workflows",
-    "Restock logging and history tracking",
-    "Responsive layout for desktop and mobile",
-    "Profile cache for faster user experience",
+    "Secure account sign in",
+    "Simple dashboard overview",
+    "Fast product updates",
+    "Restock history you can review anytime",
+    "Works on desktop and mobile",
+    "Faster returning user experience",
   ];
 
   const flow = [
@@ -116,7 +117,7 @@ export function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden px-4 pb-16 pt-14 sm:px-6 lg:px-8 lg:pb-20 lg:pt-18">
+      <section className="relative overflow-hidden px-4 pb-16 pt-8 sm:px-6 lg:px-8 lg:pb-20 lg:pt-12">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-emerald-50/70 via-white to-white" />
         <div className="absolute inset-0 -z-10 opacity-15 [background-image:radial-gradient(circle_at_1px_1px,rgba(15,23,42,0.35)_1px,transparent_0)] [background-size:24px_24px]" />
         <div className="absolute -left-10 top-20 -z-10 h-56 w-56 rounded-full bg-emerald-200/35 blur-3xl" />
@@ -280,10 +281,10 @@ export function Landing() {
               Core Features
             </p>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Everything You Need to Manage Inventory
+              Core Features for Daily Inventory Work
             </h2>
             <p className="text-lg text-gray-600">
-              Powerful features designed for small business owners
+              Built to help small businesses manage stock with less manual work.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -296,7 +297,9 @@ export function Landing() {
                   key={index}
                   className={`group relative rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:rounded-l-xl ${tone.borderAccent}`}
                 >
-                  <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-lg transition-colors ${tone.iconWrap}`}>
+                  <div
+                    className={`mb-4 flex h-12 w-12 items-center justify-center rounded-lg transition-colors ${tone.iconWrap}`}
+                  >
                     <Icon className="w-6 h-6 text-emerald-600" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">

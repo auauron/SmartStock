@@ -113,7 +113,7 @@ export function Layout() {
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+          <div className="flex items-center justify-between h-16 px-6">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 flex items-center justify-center shrink-0 overflow-hidden">
                 <img
@@ -168,7 +168,7 @@ export function Layout() {
           </nav>
 
           {/* User Profile */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4">
             <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 cursor-pointer">
               <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
                 <User className="w-4 h-4 text-emerald-700" />
