@@ -14,6 +14,7 @@ export function NotFound() {
           The page you requested could not be found.
         </p>
 
+
         <div className="mt-8">
           <Link
             to="/"
