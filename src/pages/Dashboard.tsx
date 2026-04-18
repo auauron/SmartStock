@@ -12,7 +12,7 @@ import { StatsCard } from "../components/ui/StatsCard";
 import { useRestocks } from "../hooks/useRestocks";
 import { getRelativeTime } from "../utils/date";
 import { useAuditLogs } from "../hooks/useAuditLog";
-import { DashboardSkeleton } from "../components/dashboard/DashboardSkeleton";
+
 
 interface ActivityItem {
   product: string;
@@ -140,9 +140,7 @@ export function Dashboard() {
     );
   }
 
-  if (isLoading) {
-    return <DashboardSkeleton />;
-  }
+
 
   return (
     <div className="space-y-6">
@@ -160,7 +158,7 @@ export function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <StatsCard key={index} {...stat} />
+          <StatsCard key={index} {...stat} loading={isLoading} />
         ))}
       </div>
 
@@ -175,7 +173,22 @@ export function Dashboard() {
             </p>
           </div>
           <div className="p-6">
-            {lowStockItems.length === 0 ? (
+            {isLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                    <div className="space-y-2">
+                      <div className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
+                      <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+                    </div>
+                    <div className="text-right space-y-2">
+                      <div className="h-4 w-16 bg-gray-200 rounded animate-pulse ml-auto" />
+                      <div className="h-3 w-12 bg-gray-200 rounded animate-pulse ml-auto" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : lowStockItems.length === 0 ? (
               <p className="text-gray-500 text-sm">
                 All stock levels are healthy! 🎉
               </p>
@@ -213,7 +226,23 @@ export function Dashboard() {
             </p>
           </div>
           <div className="p-6 space-y-4">
-            {recentActivity.map((act) => (
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex justify-between items-center border-b pb-2 last:border-0">
+                  <div className="space-y-2">
+                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-5 w-20 bg-gray-200 rounded animate-pulse" />
+                  </div>
+                  <div className="text-right space-y-2">
+                    <div className="h-4 w-16 bg-gray-200 rounded animate-pulse ml-auto" />
+                    <div className="h-3 w-20 bg-gray-200 rounded animate-pulse ml-auto" />
+                  </div>
+                </div>
+              ))
+            ) : recentActivity.length === 0 ? (
+              <p className="text-gray-500 text-sm">No recent activity</p>
+            ) : (
+            recentActivity.map((act) => (
               <div
                 key={`${act.timestamp}-${act.product}-${act.action}`}
                 className="flex justify-between items-center border-b pb-2 last:border-0"
@@ -245,7 +274,7 @@ export function Dashboard() {
                   </p>
                 </div>
               </div>
-            ))}
+            )))}
           </div>
         </div>
       </div>
