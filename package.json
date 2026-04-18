@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "test": "vitest",
-    "test:integration": "vitest --mode test",
+    "test": "vitest --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:all": "vitest run",
     "dev": "vite",
     "dev:test": "vite --mode test",
     "build": "tsc -b && vite build",

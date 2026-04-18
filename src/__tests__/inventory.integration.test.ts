@@ -1,99 +1,75 @@
-import { describe, it, expect, vi } from "vitest";
-import { InventoryServiceProxy } from "../services/inventoryService";
-import type { Inventory } from "../types";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { testClient, clearDatabase } from "./utils/db";
 
-interface SupabaseResponse<T = unknown> {
-    data: T | null;
-    error: Error | null;
-}
+const TEST_USER_ID = "11111111-1111-1111-1111-111111111111";
 
-interface MockSupabase {
-    auth: { 
-        getUser: () => Promise<{ data: { user: { id: string } }; error: null }>;
-    };
-    from: (table: string) => MockSupabase;
-    select: (columns?: string) => MockSupabase;
-    delete: () => MockSupabase;
-    upsert: (data: object) => MockSupabase;
-    eq: (col: string, val: string | number) => MockSupabase & PromiseLike<SupabaseResponse>;
-    single: () => Promise<SupabaseResponse>;
-    then?: (resolve: (value: SupabaseResponse) => void) => void;
-}
+let createdInventoryId: string;
 
-vi.mock('../lib/supabaseClient', () => {
-    let currentMode: 'SELECT' | 'DELETE' | 'UPSERT' = 'SELECT';
-
-    const mockSupabase: MockSupabase = {
-        auth: {
-            getUser: vi.fn().mockResolvedValue({
-                data: { user: { id: 'test-user-123' } },
-                error: null,
-            }),
-        },
-        from: vi.fn().mockReturnThis(),
-        select: vi.fn().mockImplementation(() => {
-            currentMode = 'SELECT';
-            return mockSupabase;
-        }),
-        delete: vi.fn().mockImplementation(() => {
-            currentMode = 'DELETE';
-            return mockSupabase;
-        }),
-        upsert: vi.fn().mockImplementation(() => {
-            currentMode = 'UPSERT';
-            return mockSupabase;
-        }),
-        single: vi.fn().mockImplementation(async () => {
-            if (currentMode === 'UPSERT') {
-                return { data: { id: 'mock-id' }, error: null };
-            }
-            return { data: null, error: null };
-        }),
-        eq: vi.fn().mockImplementation(function (this: MockSupabase) {
-            this.then = async (resolve) => {
-                const mockInventory = [{
-                    id: 'msw-123',
-                    name: 'MSW Test Phone',
-                    category: 'Electronics',
-                    price: 500,
-                    quantity: 10,
-                    min_stock: 2,
-                    user_id: 'test-user-123',
-                }];
-
-                const data = currentMode === 'SELECT' ? mockInventory : null;
-                resolve({ data, error: null });
-            };
-            return this;
-        }),
-    };
-
-    return { supabase: mockSupabase };
+beforeAll(async () => {
+  await clearDatabase();
 });
 
-describe('InventoryServiceProxy Integration', () => {
-	const service = new InventoryServiceProxy();
+afterAll(async () => {
+  await clearDatabase();
+});
 
-	it('should fetch inventory records', async () => {
-		const items = await service.getInventory();
-		expect(items).toHaveLength(1);
-		expect(items[0].name).toBe('MSW Test Phone');
-	});
+describe("Inventory API", () => {
+  it("POST inventories - should create a new inventory row", async () => {
+    const { data, error } = await testClient
+      .from("inventories")
+      .insert({
+        user_id: TEST_USER_ID,
+        name: "Inventory API Test Item",
+        category: "Electronics",
+        price: 199.99,
+        quantity: 10,
+        min_stock: 3,
+      })
+      .select()
+      .single();
 
-	it('should save a new inventory record', async () => {
-		const newItem: Omit<Inventory, 'id'> = {
-			name: 'Save Test',
-			category: 'Test',
-			price: 10,
-			quantity: 1,
-			minStock: 0,
-		};
-		const savedId = await service.saveInventory(newItem);
-		expect(savedId).toBe('mock-id');
-	});
+    expect(error).toBeNull();
+    expect(data!.name).toBe("Inventory API Test Item");
+    expect(data!.category).toBe("Electronics");
+    expect(data!.price).toBe(199.99);
 
-	it('should handle deletion of records', async () => {
-		// Mock needs to handle getInventoryById which is called before delete
-		await service.deleteInventory('msw-123');
-	});
+    createdInventoryId = data!.id;
+  });
+
+  it("GET inventories by ID - should fetch the created inventory", async () => {
+    const { data, error } = await testClient
+      .from("inventories")
+      .select("id, name, quantity, min_stock")
+      .eq("id", createdInventoryId)
+      .single();
+
+    expect(error).toBeNull();
+    expect(data!.id).toBe(createdInventoryId);
+    expect(data!.name).toBe("Inventory API Test Item");
+    expect(data!.quantity).toBe(10);
+  });
+
+  it("GET inventories - should list inventory rows as an array", async () => {
+    const { data, error } = await testClient.from("inventories").select("*");
+
+    expect(error).toBeNull();
+    expect(Array.isArray(data)).toBe(true);
+    expect(data!.length).toBeGreaterThan(0);
+  });
+
+  it("DELETE inventories - should delete the created inventory row", async () => {
+    const { error } = await testClient
+      .from("inventories")
+      .delete()
+      .eq("id", createdInventoryId);
+
+    expect(error).toBeNull();
+
+    const { data } = await testClient
+      .from("inventories")
+      .select("id")
+      .eq("id", createdInventoryId);
+
+    expect(data).toHaveLength(0);
+  });
 });

@@ -165,21 +165,24 @@ The Supabase PostgreSQL schema contains:
 
 ## Testing
 
-| Type                    | Tool                                   | Scope                                                                      | Status                                             |
-| ----------------------- | -------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------- |
-| Unit Testing            | Vitest + MSW                           | `inventoryFactory`, `inventoryService`, `restockService`, related hooks   | Done                                               |
-| Integration Tests       | Vitest + Supabase                      | `*.integration.test.ts` suites in `src/__tests__`                          | In Progress (excluded by current root Vitest config) |
-| Component Documentation | Storybook 10 + Chromatic               | Reusable UI, dashboard, and settings stories in `src/stories`              | Done                                               |
-| E2E Testing             | Playwright (Chromium, Firefox, WebKit) | Inventory CRUD flows and restock page end-to-end verification              | Done                                               |
+| Type                    | Tool                                   | Scope                                                                   | Status                                       |
+| ----------------------- | -------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------- |
+| Unit Testing            | Vitest + MSW                           | `inventoryFactory`, `inventoryService`, `restockService`, related hooks | Done                                         |
+| Integration Tests       | Vitest + Supabase                      | `*.integration.test.ts` suites in `src/__tests__`                       | Done (run with explicit integration project) |
+| Component Documentation | Storybook 10 + Chromatic               | Reusable UI, dashboard, and settings stories in `src/stories`           | Done                                         |
+| E2E Testing             | Playwright (Chromium, Firefox, WebKit) | Inventory CRUD flows and restock page end-to-end verification           | Done                                         |
 
 **Test commands:**
 
 ```bash
-# Unit tests (current working command)
-npx vitest run
+# Unit tests
+npm test
 
-# Integration tests (currently not discovered by vitest.config.ts exclude rules)
+# Integration tests
 npm run test:integration
+
+# Run all Vitest projects
+npm run test:all
 
 # Storybook docs
 npm run storybook
@@ -198,18 +201,19 @@ npm run build-storybook
 - **Visual regression** — Chromatic integration via Storybook
 
 CI note:
-- The current Vitest workflow uses `--project unit`, but the active root `vitest.config.ts` does not define named projects. Validate this alignment before relying on CI status.
+
+- Vitest is configured with explicit `unit` and `integration` projects in `vitest.config.ts`.
 
 ## Design Patterns (SCD-Aligned)
 
 This section is aligned to the SCD final-project requirements by showing pattern category, implementation status, code location, and system-specific justification.
 
-| Pattern        | Category   | Status      | SmartStock Usage                                                                                                              | Code Location                                                                                                    | Problem Without Pattern                                                                                         |
-| -------------- | ---------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Singleton      | Creational | Implemented | One shared Supabase client used across auth, services, and layout code                                                        | `src/lib/supabaseClient.ts`                                                                                      | Repeated client setup, inconsistent configuration, and higher risk of auth/session behavior drift               |
-| Factory Method | Creational | Implemented | `InventoryFactory` maps Supabase DB rows (`snake_case`) and app models (`camelCase`) with centralized field defaults         | `src/factories/inventoryFactory.ts`, used in `src/services/inventoryService.ts`                                 | Scattered object-construction logic in UI handlers, inconsistent defaults/validation, and tighter page coupling |
-| Proxy          | Structural | Implemented | `InventoryServiceProxy` wraps `InventoryService` to enforce auth checks and input validation before every Supabase operation  | `src/services/inventoryService.ts`                                                                               | Auth verification scattered across pages, duplicated validation logic, and harder-to-test service boundaries    |
-| Decorator      | Structural | Implemented | Reusable form-field wrappers add labels, icon/adornment support, and consistent UI behavior around base input/select/textarea | `src/components/ui/InputField.tsx`, `src/components/ui/DropdownField.tsx`, `src/components/ui/TextAreaField.tsx` | Repeated form UI logic across pages, inconsistent field behavior, and harder maintenance                        |
+| Pattern        | Category   | Status      | SmartStock Usage                                                                                                               | Code Location                                                                                                                    | Problem Without Pattern                                                                                         |
+| -------------- | ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Singleton      | Creational | Implemented | One shared Supabase client used across auth, services, and layout code                                                         | `src/lib/supabaseClient.ts`                                                                                                      | Repeated client setup, inconsistent configuration, and higher risk of auth/session behavior drift               |
+| Factory Method | Creational | Implemented | `InventoryFactory` maps Supabase DB rows (`snake_case`) and app models (`camelCase`) with centralized field defaults           | `src/factories/inventoryFactory.ts`, used in `src/services/inventoryService.ts`                                                  | Scattered object-construction logic in UI handlers, inconsistent defaults/validation, and tighter page coupling |
+| Proxy          | Structural | Implemented | `InventoryServiceProxy` wraps `InventoryService` to enforce auth checks and input validation before every Supabase operation   | `src/services/inventoryService.ts`                                                                                               | Auth verification scattered across pages, duplicated validation logic, and harder-to-test service boundaries    |
+| Decorator      | Structural | Implemented | Reusable form-field wrappers add labels, icon/adornment support, and consistent UI behavior around base input/select/textarea  | `src/components/ui/InputField.tsx`, `src/components/ui/DropdownField.tsx`, `src/components/ui/TextAreaField.tsx`                 | Repeated form UI logic across pages, inconsistent field behavior, and harder maintenance                        |
 | Observer       | Behavioral | Implemented | Notification updates are broadcast through a shared subject after inventory/preference changes and consumed by notification UI | `src/services/notificationObserver.ts`, `src/hooks/useNotifications.ts`, `src/hooks/useInventory.ts`, `src/hooks/useRestocks.ts` | Polling-only updates and tight coupling between settings, inventory actions, and notification consumers         |
 
 ### Pattern Demonstration Notes (for SCD panel)
