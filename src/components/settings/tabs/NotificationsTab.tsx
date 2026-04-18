@@ -3,6 +3,7 @@ import { Save, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "../../ui/Button";
 import { ToggleSwitch } from "../../ui/ToggleSwitch";
 import { notificationService } from "../../../services/notificationService";
+import { notificationSubject } from "../../../services/notificationObserver";
 
 export function NotificationsTab() {
   const [prefs, setPrefs] = useState({
@@ -35,8 +36,11 @@ export function NotificationsTab() {
     setStatus(null);
     try {
       await notificationService.updatePreferences(prefs);
-      window.dispatchEvent(new Event("notification-prefs-updated"));
-      setStatus({ type: "success", message: "Preferences updated successfully" });
+      notificationSubject.notify("preferences-changed");
+      setStatus({
+        type: "success",
+        message: "Preferences updated successfully",
+      });
       setTimeout(() => setStatus(null), 3000);
     } catch (err) {
       console.error("Failed to save preferences:", err);
@@ -55,7 +59,10 @@ export function NotificationsTab() {
         </div>
         <div className="space-y-6">
           {[1, 2].map((i) => (
-            <div key={i} className="flex justify-between items-center bg-white p-2">
+            <div
+              key={i}
+              className="flex justify-between items-center bg-white p-2"
+            >
               <div className="space-y-2">
                 <div className="h-5 w-32 bg-gray-100 rounded animate-pulse" />
                 <div className="h-4 w-56 bg-gray-100 rounded animate-pulse" />
@@ -119,9 +126,9 @@ export function NotificationsTab() {
       </div>
 
       <div className="flex justify-end pt-8">
-        <Button 
-          className="px-6 min-w-[160px]" 
-          onClick={handleSave} 
+        <Button
+          className="px-6 min-w-[160px]"
+          onClick={handleSave}
           disabled={saving}
           variant="primary"
         >

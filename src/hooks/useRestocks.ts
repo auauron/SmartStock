@@ -9,6 +9,7 @@ import {
   getRestockHistory,
   getRestockInventory,
 } from "../services/restockService";
+import { notificationSubject } from "../services/notificationObserver";
 
 export function useRestocks() {
   const [history, setHistory] = useState<RestockEntry[]>([]);
@@ -50,7 +51,7 @@ export function useRestocks() {
     try {
       const newEntry = await createRestock(input);
       setHistory((prev) => [newEntry, ...prev]);
-      
+
       // Clear the global inventory cache because the quantities have changed!
       // This forces useInventory to fetch fresh data when navigated to.
       try {
@@ -61,6 +62,7 @@ export function useRestocks() {
       }
 
       window.dispatchEvent(new CustomEvent("inventory-updated"));
+      notificationSubject.notify("inventory-changed");
     } catch (createError) {
       const message =
         createError instanceof Error
