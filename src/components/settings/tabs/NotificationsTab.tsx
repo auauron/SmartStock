@@ -71,7 +71,7 @@ export function NotificationsTab() {
   return (
     <div className="space-y-1">
       <div className="pb-4 border-b border-gray-100 mb-4">
-        <h3 className="text-base font-semibold text-gray-900 font-mono tracking-tight uppercase">
+        <h3 className="text-base font-semibold text-gray-900 tracking-tight uppercase">
           Notification Preferences
         </h3>
         <p className="text-sm text-gray-500 mt-1">
