@@ -42,6 +42,11 @@ export interface UserProfile {
   businessName: string;
 }
 
+export interface NotificationPreferences {
+  lowStockAlerts: boolean;
+  restockConfirmations: boolean;
+}
+
 export interface SignUpPayload {
   email: string;
   password: string;

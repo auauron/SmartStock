@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { notificationService } from '../services/notificationService';
 
 export interface AppNotification {
   id: string;
@@ -17,13 +18,12 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   
   const fetchNotifications = useCallback(async () => {
-    // 1. Get user preferences
-    const savedPrefs = localStorage.getItem("smart-stock:notifications");
+    // 1. Get user preferences from Supabase
     let prefs = { lowStockAlerts: true, restockConfirmations: true };
-    if (savedPrefs) {
-      try {
-        prefs = JSON.parse(savedPrefs);
-      } catch (e) {}
+    try {
+      prefs = await notificationService.getPreferences();
+    } catch (err) {
+      console.error("Failed to fetch notification preferences:", err);
     }
 
     // 2. Get local read states
@@ -124,10 +124,12 @@ export function useNotifications() {
     };
     
     window.addEventListener("inventory-updated", handleUpdate);
+    window.addEventListener("notification-prefs-updated", handleUpdate);
 
     return () => {
       clearInterval(intervalId);
       window.removeEventListener("inventory-updated", handleUpdate);
+      window.removeEventListener("notification-prefs-updated", handleUpdate);
     };
   }, [fetchNotifications]);
 
