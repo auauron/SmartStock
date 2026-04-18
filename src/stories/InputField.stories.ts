@@ -3,7 +3,7 @@ import { Mail } from "lucide-react";
 import { InputField } from "../components/ui/InputField";
 
 const meta: Meta<typeof InputField> = {
-  title: "Components/InputField",
+  title: "UI-Components/InputField",
   component: InputField,
   args: {
     placeholder: "Type here...",

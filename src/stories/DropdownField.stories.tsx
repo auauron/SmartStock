@@ -4,7 +4,7 @@ import { Package } from "lucide-react";
 import { DropdownField } from "../components/ui/DropdownField";
 
 const meta: Meta<typeof DropdownField> = {
-  title: "Components/DropdownField",
+  title: "UI-Components/DropdownField",
   component: DropdownField,
   parameters: {
     layout: "centered",

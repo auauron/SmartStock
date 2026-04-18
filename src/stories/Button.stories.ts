@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button } from "../components/ui/Button";
 
 const meta: Meta<typeof Button> = {
-  title: "Components/Button",
+  title: "UI-Components/Button",
   component: Button,
   parameters: {
     layout: "centered",
@@ -64,5 +64,12 @@ export const Disabled: Story = {
   args: {
     disabled: true,
     children: "Disabled Button",
+  },
+};
+
+export const Danger: Story = {
+  args: {
+    variant: "danger",
+    children: "Danger Button",
   },
 };
