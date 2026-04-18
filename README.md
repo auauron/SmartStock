@@ -24,6 +24,7 @@ Many small retail stores, mini groceries, and supply shops still rely on manual 
 | Backend / Auth | Supabase (PostgreSQL + Auth + RLS)        |
 | Icons          | Lucide React                              |
 | Notifications  | Sonner                                    |
+| PWA            | vite-plugin-pwa (Workbox)                 |
 | Utilities      | tailwind-merge, tw-animate-css            |
 
 ## Project Structure
@@ -150,7 +151,6 @@ The Supabase PostgreSQL schema contains:
 - `create_restock_transaction` — atomic RPC that updates product quantity and inserts a restock record in a single transaction, preventing lost updates
 - Automatic `updated_at` triggers on mutable tables
 - Indexed columns for `user_id`, `name`, `category`, and `restocked_at`
-
 
 ## Testing
 

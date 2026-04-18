@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 import { Outlet, Link, useLocation } from "react-router";
 import {
   LayoutDashboard,
@@ -17,6 +18,7 @@ import {
   readCachedProfile,
   writeCachedProfile,
 } from "../hooks/useProfileCache";
+import { clearCachedLogs } from "../hooks/useAuditLog";
 
 export type { LayoutOutletContext };
 
@@ -47,36 +49,43 @@ export function Layout() {
   useEffect(() => {
     let isMounted = true;
 
-    const loadUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!isMounted) {
-        return;
-      }
-
-      if (!user) {
-        setProfile(emptyProfile);
-        clearCachedProfile();
-        return;
-      }
-
-      const nextProfile = {
-        fullName: (user.user_metadata?.full_name as string | undefined) || "",
-        email: user.email || "",
-        businessName:
-          (user.user_metadata?.business_name as string | undefined) || "",
+    const updateProfile = (user: SupabaseUser) => {
+      const nextProfile: UserProfile = {
+        fullName: String(user.user_metadata?.full_name ?? ""),
+        email: user.email ?? "",
+        businessName: String(user.user_metadata?.business_name ?? ""),
       };
-
-      setProfile(nextProfile);
-      writeCachedProfile(nextProfile);
+      
+      if (isMounted) {
+        setProfile(nextProfile);
+        writeCachedProfile(nextProfile);
+      }
     };
 
-    void loadUser();
+    const getInitialUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && isMounted) {
+        updateProfile(user);
+      }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (isMounted) {
+        if (session?.user) {
+          updateProfile(session.user);
+        } else {
+          setProfile(emptyProfile);
+          clearCachedProfile();
+          clearCachedLogs();
+        }
+      }
+    });
+
+    void getInitialUser();
 
     return () => {
       isMounted = false;
+      subscription.unsubscribe();
     };
   }, []);
 

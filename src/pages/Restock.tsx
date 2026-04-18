@@ -182,7 +182,7 @@ return (
                 <Button
                     type="submit"
                     disabled={submitting || loading}
-                   ><Plus className="w-5 h-5" />
+                    ><Plus className="w-5 h-5" />
                     {submitting ? "Adding..." : "Add Restock Entry"}
                 </Button>
             </form>

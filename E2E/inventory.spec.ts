@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
-const LOGIN_URL = 'http://localhost:5174/login'
-const INVENTORY_URL = 'http://localhost:5174/inventory'
+const LOGIN_URL = '/login'
+const INVENTORY_URL = '/inventory'
 
 const TEST_EMAIL = process.env.TEST_USER_EMAIL;
 const TEST_PASSWORD = process.env.TEST_USER_PASSWORD;

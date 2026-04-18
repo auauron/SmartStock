@@ -25,4 +25,14 @@ export const clearDatabase = async () => {
   if (productError) {
     throw new Error(`Failed to clear inventories: ${productError.message}`);
   }
+
+  // Also clear legacy products table if it exists
+  try {
+    await testClient
+      .from("products")
+      .delete()
+      .neq("id", "00000000-0000-0000-0000-000000000000");
+  } catch (e) {
+    // Ignore if table doesn't exist
+  }
 };
