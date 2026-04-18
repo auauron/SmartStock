@@ -12,6 +12,25 @@ import {
 } from "lucide-react";
 
 export function Landing() {
+  const featureTones = [
+    {
+      iconWrap: "bg-emerald-100 group-hover:bg-emerald-200",
+      borderAccent: "before:bg-emerald-500",
+    },
+    {
+      iconWrap: "bg-amber-100 group-hover:bg-amber-200",
+      borderAccent: "before:bg-amber-500",
+    },
+    {
+      iconWrap: "bg-blue-100 group-hover:bg-blue-200",
+      borderAccent: "before:bg-blue-500",
+    },
+    {
+      iconWrap: "bg-slate-100 group-hover:bg-slate-200",
+      borderAccent: "before:bg-slate-500",
+    },
+  ] as const;
+
   const features = [
     {
       icon: Package,
@@ -253,9 +272,13 @@ export function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-18 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <section className="relative overflow-hidden bg-gray-50 py-18 px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 -z-10 opacity-25 [background-image:radial-gradient(circle_at_1px_1px,rgba(15,23,42,0.16)_1px,transparent_0)] [background-size:24px_24px]" />
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
+            <p className="inline-flex rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+              Core Features
+            </p>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Everything You Need to Manage Inventory
             </h2>
@@ -266,12 +289,14 @@ export function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon;
+              const tone = featureTones[index % featureTones.length];
+
               return (
                 <div
                   key={index}
-                  className="group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                  className={`group relative rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:rounded-l-xl ${tone.borderAccent}`}
                 >
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 transition-colors group-hover:bg-emerald-200">
+                  <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-lg transition-colors ${tone.iconWrap}`}>
                     <Icon className="w-6 h-6 text-emerald-600" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -286,9 +311,13 @@ export function Landing() {
       </section>
 
       {/* Flow Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden py-16 px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white via-emerald-50/40 to-white" />
         <div className="max-w-7xl mx-auto">
           <div className="mb-10 text-center">
+            <p className="inline-flex rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+              Workflow
+            </p>
             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">
               How Smart Stock Works
             </h2>
@@ -297,13 +326,14 @@ export function Landing() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="relative grid grid-cols-1 gap-6 md:grid-cols-3">
+            <div className="pointer-events-none absolute left-[16.66%] right-[16.66%] top-4 hidden h-px bg-gradient-to-r from-emerald-200 via-emerald-400 to-emerald-200 md:block" />
             {flow.map((step, index) => (
               <div
                 key={step.title}
-                className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
+                className="relative rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
               >
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-sm font-semibold text-emerald-700">
+                <span className="relative z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-sm font-semibold text-emerald-700">
                   {index + 1}
                 </span>
                 <h3 className="mt-4 text-lg font-semibold text-gray-900">
@@ -323,6 +353,9 @@ export function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
+              <p className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                Why Teams Choose It
+              </p>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
                 Built for Small Business Success
               </h2>
@@ -331,10 +364,13 @@ export function Landing() {
                 business decisions with our intuitive inventory management
                 platform.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                  <div
+                    key={index}
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                     <span className="text-gray-700">{benefit}</span>
                   </div>
                 ))}
@@ -371,6 +407,27 @@ export function Landing() {
                     </span>
                   </div>
                 </div>
+
+                <div className="mt-5 space-y-2">
+                  <div>
+                    <div className="mb-1 flex items-center justify-between text-xs text-gray-500">
+                      <span>Stock health</span>
+                      <span>88%</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-gray-100">
+                      <div className="h-2 w-[88%] rounded-full bg-emerald-500" />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-1 flex items-center justify-between text-xs text-gray-500">
+                      <span>Restock completion</span>
+                      <span>74%</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-gray-100">
+                      <div className="h-2 w-[74%] rounded-full bg-blue-500" />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -378,7 +435,10 @@ export function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-18 px-4 sm:px-6 lg:px-8 bg-emerald-600">
+      <section className="relative overflow-hidden bg-emerald-600 py-18 px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.55)_1px,transparent_0)] [background-size:22px_22px]" />
+        <div className="absolute -left-10 bottom-0 h-44 w-44 rounded-full bg-emerald-400/40 blur-3xl" />
+        <div className="absolute -right-10 top-0 h-52 w-52 rounded-full bg-emerald-300/30 blur-3xl" />
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Take Control of Your Inventory?
