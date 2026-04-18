@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router-dom";
-import { AuditLog, LayoutOutletContext, RestockEntry } from "../types";
+import { LayoutOutletContext } from "../types";
 import { useInventory } from "../hooks/useInventory";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   AlertTriangle,
   Package,
@@ -12,65 +12,18 @@ import { StatsCard } from "../components/ui/StatsCard";
 import { useRestocks } from "../hooks/useRestocks";
 import { getRelativeTime } from "../utils/date";
 import { useAuditLogs } from "../hooks/useAuditLog";
+import { transformAuditLogs, transformRestockLogs } from "../utils/activity";
+import { ActivityModal } from "../components/dashboard/ActivityModal";
 
-
-interface ActivityItem {
-  itemName: string;
-  action: string;
-  detail: string;
-  timestamp: number;
-}
-
-function transformAuditLogs(logs: AuditLog[]): ActivityItem[] {
-  return logs.map((log) => {
-    let detailMessage = "Action performed";
-    if (log.action === "DELETE") {
-      detailMessage = "Removed from inventory";
-    } else if (log.action === "INSERT") {
-      const quantity = log.changes?.quantity?.to ?? 0;
-      detailMessage = `Added ${quantity} units`;
-    } else if (log.action === "UPDATE") {
-      const entries = Object.entries(log.changes ?? {});
-      if (entries.length === 0) {
-        detailMessage = "Modified";
-      } else {
-        detailMessage = entries
-          .map(([key, value]) => {
-            const label = key.replace(/([A-Z])/g, " $1").toLowerCase();
-            return `${label.charAt(0).toUpperCase() + label.slice(1)} updated: ${value.from} → ${value.to}`;
-          })
-          .join(", ");
-      }
-    }
-
-    return {
-      itemName: log.itemName,
-      action: log.action,
-      detail: detailMessage,
-      timestamp:
-        log.createdAt instanceof Date
-          ? log.createdAt.getTime()
-          : new Date(log.createdAt).getTime(),
-    };
-  });
-}
-
-function transformRestockLogs(history: RestockEntry[]): ActivityItem[] {
-  return history.map((h) => ({
-    itemName: h.inventoryName,
-    action: "RESTOCK",
-    detail: `Added ${h.quantityAdded} units`,
-    timestamp: new Date(h.date).getTime(),
-  }));
-}
 
 export function Dashboard() {
   const { profile } = useOutletContext<LayoutOutletContext>();
   const { inventory, loading: inventoryLoading, error, clearError } = useInventory();
   const { history, loading: restockLoading } = useRestocks();
   const { logs, loading: logsLoading } = useAuditLogs();
+  const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
 
-  const { stats, lowStockItems, recentActivity } = useMemo(() => {
+  const { stats, lowStockItems, recentActivity, allActivity } = useMemo(() => {
     const totalProducts = inventory.length;
     const lowStock = inventory.filter((p) => p.quantity < p.minStock);
     const value = inventory.reduce((sum, p) => sum + p.price * p.quantity, 0);
@@ -78,9 +31,8 @@ export function Dashboard() {
     const auditItems = transformAuditLogs(logs);
     const restockItems = transformRestockLogs(history);
 
-    const allActivity = [...restockItems, ...auditItems]
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 10);
+    const allUnifiedActivity = [...restockItems, ...auditItems]
+      .sort((a, b) => b.timestamp - a.timestamp);
 
     const statsData = [
       {
@@ -123,7 +75,8 @@ export function Dashboard() {
     return {
       stats: statsData,
       lowStockItems: lowStock,
-      recentActivity: allActivity,
+      recentActivity: allUnifiedActivity.slice(0, 4),
+      allActivity: allUnifiedActivity,
     };
   }, [inventory, history, logs]);
 
@@ -142,8 +95,6 @@ export function Dashboard() {
       </div>
     );
   }
-
-
 
   return (
     <div className="space-y-6">
@@ -221,13 +172,23 @@ export function Dashboard() {
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Recent Activity
-            </h2>
-            <p className="text-sm text-gray-500">
-              Latest updates to your inventory
-            </p>
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Recent Activity
+              </h2>
+              <p className="text-sm text-gray-500">
+                Latest updates to your inventory
+              </p>
+            </div>
+            {allActivity.length > 0 && (
+              <button
+                onClick={() => setIsActivityModalOpen(true)}
+                className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors px-3 py-1.5 rounded-md hover:bg-emerald-50 border border-transparent hover:border-emerald-100"
+              >
+                View All
+              </button>
+            )}
           </div>
           <div className="p-6 space-y-4">
             {logsLoading || restockLoading ? (
@@ -286,6 +247,12 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      <ActivityModal
+        isOpen={isActivityModalOpen}
+        onClose={() => setIsActivityModalOpen(false)}
+        activities={allActivity}
+      />
     </div>
   );
 }
