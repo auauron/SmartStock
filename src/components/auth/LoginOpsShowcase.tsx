@@ -1,7 +1,6 @@
 import {
   CheckCircle2,
   Clock3,
-  ShieldCheck,
   Siren,
   Sparkles,
   TrendingUp,
@@ -37,10 +36,11 @@ const activity = [
 export function LoginOpsShowcase() {
   return (
     <div className="relative hidden min-h-screen overflow-hidden lg:flex lg:items-center lg:px-14 xl:px-20">
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-sky-50" />
-      <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(15,23,42,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.08)_1px,transparent_1px)] [background-size:30px_30px]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/55 via-white to-sky-100/45" />
+      <div className="absolute inset-0 opacity-24 [background-image:radial-gradient(circle_at_1px_1px,rgba(15,23,42,0.32)_1px,transparent_0)] [background-size:22px_22px]" />
       <div className="absolute right-8 top-20 h-56 w-56 rounded-full bg-emerald-200/40 blur-3xl" />
       <div className="absolute left-8 bottom-14 h-64 w-64 rounded-full bg-sky-200/35 blur-3xl" />
+      <div className="absolute -left-18 top-1/3 h-72 w-72 rounded-full bg-emerald-100/35 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-xl">
         <h2 className="mt-5 text-4xl font-semibold leading-tight text-gray-900 xl:text-5xl">
