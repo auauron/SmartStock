@@ -94,6 +94,7 @@ export function ProfileTab({ profile, userInitials }: ProfileTabProps) {
           type="text"
           label="Full Name"
           placeholder="John Doe"
+          maxLength={50}
           className="py-2"
           value={draft.fullName}
           onChange={(e) =>
@@ -104,6 +105,7 @@ export function ProfileTab({ profile, userInitials }: ProfileTabProps) {
           id="settings-email"
           type="email"
           label="Email"
+          maxLength={100}
           placeholder="john@example.com"
           className="py-2"
           value={draft.email}
@@ -116,6 +118,7 @@ export function ProfileTab({ profile, userInitials }: ProfileTabProps) {
         id="settings-business"
         type="text"
         label="Business Name"
+        maxLength={50}
         placeholder="My Small Business"
         className="py-2"
         value={draft.businessName}
