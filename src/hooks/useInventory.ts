@@ -41,7 +41,7 @@ export function useInventory() {
 
     window.addEventListener("inventory-updated", handleUpdate);
     return () => window.removeEventListener("inventory-updated", handleUpdate);
-  }, [load]);
+  }, []);
 
   const saveInventory = async (
     item: Omit<Inventory, "id"> & { id?: string },

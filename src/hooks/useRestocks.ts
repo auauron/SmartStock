@@ -42,7 +42,7 @@ export function useRestocks() {
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, []);
 
   const addRestock = useCallback(async (input: CreateRestockInput) => {
     setSubmitting(true);
