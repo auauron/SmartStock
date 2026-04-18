@@ -96,9 +96,18 @@ export function Restock() {
 
   return (
     <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold text-gray-900">
+          Restock Management
+        </h1>
+        <p className="text-gray-600 mt-1">
+          Add new stock and track restock history
+        </p>
+      </div>
+
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Add restock
+          Add Restock
         </h2>
         {error || validationError ? (
           <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">

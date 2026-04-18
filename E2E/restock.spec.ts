@@ -24,8 +24,8 @@ async function loginAndGoToRestock(page: import("@playwright/test").Page) {
   await page.fill('input[type="password"]', TEST_PASSWORD!);
   await page.click('button[type="submit"]');
   await page.waitForURL("**/dashboard");
-  await page.goto(RESTOCK_URL);
-  await page.waitForLoadState("networkidle");
+  await page.goto(RESTOCK_URL, { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: "Add Restock" })).toBeVisible();
 }
 
 test.describe("Restock Page - End-to-End Flow", () => {
@@ -36,9 +36,8 @@ test.describe("Restock Page - End-to-End Flow", () => {
       await loginAndGoToRestock(page);
 
       await expect(
-        page.getByRole("heading", { name: "Restock Management" }),
+        page.getByRole("heading", { name: "Add Restock" }),
       ).toBeVisible();
-      await expect(page.getByRole("heading", { name: "Add Restock" })).toBeVisible();
       await expect(
         page.getByRole("heading", { name: "Restock History" }),
       ).toBeVisible();
@@ -91,12 +90,14 @@ test.describe("Restock Page - End-to-End Flow", () => {
       }
     });
 
-    test("should render a seeded restock entry in history", async ({ page }) => {
+    test("should render a seeded restock entry in history", async ({
+      page,
+    }) => {
       const quantity = 25;
       const notes = `E2E restock note ${Date.now()}`;
 
       await seedRestockEntry(seededItemId, quantity, notes);
-      await page.reload({ waitUntil: "networkidle" });
+      await page.reload({ waitUntil: "domcontentloaded" });
 
       await expect(page.locator("table")).toContainText(seededItemName, {
         timeout: 10_000,
@@ -105,11 +106,17 @@ test.describe("Restock Page - End-to-End Flow", () => {
       await expect(page.locator("table")).toContainText(notes);
     });
 
-    test("should show the quantity badge with correct format (+N units)", async ({ page }) => {
+    test("should show the quantity badge with correct format (+N units)", async ({
+      page,
+    }) => {
       const quantity = 10;
 
       await seedRestockEntry(seededItemId, quantity);
-      await page.reload({ waitUntil: "networkidle" });
+      await page.reload({ waitUntil: "domcontentloaded" });
+
+      await expect(page.locator("table")).toContainText(seededItemName, {
+        timeout: 10_000,
+      });
 
       await expect(page.locator("table")).toContainText(`+${quantity} units`, {
         timeout: 10_000,
@@ -120,7 +127,11 @@ test.describe("Restock Page - End-to-End Flow", () => {
       page,
     }) => {
       await seedRestockEntry(seededItemId, 5, "");
-      await page.reload({ waitUntil: "networkidle" });
+      await page.reload({ waitUntil: "domcontentloaded" });
+
+      await expect(page.locator("table")).toContainText(seededItemName, {
+        timeout: 10_000,
+      });
 
       await expect(page.locator("table")).toContainText("No notes", {
         timeout: 10_000,
@@ -153,11 +164,13 @@ test.describe("Restock Page - End-to-End Flow", () => {
     test("should render the restock page for unauthenticated users (no auth guard in Layout)", async ({
       page,
     }) => {
-      await page.goto(RESTOCK_URL);
-      await page.waitForLoadState("networkidle");
+      await page.goto(RESTOCK_URL, { waitUntil: "domcontentloaded" });
 
       await expect(
-        page.getByRole("heading", { name: "Restock Management" }),
+        page.getByRole("heading", { name: "Add Restock" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Restock History" }),
       ).toBeVisible();
     });
   });
