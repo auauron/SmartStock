@@ -53,23 +53,21 @@ export function RestockIntelligence({
     const msPerDay = 86_400_000;
 
     const results: ItemForecast[] = inventory.map((item) => {
-      const itemRestocks = history.filter(
-        (h) => h.inventoryName === item.name
-      );
+      const itemRestocks = history.filter((h) => h.inventoryName === item.name);
 
       let dailyConsumptionRate: number;
 
       if (itemRestocks.length > 0) {
         const totalRestocked = itemRestocks.reduce(
           (sum, h) => sum + h.quantityAdded,
-          0
+          0,
         );
         const earliest = Math.min(
-          ...itemRestocks.map((h) => new Date(h.date).getTime())
+          ...itemRestocks.map((h) => new Date(h.date).getTime()),
         );
         const daysSinceFirst = Math.max(
           1,
-          Math.floor((now - earliest) / msPerDay)
+          Math.floor((now - earliest) / msPerDay),
         );
         dailyConsumptionRate = totalRestocked / daysSinceFirst;
       } else {
@@ -115,16 +113,18 @@ export function RestockIntelligence({
     });
 
     // Return all items that need attention (critical or warning)
-    return results.filter(f => f.urgency !== "healthy");
+    return results.filter((f) => f.urgency !== "healthy");
   }, [inventory, history]);
 
-  const criticalCount = forecasts.filter((f) => f.urgency === "critical").length;
+  const criticalCount = forecasts.filter(
+    (f) => f.urgency === "critical",
+  ).length;
   const warningCount = forecasts.filter((f) => f.urgency === "warning").length;
 
   const totalPages = Math.ceil(forecasts.length / ITEMS_PER_PAGE);
   const currentItems = forecasts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   if (loading) {
@@ -181,7 +181,9 @@ export function RestockIntelligence({
 
       <div
         className={`transition-all duration-300 ease-in-out ${
-          isExpanded ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0 overflow-hidden"
+          isExpanded
+            ? "max-h-[800px] opacity-100"
+            : "max-h-0 opacity-0 overflow-hidden"
         }`}
       >
         <div className="px-6 pb-6 pt-2 border-t border-gray-100">
@@ -195,35 +197,39 @@ export function RestockIntelligence({
             </p>
           ) : (
             <div className="space-y-3">
-              {/* Header row — desktop only */}
               <div className="hidden md:grid md:grid-cols-[2fr_2fr_120px_120px_104px] gap-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 pb-2 border-b border-gray-100">
-                <span>Item</span>
-                <span>Stock Level</span>
-                <span>Days Left</span>
-                <span>Suggested</span>
-                <span className="text-right">Action</span>
+                <div className="flex items-center gap-2">
+                  <span className="w-[60px] text-center">Status</span>
+                  <span>Item</span>
+                </div>
+                <span className="text-center">Stock Level</span>
+                <span className="text-center">Days Left</span>
+                <span className="text-center">Suggested</span>
+                <span className="ml-10">Action</span>
               </div>
 
               {currentItems.map((f) => {
                 const barWidth = Math.min(
                   100,
                   Math.round(
-                    (f.item.quantity / Math.max(1, f.item.minStock * 2)) * 100
-                  )
+                    (f.item.quantity / Math.max(1, f.item.minStock * 2)) * 100,
+                  ),
                 );
 
                 return (
                   <div
                     key={f.item.id}
-                    className="grid grid-cols-1 md:grid-cols-[2fr_1.5fr_120px_120px_104px] gap-4 items-center py-3 border-b border-gray-50 last:border-0 last:pb-0"
+                    className="grid grid-cols-1 md:grid-cols-[2fr_2fr_120px_120px_104px] gap-4 items-center py-3 border-b border-gray-50 last:border-0 last:pb-0"
                   >
                     {/* Item info */}
                     <div className="flex items-center gap-2">
-                      <span
-                        className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider ${URGENCY_STYLES[f.urgency]}`}
-                      >
-                        {URGENCY_LABELS[f.urgency]}
-                      </span>
+                      <div className="w-[60px] flex justify-center">
+                        <span
+                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider ${URGENCY_STYLES[f.urgency]}`}
+                        >
+                          {URGENCY_LABELS[f.urgency]}
+                        </span>
+                      </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
                           {f.item.name}
@@ -235,21 +241,21 @@ export function RestockIntelligence({
                     </div>
 
                     {/* Stock level bar */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center gap-3 mx-auto w-full max-w-[200px] px-2">
                       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all ${BAR_COLORS[f.urgency]}`}
                           style={{ width: `${barWidth}%` }}
                         />
                       </div>
-                      <span className="text-[10px] font-medium text-gray-500 whitespace-nowrap">
+                      <span className="text-[10px] font-medium text-gray-500 whitespace-nowrap min-w-[32px] text-right">
                         {f.item.quantity}/{f.item.minStock}
                       </span>
                     </div>
 
                     {/* Days left */}
                     <p
-                      className={`text-sm font-medium ${
+                      className={`text-sm font-medium text-center ${
                         f.urgency === "critical"
                           ? "text-red-700"
                           : f.urgency === "warning"
@@ -265,7 +271,7 @@ export function RestockIntelligence({
                     </p>
 
                     {/* Suggested qty */}
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-gray-900 text-center">
                       {f.suggestedQty > 0 ? `+${f.suggestedQty}` : "—"}
                     </p>
 
@@ -280,7 +286,7 @@ export function RestockIntelligence({
                   </div>
                 );
               })}
-              
+
               {totalPages > 1 && (
                 <div className="pt-4 border-t border-gray-100 mt-4 mb-2">
                   <Pagination
