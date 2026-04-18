@@ -72,7 +72,7 @@ export function NotificationsTab() {
     <div className="space-y-1">
       <div className="pb-4 border-b border-gray-100 mb-4">
         <h3 className="text-base font-semibold text-gray-900 font-mono tracking-tight uppercase">
-          Signal Parameters
+          Notification Preferences
         </h3>
         <p className="text-sm text-gray-500 mt-1">
           Configure real-time monitoring and alert thresholds
@@ -133,7 +133,7 @@ export function NotificationsTab() {
           ) : (
             <>
               <Save className="w-4 h-4" />
-              <span>Save Manifest</span>
+              <span>Save Preference</span>
             </>
           )}
         </Button>
