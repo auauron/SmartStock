@@ -33,6 +33,13 @@ export function useInventory() {
 
     useEffect(() => { 
         load();
+
+        const handleUpdate = () => {
+            load(true);
+        };
+
+        window.addEventListener("inventory-updated", handleUpdate);
+        return () => window.removeEventListener("inventory-updated", handleUpdate);
     }, [load]);
 
     const saveInventory = async (item: Omit<Inventory, "id"> & { id?: string }) => {
@@ -51,6 +58,7 @@ export function useInventory() {
             cache = updated;
             return updated;
         });
+        window.dispatchEvent(new CustomEvent("inventory-updated"));
     };
 
     const deleteInventory = async (id: string) => {
@@ -61,6 +69,7 @@ export function useInventory() {
             cache = updated;
             return updated;
         });
+        window.dispatchEvent(new CustomEvent("inventory-updated"));
     };
 
     return { 

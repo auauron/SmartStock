@@ -20,6 +20,7 @@ import {
 } from "../hooks/useProfileCache";
 import { clearCachedLogs } from "../hooks/useAuditLog";
 import { clearInventoryCache } from "../hooks/useInventory";
+import { useNotifications } from "../hooks/useNotifications";
 
 export type { LayoutOutletContext };
 
@@ -34,7 +35,10 @@ export function Layout() {
     return readCachedProfile() || emptyProfile;
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const location = useLocation();
+
+  const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotification } = useNotifications();
 
   const navigation = [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
@@ -202,10 +206,57 @@ export function Layout() {
             <div className="flex-1" />
 
             <div className="flex items-center gap-4">
-              <button className="relative p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-50">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-50"
+                  aria-label="Notifications"
+                >
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-sm ring-1 ring-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {showNotifications && (
+                   <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden text-left">
+                     <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+                        <h3 className="font-semibold text-gray-900 text-sm">Notifications</h3>
+                        {unreadCount > 0 && (
+                           <button onClick={markAllAsRead} className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+                             Mark all as read
+                           </button>
+                        )}
+                     </div>
+                     <div className="max-h-96 overflow-y-auto">
+                        {notifications.length === 0 ? (
+                           <div className="px-4 py-8 text-center">
+                             <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                             <p className="text-sm text-gray-500">No new notifications</p>
+                           </div>
+                        ) : (
+                           notifications.map(n => (
+                              <div key={n.id} className={`flex items-start gap-3 p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors ${!n.isRead ? 'bg-emerald-50/30' : ''}`}>
+                                  <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { if(!n.isRead) markAsRead(n.id); }}>
+                                     <p className={`text-sm ${!n.isRead ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>{n.title}</p>
+                                     <p className={`text-xs mt-0.5 ${!n.isRead ? 'text-gray-600' : 'text-gray-500'}`}>{n.message}</p>
+                                     <p className="text-[10px] text-gray-400 mt-1.5 uppercase font-medium tracking-wider">
+                                       {n.time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} •{" "}
+                                       {n.time.toLocaleDateString([], {month: 'short', day: 'numeric'})}
+                                     </p>
+                                  </div>
+                                  <button onClick={(e) => { e.stopPropagation(); clearNotification(n.id); }} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors" aria-label="Dismiss">
+                                     <X className="w-4 h-4" />
+                                  </button>
+                              </div>
+                           ))
+                        )}
+                     </div>
+                   </div>
+                )}
+              </div>
               <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center cursor-pointer">
                 <User className="w-4 h-4 text-emerald-700" />
               </div>

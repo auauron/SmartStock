@@ -7,7 +7,6 @@ export function NotificationsTab() {
   const [prefs, setPrefs] = useState({
     lowStockAlerts: true,
     restockConfirmations: true,
-    emailNotifications: false,
   });
   const [saving, setSaving] = useState(false);
 
@@ -57,16 +56,6 @@ export function NotificationsTab() {
           checked={prefs.restockConfirmations}
           onChange={(e) =>
             setPrefs((p) => ({ ...p, restockConfirmations: e.target.checked }))
-          }
-        />
-        <div className="border-t border-gray-50" />
-        <ToggleSwitch
-          id="email-notifications"
-          label="Email Notifications"
-          description="Send notifications to your email address"
-          checked={prefs.emailNotifications}
-          onChange={(e) =>
-            setPrefs((p) => ({ ...p, emailNotifications: e.target.checked }))
           }
         />
       </div>
