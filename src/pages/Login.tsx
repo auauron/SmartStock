@@ -5,7 +5,6 @@ import { Mail, Lock } from "lucide-react";
 import { AuthShell } from "../components/auth/AuthShell";
 import { Button } from "../components/ui/Button";
 import { CheckboxField } from "../components/ui/CheckboxField";
-import { FormDivider } from "../components/ui/FormDivider";
 import { InputField } from "../components/ui/InputField";
 import { useAuthStore } from "../stores/authStore";
 
