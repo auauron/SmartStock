@@ -8,7 +8,6 @@ export function DataTab() {
   const handleExport = () => {
     // Use human-readable headers instead of raw database column names
     const headers = [
-      "Item Reference",
       "Product Name",
       "Category",
       "Unit Price",
@@ -18,7 +17,7 @@ export function DataTab() {
     
     const rows = inventory.map(
       (item) =>
-        `${item.id},"${item.name}","${item.category}",${item.price},${item.quantity},${item.minStock}`,
+        `"${item.name}","${item.category}",${item.price},${item.quantity},${item.minStock}`,
     );
     
     const csvContent =

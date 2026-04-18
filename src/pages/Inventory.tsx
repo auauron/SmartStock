@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import {
   Plus,
   Edit2,
@@ -43,6 +43,14 @@ export function Inventory() {
   const pendingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map()
   );
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterCategory, sortBy]);
+
   const { refresh: refreshLogs } = useAuditLogs();
   const { toasts, addToast, dismissToast } = useToast();
 
@@ -152,6 +160,12 @@ export function Inventory() {
 
     return result;
   }, [visibleItems, searchQuery, filterCategory, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
+  const paginatedItems = filteredItems.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const categories = useMemo(
     () => Array.from(new Set(inventory.map((p) => p.category))),
@@ -264,7 +278,7 @@ export function Inventory() {
             <tbody className="divide-y divide-gray-200">
               {loading ? (
                 <InventorySkeleton rows={5} />
-              ) : filteredItems.length === 0 ? (
+              ) : paginatedItems.length === 0 ? (
                 <tr>
                   <td
                     colSpan={6}
@@ -274,7 +288,7 @@ export function Inventory() {
                   </td>
                 </tr>
               ) : (
-                filteredItems.map((item) => {
+                paginatedItems.map((item) => {
                   const status = getStatus(item);
                   return (
                     <tr key={item.id} className="hover:bg-gray-50">
@@ -326,6 +340,32 @@ export function Inventory() {
             </tbody>
           </table>
         </div>
+
+        {!loading && filteredItems.length > 0 && (
+          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between text-sm bg-gray-50/50">
+            <span className="text-gray-500 font-medium">
+              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredItems.length)} of {filteredItems.length} items
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-1.5 font-bold text-gray-500"
+              >
+                PREV
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-1.5 font-bold text-emerald-600"
+              >
+                NEXT
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <InventoryModal
