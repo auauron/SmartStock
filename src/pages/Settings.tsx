@@ -128,7 +128,6 @@ export function Settings() {
             <ProfileTab
               profile={profile}
               userInitials={userInitials}
-              onChange={setProfile}
             />
           )}
           {activeTab === "notifications" && <NotificationsTab />}
@@ -154,15 +153,52 @@ export function Settings() {
 function ProfileTab({
   profile,
   userInitials,
-  onChange,
 }: {
   profile: UserProfile;
   userInitials: string;
-  onChange: (p: UserProfile) => void;
 }) {
+  const [draft, setDraft] = useState<UserProfile>({ ...profile });
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  useEffect(() => {
+    setDraft({ ...profile });
+  }, [profile]);
+
+  const hasChanges =
+    draft.fullName !== profile.fullName ||
+    draft.email !== profile.email ||
+    draft.businessName !== profile.businessName;
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveMessage(null);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        email: draft.email !== profile.email ? draft.email : undefined,
+        data: {
+          full_name: draft.fullName,
+          business_name: draft.businessName,
+        },
+      });
+
+      if (error) throw error;
+
+      setSaveMessage({ type: "success", text: "Profile saved successfully!" });
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (err) {
+      setSaveMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "Failed to save profile",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Avatar + Name Preview */}
+      {/* Avatar + Name Preview (shows SAVED profile, not draft) */}
       <div className="flex items-center gap-4 pb-6 border-b border-gray-100">
         <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
           <span className="text-xl font-semibold text-emerald-700">
@@ -184,7 +220,20 @@ function ProfileTab({
         </div>
       </div>
 
-      {/* Form Fields */}
+      {/* Save feedback */}
+      {saveMessage && (
+        <div
+          className={`px-4 py-3 rounded-lg text-sm font-medium ${
+            saveMessage.type === "success"
+              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+              : "bg-red-50 text-red-700 border border-red-200"
+          }`}
+        >
+          {saveMessage.text}
+        </div>
+      )}
+
+      {/* Form Fields (edits the DRAFT) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <InputField
           id="settings-fullname"
@@ -192,9 +241,9 @@ function ProfileTab({
           label="Full Name"
           placeholder="John Doe"
           className="py-2"
-          value={profile.fullName}
+          value={draft.fullName}
           onChange={(e) =>
-            onChange({ ...profile, fullName: e.target.value })
+            setDraft((prev) => ({ ...prev, fullName: e.target.value }))
           }
         />
         <InputField
@@ -203,9 +252,9 @@ function ProfileTab({
           label="Email"
           placeholder="john@example.com"
           className="py-2"
-          value={profile.email}
+          value={draft.email}
           onChange={(e) =>
-            onChange({ ...profile, email: e.target.value })
+            setDraft((prev) => ({ ...prev, email: e.target.value }))
           }
         />
       </div>
@@ -215,16 +264,29 @@ function ProfileTab({
         label="Business Name"
         placeholder="My Small Business"
         className="py-2"
-        value={profile.businessName}
+        value={draft.businessName}
         onChange={(e) =>
-          onChange({ ...profile, businessName: e.target.value })
+          setDraft((prev) => ({ ...prev, businessName: e.target.value }))
         }
       />
 
       <div className="flex justify-end pt-2">
-        <Button className="px-6">
-          <Save className="w-4 h-4" />
-          Save Profile
+        <Button
+          className="px-6"
+          onClick={handleSave}
+          disabled={saving || !hasChanges}
+        >
+          {saving ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4" />
+              Save Profile
+            </>
+          )}
         </Button>
       </div>
     </div>
