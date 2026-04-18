@@ -38,11 +38,19 @@ export function Signup() {
       return;
     }
 
+    const formatName = (name: string) => {
+      return name
+        .trim()
+        .split(/\s+/)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    };
+
     const success = await signUp({
       email: formData.email,
       password: formData.password,
-      fullName: formData.fullName,
-      businessName: formData.businessName,
+      fullName: formatName(formData.fullName),
+      businessName: formatName(formData.businessName),
     });
 
     if (!success) {

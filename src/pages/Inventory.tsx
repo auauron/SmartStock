@@ -18,6 +18,7 @@ import { InventorySkeleton } from "../components/inventory/InventorySkeleton";
 import { ToastContainer, useToast } from "../components/ui/Toast";
 import { useAuditLogs } from "../hooks/useAuditLog";
 import { Pagination } from "../components/ui/Pagination";
+import { ActionMenu } from "../components/ui/ActionMenu";
 
 const UNDO_DELAY_MS = 5000;
 
@@ -271,7 +272,7 @@ export function Inventory() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
                   Actions
                 </th>
               </tr>
@@ -312,27 +313,26 @@ export function Inventory() {
                           {status.label}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <button
-                            aria-label={`Edit item ${item.name}`}
-                            onClick={() => {
-                              setEditingItem(item);
-                              setIsModalOpen(true);
-                            }}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            aria-label={`Delete item ${item.name}`}
-                            data-testid="delete-item-button"
-                            onClick={() => openDeleteConfirm(item)}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                        <ActionMenu
+                          items={[
+                            {
+                              label: "Edit Item",
+                              icon: Edit2,
+                              onClick: () => {
+                                setEditingItem(item);
+                                setIsModalOpen(true);
+                              },
+                            },
+                            {
+                              label: "Delete Item",
+                              icon: Trash2,
+                              onClick: () => openDeleteConfirm(item),
+                              variant: "danger",
+                            },
+                          ]}
+                          ariaLabel={`Actions for ${item.name}`}
+                        />
                       </td>
                     </tr>
                   );
