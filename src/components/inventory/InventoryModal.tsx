@@ -5,6 +5,10 @@ import { Modal } from "../ui/Modal";
 import { InputField } from "../ui/InputField";
 import { DropdownField } from "../ui/DropdownField";
 
+function capitalizeWords(str: string): string {
+  return str.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 
 
 interface ProductModalProps {
@@ -53,6 +57,8 @@ export function InventoryModal ({
             await onSave({
                 id: item?.id || "",
                 ...formData,
+                name: capitalizeWords(formData.name.trim()),
+                category: capitalizeWords(formData.category.trim()),
                 price: isNaN(formData.price) ? 0 : formData.price,
                 quantity: isNaN(formData.quantity) ? 0 : formData.quantity,
                 minStock: isNaN(formData.minStock) ? 0 : formData.minStock,
