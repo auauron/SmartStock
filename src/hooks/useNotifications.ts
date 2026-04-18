@@ -63,7 +63,7 @@ export function useNotifications() {
               type: 'low_stock',
               title: 'Low Stock Alert',
               message: `${item.name} is running low (${item.quantity} left).`,
-              time: new Date(), // Always show as current active issue 
+              time: new Date(item.updated_at || item.created_at || Date.now()),
               isRead: !!readState[id],
               link: '/inventory'
             });
@@ -118,7 +118,17 @@ export function useNotifications() {
   useEffect(() => {
     fetchNotifications();
     const intervalId = setInterval(fetchNotifications, POLLING_INTERVAL);
-    return () => clearInterval(intervalId);
+    
+    const handleUpdate = () => {
+      fetchNotifications();
+    };
+    
+    window.addEventListener("inventory-updated", handleUpdate);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("inventory-updated", handleUpdate);
+    };
   }, [fetchNotifications]);
 
   const markAsRead = (id: string) => {

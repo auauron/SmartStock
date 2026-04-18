@@ -50,6 +50,17 @@ export function useRestocks() {
     try {
       const newEntry = await createRestock(input);
       setHistory((prev) => [newEntry, ...prev]);
+      
+      // Clear the global inventory cache because the quantities have changed!
+      // This forces useInventory to fetch fresh data when navigated to.
+      try {
+        const { clearInventoryCache } = await import("./useInventory");
+        clearInventoryCache();
+      } catch (e) {
+        // ignore
+      }
+
+      window.dispatchEvent(new CustomEvent("inventory-updated"));
     } catch (createError) {
       const message =
         createError instanceof Error
