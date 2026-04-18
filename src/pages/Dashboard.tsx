@@ -8,7 +8,7 @@ import {
   PhilippinePeso,
   RefreshCw,
 } from "lucide-react";
-import { StatsCard } from "../components/ui/StatsCard";
+import { StatsCard, StatsCardProps } from "../components/ui/StatsCard";
 import { useRestocks } from "../hooks/useRestocks";
 import { getRelativeTime } from "../utils/date";
 import { useAuditLogs } from "../hooks/useAuditLog";
@@ -24,9 +24,32 @@ export function Dashboard() {
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
 
   const { stats, lowStockItems, recentActivity, allActivity } = useMemo(() => {
+    const now = Date.now();
+    const msInDay = 24 * 60 * 60 * 1000;
+    const sevenDaysAgo = now - 7 * msInDay;
+    const fourteenDaysAgo = now - 14 * msInDay;
+
     const totalProducts = inventory.length;
     const lowStock = inventory.filter((p) => p.quantity < p.minStock);
     const value = inventory.reduce((sum, p) => sum + p.price * p.quantity, 0);
+
+    // Calculate restock trends
+    const thisWeekRestocks = history.filter(h => new Date(h.date).getTime() >= sevenDaysAgo);
+    const lastWeekRestocks = history.filter(h => {
+      const time = new Date(h.date).getTime();
+      return time >= fourteenDaysAgo && time < sevenDaysAgo;
+    });
+
+    const thisWeekTotal = thisWeekRestocks.reduce((sum, h) => sum + h.quantityAdded, 0);
+    const lastWeekTotal = lastWeekRestocks.reduce((sum, h) => sum + h.quantityAdded, 0);
+
+    const restockTrend = lastWeekTotal === 0 
+      ? (thisWeekTotal > 0 ? 100 : 0)
+      : Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100);
+
+    // Calculate inventory item growth
+    const newItemsThisWeek = inventory.filter(p => p.createdAt && new Date(p.createdAt).getTime() >= sevenDaysAgo).length;
+    const itemGrowthTrend = totalProducts === 0 ? 0 : Math.round((newItemsThisWeek / (totalProducts || 1)) * 100);
 
     const auditItems = transformAuditLogs(logs);
     const restockItems = transformRestockLogs(history);
@@ -34,30 +57,40 @@ export function Dashboard() {
     const allUnifiedActivity = [...restockItems, ...auditItems]
       .sort((a, b) => b.timestamp - a.timestamp);
 
-    const statsData = [
+    const statsData: StatsCardProps[] = [
       {
         title: "Total Inventory",
         value: totalProducts.toString(),
-        subtitle: "Active items in system",
+        subtitle: "Items currently tracked",
         icon: Package,
-        iconBgColor: "bg-blue-100",
-        iconColor: "text-blue-700",
+        iconBgColor: "bg-blue-50",
+        iconColor: "text-blue-600",
+        trend: {
+          value: itemGrowthTrend,
+          label: "vs last week",
+          direction: itemGrowthTrend > 0 ? "up" : "neutral",
+        }
       },
       {
         title: "Stock Alerts",
         value: lowStock.length.toString(),
-        subtitle: "Items below minimum level",
+        subtitle: "Items below minimum",
         icon: AlertTriangle,
-        iconBgColor: "bg-yellow-100",
-        iconColor: "text-yellow-700",
+        iconBgColor: "bg-amber-50",
+        iconColor: "text-amber-600",
       },
       {
-        title: "Latest Intake",
-        value: history.length > 0 ? history[0].quantityAdded.toString() : "0",
-        subtitle: "Most recent restock quantity",
+        title: "Weekly Restocks",
+        value: thisWeekTotal.toString(),
+        subtitle: "Units added this week",
         icon: RefreshCw,
-        iconBgColor: "bg-emerald-100",
-        iconColor: "text-emerald-700",
+        iconBgColor: "bg-emerald-50",
+        iconColor: "text-emerald-600",
+        trend: {
+          value: Math.abs(restockTrend),
+          label: "vs last week",
+          direction: restockTrend > 0 ? "up" : restockTrend < 0 ? "down" : "neutral",
+        }
       },
       {
         title: "Inventory Value",
@@ -65,10 +98,10 @@ export function Dashboard() {
           style: "currency",
           currency: "PHP",
         }).format(value),
-        subtitle: "Current valuation of stock",
+        subtitle: "Total stock valuation",
         icon: PhilippinePeso,
-        iconBgColor: "bg-purple-100",
-        iconColor: "text-purple-700",
+        iconBgColor: "bg-purple-50",
+        iconColor: "text-purple-600",
       },
     ];
 
