@@ -227,10 +227,10 @@ export function Dashboard() {
                               : "bg-gray-100 text-gray-400"
                     }`}
                   >
-                    {act.action === "INSERT" ? "ITEM ADDED" : 
-                     act.action === "UPDATE" ? "MODIFIED" :
+                    {act.action === "INSERT" ? "NEW ITEM" : 
+                     act.action === "UPDATE" ? "UPDATED" :
                      act.action === "DELETE" ? "REMOVED" :
-                     act.action === "RESTOCK" ? "STOCK INTAKE" :
+                     act.action === "RESTOCK" ? "RESTOCKED" :
                      act.action}
                   </span>
                 </div>
