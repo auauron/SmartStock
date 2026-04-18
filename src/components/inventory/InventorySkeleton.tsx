@@ -25,10 +25,9 @@ function SkeletonRow() {
       <td className="px-6 py-4 whitespace-nowrap">
         <SkeletonPulse className="h-6 w-20 rounded-full" />
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex items-center gap-2">
-          <SkeletonPulse className="h-7 w-7 rounded" />
-          <SkeletonPulse className="h-7 w-7 rounded" />
+      <td className="px-6 py-4 whitespace-nowrap text-center">
+        <div className="inline-block">
+          <SkeletonPulse className="h-8 w-8 rounded-lg" />
         </div>
       </td>
     </tr>
