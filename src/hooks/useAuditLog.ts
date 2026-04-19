@@ -32,8 +32,6 @@ export const useAuditLogs = () => {
     [service],
   );
 
-  const shouldLoad = cachedLogs.length === 0;
-
   useEffect(() => {
     loadLogs();
   }, [loadLogs]);
