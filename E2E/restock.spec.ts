@@ -25,7 +25,26 @@ async function loginAndGoToRestock(page: import("@playwright/test").Page) {
   await page.click('button[type="submit"]');
   await page.waitForURL("**/dashboard");
   await page.goto(RESTOCK_URL, { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: "Add Restock" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Add Restock" }),
+  ).toBeVisible();
+}
+
+async function refreshRestockPage(page: import("@playwright/test").Page) {
+  await page.goto(RESTOCK_URL, { waitUntil: "domcontentloaded" });
+  await expect(
+    page.getByRole("heading", { name: "Add Restock" }),
+  ).toBeVisible();
+}
+
+async function filterHistoryByItemName(
+  page: import("@playwright/test").Page,
+  itemName: string,
+) {
+  const itemFilter = page.locator("#restock-history-item-filter");
+  await expect(itemFilter).toBeVisible();
+  await itemFilter.click();
+  await page.getByRole("option", { name: itemName }).click();
 }
 
 test.describe("Restock Page - End-to-End Flow", () => {
@@ -97,7 +116,8 @@ test.describe("Restock Page - End-to-End Flow", () => {
       const notes = `E2E restock note ${Date.now()}`;
 
       await seedRestockEntry(seededItemId, quantity, notes);
-      await page.reload({ waitUntil: "domcontentloaded" });
+      await refreshRestockPage(page);
+      await filterHistoryByItemName(page, seededItemName);
 
       await expect(page.locator("table")).toContainText(seededItemName, {
         timeout: 10_000,
@@ -112,7 +132,8 @@ test.describe("Restock Page - End-to-End Flow", () => {
       const quantity = 10;
 
       await seedRestockEntry(seededItemId, quantity);
-      await page.reload({ waitUntil: "domcontentloaded" });
+      await refreshRestockPage(page);
+      await filterHistoryByItemName(page, seededItemName);
 
       await expect(page.locator("table")).toContainText(seededItemName, {
         timeout: 10_000,
@@ -127,7 +148,8 @@ test.describe("Restock Page - End-to-End Flow", () => {
       page,
     }) => {
       await seedRestockEntry(seededItemId, 5, "");
-      await page.reload({ waitUntil: "domcontentloaded" });
+      await refreshRestockPage(page);
+      await filterHistoryByItemName(page, seededItemName);
 
       await expect(page.locator("table")).toContainText(seededItemName, {
         timeout: 10_000,

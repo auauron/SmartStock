@@ -48,6 +48,7 @@ export function RestockHistoryTable({
 
         <div className="flex flex-col sm:flex-row gap-3">
           <DropdownField
+            id="restock-history-date-filter"
             icon={Calendar}
             value={dateFilter}
             onChange={(e) => onDateFilterChange(e.target.value)}
@@ -63,6 +64,7 @@ export function RestockHistoryTable({
           </DropdownField>
 
           <DropdownField
+            id="restock-history-item-filter"
             icon={Filter}
             value={inventoryFilter}
             onChange={(e) => onInventoryFilterChange(e.target.value)}

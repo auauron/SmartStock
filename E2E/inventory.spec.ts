@@ -65,10 +65,13 @@ test.describe("Inventory End-to-End Flow", () => {
     const seeded = await seedInventoryItem(testItemName, "Electronics");
 
     try {
-      await page.reload({ waitUntil: "networkidle" });
+      await page.goto(INVENTORY_URL, { waitUntil: "domcontentloaded" });
+      await expect(page.getByPlaceholder("Search inventory...")).toBeVisible();
 
       await page.getByPlaceholder("Search inventory...").fill(testItemName);
-      await expect(page.locator("table")).toContainText(testItemName);
+      await expect(page.locator("table")).toContainText(testItemName, {
+        timeout: 15_000,
+      });
 
       // Find the row for our seeded item and click its delete action
       const row = page.locator("tr", { hasText: testItemName });
