@@ -187,7 +187,7 @@ const snapshots: OperationSnapshot[] = [
     title: "Smart Analytics",
     subtitle: "Insights and trends",
     metrics: [
-      { label: "Top Category", value: "By units", color: "text-violet-700" },
+      { label: "Top Category", value: "Foods", color: "text-violet-700" },
       { label: "Trend", value: "+12%", color: "text-emerald-700" },
     ],
     activities: [

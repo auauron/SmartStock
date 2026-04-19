@@ -163,10 +163,14 @@ const snapshots: ShowcaseSnapshot[] = [
       },
       {
         label: "Top Category",
-        value: "By units",
+        value: "Foods",
         toneClass: "text-emerald-700",
       },
-      { label: "Change (7 Days)", value: "+2.3%", toneClass: "text-emerald-700" },
+      {
+        label: "Change (7 Days)",
+        value: "+2.3%",
+        toneClass: "text-emerald-700",
+      },
     ],
   },
 ];
