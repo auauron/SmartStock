@@ -1,27 +1,14 @@
 import { supabase } from "../lib/supabaseClient";
+import {
+  CreateRestockRpcRow,
+  RestockFactory,
+  RestockRow,
+} from "../factories/restockFactory";
 import type {
   CreateRestockInput,
   RestockEntry,
   RestockInventoryOption,
 } from "../types";
-
-interface RestockRow {
-  id: string;
-  inventory_id: string;
-  quantity_added: number;
-  notes: string | null;
-  restocked_at: string;
-  inventories: { name: string } | { name: string }[] | null;
-}
-
-interface CreateRestockRpcRow {
-  id: string;
-  inventory_id: string;
-  inventory_name: string;
-  quantity_added: number;
-  notes: string;
-  restocked_at: string;
-}
 
 async function requireUserId(): Promise<string> {
   const {
@@ -34,17 +21,6 @@ async function requireUserId(): Promise<string> {
   }
 
   return user.id;
-}
-
-function getJoinedInventoryName(
-  joined: RestockRow["inventories"],
-  fallback = "Unknown Item",
-): string {
-  if (!joined) return fallback;
-  if (Array.isArray(joined)) {
-    return joined[0]?.name ?? fallback;
-  }
-  return joined.name;
 }
 
 export async function getRestockInventory(): Promise<RestockInventoryOption[]> {
@@ -71,7 +47,9 @@ export async function getRestockHistory(): Promise<RestockEntry[]> {
 
   const { data, error } = await supabase
     .from("restocks")
-    .select("id, inventory_id, quantity_added, notes, restocked_at, inventories(name)")
+    .select(
+      "id, inventory_id, quantity_added, notes, restocked_at, inventories(name)",
+    )
     .eq("user_id", userId)
     .order("restocked_at", { ascending: false });
 
@@ -79,14 +57,9 @@ export async function getRestockHistory(): Promise<RestockEntry[]> {
     throw new Error(error.message);
   }
 
-  return ((data ?? []) as unknown as RestockRow[]).map((row) => ({
-    id: row.id,
-    inventoryId: row.inventory_id,
-    inventoryName: getJoinedInventoryName(row.inventories),
-    quantityAdded: row.quantity_added,
-    date: row.restocked_at,
-    notes: row.notes ?? "",
-  }));
+  return ((data ?? []) as unknown as RestockRow[]).map((row) =>
+    RestockFactory.createFromHistoryRow(row),
+  );
 }
 
 export async function createRestock(
@@ -109,12 +82,5 @@ export async function createRestock(
     throw new Error("Failed to create restock entry.");
   }
 
-  return {
-    id: restockData.id,
-    inventoryId: restockData.inventory_id,
-    inventoryName: restockData.inventory_name,
-    quantityAdded: restockData.quantity_added,
-    date: restockData.restocked_at,
-    notes: restockData.notes ?? "",
-  };
+  return RestockFactory.createFromRpcRow(restockData);
 }
