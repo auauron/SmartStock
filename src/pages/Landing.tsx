@@ -4,7 +4,6 @@ import {
   BarChart3,
   Bell,
   Shield,
-  Gauge,
   AlertTriangle,
   RefreshCw,
   CheckCircle2,
