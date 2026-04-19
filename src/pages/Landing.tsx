@@ -16,25 +16,29 @@ export function Landing() {
     {
       iconWrap: "bg-emerald-100 group-hover:bg-emerald-200",
       borderAccent: "before:bg-emerald-500",
+      iconColor: "text-emerald-600",
     },
     {
       iconWrap: "bg-amber-100 group-hover:bg-amber-200",
       borderAccent: "before:bg-amber-500",
+      iconColor: "text-amber-600",
     },
     {
       iconWrap: "bg-blue-100 group-hover:bg-blue-200",
       borderAccent: "before:bg-blue-500",
+      iconColor: "text-blue-600",
     },
     {
       iconWrap: "bg-slate-100 group-hover:bg-slate-200",
       borderAccent: "before:bg-slate-500",
+      iconColor: "text-slate-600",
     },
   ] as const;
 
   const features = [
     {
       icon: BarChart3,
-      title: "Dashboard + Smart Analytics", 
+      title: "Dashboard + Smart Analytics",
       description:
         "See your stock value, low-stock items, weekly restocks, and recent activity in one quick view.",
     },
@@ -125,11 +129,6 @@ export function Landing() {
 
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1.08fr_0.92fr]">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
-              <Gauge className="h-3.5 w-3.5" />
-              Inventory command board
-            </p>
-
             <h1 className="mt-5 text-4xl font-bold leading-tight text-gray-900 sm:text-5xl lg:text-6xl">
               Run your stock room
               <span className="block text-emerald-600">
@@ -300,7 +299,7 @@ export function Landing() {
                   <div
                     className={`mb-4 flex h-12 w-12 items-center justify-center rounded-lg transition-colors ${tone.iconWrap}`}
                   >
-                    <Icon className="w-6 h-6 text-emerald-600" />
+                    <Icon className={`w-6 h-6 ${tone.iconColor}`} />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {feature.title}

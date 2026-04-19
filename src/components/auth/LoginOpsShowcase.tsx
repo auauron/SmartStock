@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import {
   CheckCircle2,
   Clock3,
@@ -5,37 +6,245 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react";
+import { cn } from "../../lib/cn";
 
-const activity = [
+const animationStyles = `
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .animate-slideInUp {
+    animation: slideInUp 0.4s ease-out forwards;
+  }
+  
+  .animate-slideInDown {
+    animation: slideInDown 0.4s ease-out forwards;
+  }
+  
+  .animate-scaleIn {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+  
+  .metric-item-0 { animation-delay: 0ms; }
+  .metric-item-1 { animation-delay: 60ms; }
+  .activity-item-0 { animation-delay: 120ms; }
+  .activity-item-1 { animation-delay: 180ms; }
+  .activity-item-2 { animation-delay: 240ms; }
+  .action-item-0 { animation-delay: 300ms; }
+  .action-item-1 { animation-delay: 360ms; }
+  .action-item-2 { animation-delay: 420ms; }
+`;
+
+interface OperationSnapshot {
+  id: string;
+  title: string;
+  subtitle: string;
+  metrics: Array<{
+    label: string;
+    value: string;
+    color: string;
+  }>;
+  activities: Array<{
+    title: string;
+    detail: string;
+    time: string;
+    tone: string;
+    dot: string;
+  }>;
+}
+
+const ROTATION_INTERVAL_MS = 5200;
+const TRANSITION_DURATION_MS = 320;
+
+const snapshots: OperationSnapshot[] = [
   {
-    id: "a1",
-    title: "Low-stock alert detected",
-    detail: "Rice 25kg is below minimum stock",
-    time: "3 mins ago",
-    tone: "text-amber-700",
-    dot: "bg-amber-500",
+    id: "dashboard-overview",
+    title: "Dashboard Overview",
+    subtitle: "All your metrics in one view",
+    metrics: [
+      { label: "Total Products", value: "142", color: "text-blue-700" },
+      { label: "Stock Alerts", value: "24", color: "text-amber-700" },
+    ],
+    activities: [
+      {
+        title: "Low stock alert",
+        detail: "Product has fallen below minimum level",
+        time: "Just now",
+        tone: "text-amber-700",
+        dot: "bg-amber-500",
+      },
+      {
+        title: "Restock logged",
+        detail: "New stock added and recorded to history",
+        time: "5 mins ago",
+        tone: "text-emerald-700",
+        dot: "bg-emerald-500",
+      },
+      {
+        title: "Inventory updated",
+        detail: "Product details and quantities synced",
+        time: "12 mins ago",
+        tone: "text-blue-700",
+        dot: "bg-blue-500",
+      },
+    ],
   },
   {
-    id: "a2",
-    title: "Restock recorded",
-    detail: "Beverages +42 units added",
-    time: "26 mins ago",
-    tone: "text-emerald-700",
-    dot: "bg-emerald-500",
+    id: "inventory-management",
+    title: "Inventory Management",
+    subtitle: "Organize and track products",
+    metrics: [
+      { label: "Categories", value: "12", color: "text-emerald-700" },
+      { label: "Restocked", value: "8", color: "text-blue-700" },
+    ],
+    activities: [
+      {
+        title: "Product added",
+        detail: "New item created with category and price",
+        time: "2 mins ago",
+        tone: "text-emerald-700",
+        dot: "bg-emerald-500",
+      },
+      {
+        title: "Quantity updated",
+        detail: "Stock count changed after verification",
+        time: "18 mins ago",
+        tone: "text-blue-700",
+        dot: "bg-blue-500",
+      },
+      {
+        title: "Category assigned",
+        detail: "Product organized for better tracking",
+        time: "1 hour ago",
+        tone: "text-emerald-700",
+        dot: "bg-emerald-500",
+      },
+    ],
   },
   {
-    id: "a3",
-    title: "Inventory sync complete",
-    detail: "All items and trends are up to date",
-    time: "1 hour ago",
-    tone: "text-blue-700",
-    dot: "bg-blue-500",
+    id: "restock-history",
+    title: "Restock History",
+    subtitle: "Track all restocking activity",
+    metrics: [
+      { label: "This Week", value: "156 units", color: "text-emerald-700" },
+      { label: "Last Week", value: "142 units", color: "text-gray-600" },
+    ],
+    activities: [
+      {
+        title: "Restock recorded",
+        detail: "78 units added to inventory",
+        time: "4 mins ago",
+        tone: "text-emerald-700",
+        dot: "bg-emerald-500",
+      },
+      {
+        title: "Bulk restock",
+        detail: "Multiple products restocked together",
+        time: "35 mins ago",
+        tone: "text-blue-700",
+        dot: "bg-blue-500",
+      },
+      {
+        title: "Trend detected",
+        detail: "Weekly pattern shows increased movement",
+        time: "2 hours ago",
+        tone: "text-cyan-700",
+        dot: "bg-cyan-500",
+      },
+    ],
+  },
+  {
+    id: "smart-analytics",
+    title: "Smart Analytics",
+    subtitle: "Insights and trends",
+    metrics: [
+      { label: "Top Category", value: "By units", color: "text-violet-700" },
+      { label: "Trend", value: "+12%", color: "text-emerald-700" },
+    ],
+    activities: [
+      {
+        title: "Weekly trend report",
+        detail: "Restocking activity up compared to last week",
+        time: "30 mins ago",
+        tone: "text-emerald-700",
+        dot: "bg-emerald-500",
+      },
+      {
+        title: "Category analysis",
+        detail: "Category distribution calculated automatically",
+        time: "1 hour ago",
+        tone: "text-violet-700",
+        dot: "bg-violet-500",
+      },
+      {
+        title: "Forecast generated",
+        detail: "Restock intelligence based on patterns",
+        time: "2 hours ago",
+        tone: "text-blue-700",
+        dot: "bg-blue-500",
+      },
+    ],
   },
 ];
 
 export function LoginOpsShowcase() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  useEffect(() => {
+    let swapTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+
+      swapTimer = setTimeout(() => {
+        setActiveIndex((prev) => (prev + 1) % snapshots.length);
+        setIsTransitioning(false);
+      }, TRANSITION_DURATION_MS);
+    }, ROTATION_INTERVAL_MS);
+
+    return () => {
+      clearInterval(interval);
+      if (swapTimer) {
+        clearTimeout(swapTimer);
+      }
+    };
+  }, []);
+
+  const activeSnapshot = useMemo(() => snapshots[activeIndex], [activeIndex]);
+
   return (
     <div className="relative hidden min-h-screen overflow-hidden lg:flex lg:items-center lg:px-14 xl:px-20">
+      <style>{animationStyles}</style>
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/55 via-white to-sky-100/45" />
       <div className="absolute inset-0 opacity-24 [background-image:radial-gradient(circle_at_1px_1px,rgba(15,23,42,0.32)_1px,transparent_0)] [background-size:22px_22px]" />
       <div className="absolute right-8 top-20 h-56 w-56 rounded-full bg-emerald-200/40 blur-3xl" />
@@ -43,21 +252,31 @@ export function LoginOpsShowcase() {
       <div className="absolute -left-18 top-1/3 h-72 w-72 rounded-full bg-emerald-100/35 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-xl">
-        <h2 className="mt-5 text-4xl font-semibold leading-tight text-gray-900 xl:text-5xl">
+        <h2 className="-mb-4 text-4xl font-semibold leading-tight text-gray-900 xl:text-5xl">
           Pick up where your inventory left off.
         </h2>
 
-        <div className="mt-9 rounded-2xl border border-gray-200 bg-white/95 p-6 shadow-[0_24px_45px_-28px_rgba(17,24,39,0.45)] backdrop-blur">
-          <div className="flex items-center justify-between gap-4">
+        <div
+          className={cn(
+            "mt-9 rounded-2xl border border-gray-200 bg-white/95 p-6 shadow-[0_24px_45px_-28px_rgba(17,24,39,0.45)] backdrop-blur transition-all duration-300",
+            isTransitioning
+              ? "translate-y-3 scale-[0.985] opacity-0"
+              : "translate-y-0 scale-100 opacity-100",
+          )}
+        >
+          <div className="flex items-center justify-between gap-4 animate-slideInDown">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
                 Operations Pulse
               </p>
               <h3 className="mt-1.5 text-xl font-semibold text-gray-900">
-                Today at a glance
+                {activeSnapshot.title}
               </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {activeSnapshot.subtitle}
+              </p>
             </div>
-            <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700">
+            <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 animate-scaleIn">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
@@ -67,59 +286,91 @@ export function LoginOpsShowcase() {
           </div>
 
           <div className="mt-5 grid grid-cols-2 gap-3">
-            <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5">
-              <p className="text-[11px] uppercase tracking-wide text-gray-500">
-                Stock Alerts
-              </p>
-              <p className="mt-1 text-xl font-bold text-amber-700">17</p>
-            </div>
-            <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5">
-              <p className="text-[11px] uppercase tracking-wide text-gray-500">
-                Weekly Restock
-              </p>
-              <p className="mt-1 text-xl font-bold text-emerald-700">84</p>
-            </div>
+            {activeSnapshot.metrics.map((metric, index) => (
+              <div
+                key={metric.label}
+                className={cn(
+                  "animate-slideInUp metric-item-" + index,
+                  "rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5 transition-all hover:border-emerald-200 hover:shadow-md hover:scale-[1.02]",
+                )}
+              >
+                <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                  {metric.label}
+                </p>
+                <p className={cn("mt-1 text-xl font-bold", metric.color)}>
+                  {metric.value}
+                </p>
+              </div>
+            ))}
           </div>
 
           <div className="mt-5 space-y-3">
-            {activity.map((item) => (
+            {activeSnapshot.activities.map((activity, index) => (
               <div
-                key={item.id}
-                className="flex items-start gap-3 rounded-lg border border-gray-100 bg-white px-3 py-2.5"
+                key={activity.title}
+                className={cn(
+                  "animate-slideInUp activity-item-" + index,
+                  "flex items-start gap-3 rounded-lg border border-gray-100 bg-white px-3 py-2.5 transition-all hover:border-emerald-200 hover:shadow-md",
+                )}
               >
-                <span className={`mt-1 h-2.5 w-2.5 rounded-full ${item.dot}`} />
+                <span
+                  className={`mt-1 h-2.5 w-2.5 rounded-full ${activity.dot}`}
+                />
                 <div className="min-w-0 flex-1">
-                  <p className={`text-sm font-semibold ${item.tone}`}>
-                    {item.title}
+                  <p className={`text-sm font-semibold ${activity.tone}`}>
+                    {activity.title}
                   </p>
-                  <p className="text-xs text-gray-500">{item.detail}</p>
+                  <p className="text-xs text-gray-500">{activity.detail}</p>
                 </div>
                 <span className="inline-flex items-center gap-1 text-[11px] text-gray-400">
                   <Clock3 className="h-3.5 w-3.5" />
-                  {item.time}
+                  {activity.time}
                 </span>
               </div>
             ))}
           </div>
 
           <div className="mt-5 grid grid-cols-3 gap-2">
-            <div className="inline-flex items-center justify-center gap-1 rounded-md bg-emerald-50 px-2 py-1.5 text-[11px] font-semibold text-emerald-700">
+            <div className="animate-slideInUp action-item-0 inline-flex items-center justify-center gap-1 rounded-md bg-emerald-50 px-2 py-1.5 text-[11px] font-semibold text-emerald-700 transition-all hover:scale-105 hover:shadow-sm">
               <TrendingUp className="h-3.5 w-3.5" />
               Trends
             </div>
-            <div className="inline-flex items-center justify-center gap-1 rounded-md bg-blue-50 px-2 py-1.5 text-[11px] font-semibold text-blue-700">
+            <div className="animate-slideInUp action-item-1 inline-flex items-center justify-center gap-1 rounded-md bg-blue-50 px-2 py-1.5 text-[11px] font-semibold text-blue-700 transition-all hover:scale-105 hover:shadow-sm">
               <Sparkles className="h-3.5 w-3.5" />
               Insights
             </div>
-            <div className="inline-flex items-center justify-center gap-1 rounded-md bg-amber-50 px-2 py-1.5 text-[11px] font-semibold text-amber-700">
+            <div className="animate-slideInUp action-item-2 inline-flex items-center justify-center gap-1 rounded-md bg-amber-50 px-2 py-1.5 text-[11px] font-semibold text-amber-700 transition-all hover:scale-105 hover:shadow-sm">
               <Siren className="h-3.5 w-3.5" />
               Alerts
             </div>
           </div>
 
-          <div className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-gray-500">
+          <div
+            className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-gray-500 animate-slideInUp"
+            style={{ animationDelay: "480ms" }}
+          >
             <CheckCircle2 className="h-4 w-4 text-emerald-600" />
             Stable and synced. Ready to continue operations.
+          </div>
+
+          <div className="mt-5 flex items-center gap-2">
+            {snapshots.map((snapshot, index) => (
+              <button
+                key={snapshot.id}
+                type="button"
+                aria-label={`Show ${snapshot.title}`}
+                onClick={() => {
+                  setIsTransitioning(false);
+                  setActiveIndex(index);
+                }}
+                className={cn(
+                  "h-2.5 rounded-full transition-all duration-300 hover:scale-125",
+                  index === activeIndex
+                    ? "w-8 bg-emerald-600 shadow-md"
+                    : "w-2.5 bg-emerald-200 hover:bg-emerald-300",
+                )}
+              />
+            ))}
           </div>
         </div>
       </div>
