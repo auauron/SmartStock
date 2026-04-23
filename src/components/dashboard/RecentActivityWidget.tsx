@@ -123,7 +123,7 @@ export function RecentActivityWidget({
             Recent Activity
           </h2>
           <p className="max-w-md text-sm text-gray-500">
-            Live timeline of restocks, edits, and pricing updates across your
+            Live timeline of restocks, edits, and pricing updates of your
             inventory.
           </p>
         </div>
