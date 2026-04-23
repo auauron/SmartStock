@@ -101,8 +101,6 @@ export function Dashboard() {
         icon: AlertTriangle,
         iconBgColor: "bg-amber-50",
         iconColor: "text-amber-600",
-        actionLabel: "View alerts",
-        onAction: () => setIsLowStockModalOpen(true),
         actionDisabled: lowStock.length === 0,
       },
       {
