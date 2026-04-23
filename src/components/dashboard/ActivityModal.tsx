@@ -83,7 +83,7 @@ export function ActivityModal({
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <div className="rounded-xl border border-gray-100 bg-gray-50/60 px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400">
-                  Total Events
+                  Total Activities
                 </p>
                 <p className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
                   {sortedActivities.length}
