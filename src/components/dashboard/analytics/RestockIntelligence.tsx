@@ -54,7 +54,11 @@ export function RestockIntelligence({
 
     const results: ItemForecast[] = inventory.map((item) => {
       // Map by ID, fallback to name for legacy entries without inventoryId
-      const itemRestocks = history.filter((h) => h.inventoryId === item.id || (!h.inventoryId && h.inventoryName === item.name));
+      const itemRestocks = history.filter(
+        (h) =>
+          h.inventoryId === item.id ||
+          (!h.inventoryId && h.inventoryName === item.name),
+      );
 
       let dailyRestockRate: number;
 
@@ -288,7 +292,14 @@ export function RestockIntelligence({
 
                     {/* Action */}
                     <button
-                      onClick={() => navigate("/restock")}
+                      onClick={() =>
+                        navigate("/restock", {
+                          state: {
+                            prefillInventoryId: f.item.id,
+                            prefillQuantity: f.suggestedQty,
+                          },
+                        })
+                      }
                       className="inline-flex items-center justify-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-1.5 hover:bg-emerald-100 transition-colors cursor-pointer md:ml-auto"
                     >
                       Restock
