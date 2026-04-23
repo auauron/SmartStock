@@ -16,32 +16,42 @@ export function Pagination({
 }: PaginationProps) {
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
-    const showNeighbors = 1;
 
-    if (totalPages <= 7) {
+    if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
-    } else {
-      pages.push(1);
+      return pages;
+    }
 
-      if (currentPage > showNeighbors + 2) {
-        pages.push("...");
-      }
-
-      const start = Math.max(2, currentPage - showNeighbors);
-      const end = Math.min(totalPages - 1, currentPage + showNeighbors);
-
-      for (let i = start; i <= end; i++) {
+    // Near the start: show first 5 pages, then ellipsis and last page.
+    if (currentPage <= 3) {
+      for (let i = 1; i <= 5; i++) {
         pages.push(i);
       }
-
-      if (currentPage < totalPages - (showNeighbors + 1)) {
-        pages.push("...");
-      }
-
+      pages.push("...");
       pages.push(totalPages);
+      return pages;
     }
+
+    // Near the end: show first page, ellipsis, then last 5 pages.
+    if (currentPage >= totalPages - 2) {
+      pages.push(1);
+      pages.push("...");
+      for (let i = totalPages - 4; i <= totalPages; i++) {
+        pages.push(i);
+      }
+      return pages;
+    }
+
+    // Middle: first page, ellipsis, current window (3 pages), ellipsis, last page.
+    pages.push(1);
+    pages.push("...");
+    pages.push(currentPage - 1);
+    pages.push(currentPage);
+    pages.push(currentPage + 1);
+    pages.push("...");
+    pages.push(totalPages);
 
     return pages;
   };
@@ -86,7 +96,7 @@ export function Pagination({
                 "min-w-[40px] px-3 py-1.5 text-sm font-medium rounded-lg border transition-all",
                 isCurrent
                   ? "border-emerald-600 text-emerald-600 bg-emerald-50 ring-1 ring-emerald-600"
-                  : "border-gray-200 text-gray-700 bg-white hover:border-gray-300 hover:bg-gray-50"
+                  : "border-gray-200 text-gray-700 bg-white hover:border-gray-300 hover:bg-gray-50",
               )}
             >
               {page}
