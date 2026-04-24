@@ -8,7 +8,7 @@ A responsive web-based inventory and restock management system built for small b
 - Inventory and restock flows are connected to Supabase tables and an atomic restock RPC.
 - Notification preferences are persisted in Supabase; read/cleared notification state is cached locally.
 - Unit, integration, Storybook, and Playwright test suites are present in the repository.
-- Server-side report generation, low-stock email automation, and realtime subscriptions are still planned.
+- Server-side report generation, low-stock email automation, and real-time subscriptions are still planned.
 - Client-side route guarding for protected pages is still in progress.
 
 ## Overview
