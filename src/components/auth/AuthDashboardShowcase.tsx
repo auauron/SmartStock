@@ -212,10 +212,6 @@ export function SignupDashboardShowcase() {
       <div className="absolute -right-20 bottom-10 h-80 w-80 rounded-full bg-sky-200/35 blur-3xl" />
 
       <div className="relative z-10 max-w-xl">
-        <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/85 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-          <TrendingUp className="h-3.5 w-3.5" />
-          Smart Stock Preview
-        </p>
         <h2 className="mt-5 text-4xl font-semibold leading-tight text-gray-900 xl:text-5xl">
           Build inventory confidence from day one.
         </h2>
