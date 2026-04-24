@@ -9,6 +9,7 @@ export function NotificationsTab() {
   const [prefs, setPrefs] = useState({
     lowStockAlerts: true,
     restockConfirmations: true,
+    emailNotifications: true,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -123,11 +124,21 @@ export function NotificationsTab() {
             setPrefs((p) => ({ ...p, restockConfirmations: e.target.checked }))
           }
         />
+        <div className="border-t border-gray-100/50" />
+        <ToggleSwitch
+          id="email-notifications"
+          label="Email Notifications"
+          description="Send verified email alerts when Smart Stock detects a new notification"
+          checked={prefs.emailNotifications}
+          onChange={(e) =>
+            setPrefs((p) => ({ ...p, emailNotifications: e.target.checked }))
+          }
+        />
       </div>
 
       <div className="flex justify-end pt-8">
         <Button
-          className="px-6 min-w-[160px]"
+          className="px-6 min-w-40"
           onClick={handleSave}
           disabled={saving}
           variant="primary"

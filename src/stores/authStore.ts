@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "../lib/supabaseClient";
-import type { SignUpPayload } from "../types";
+import type { SignUpPayload, SignUpResult } from "../types";
 
 interface AuthState {
   loading: boolean;
@@ -12,7 +12,8 @@ type AuthStore = {
   subscribe: (listener: () => void) => () => void;
   clearError: () => void;
   signIn: (email: string, password: string) => Promise<boolean>;
-  signUp: (payload: SignUpPayload) => Promise<boolean>;
+  signUp: (payload: SignUpPayload) => Promise<SignUpResult>;
+  resendVerificationEmail: (email: string) => Promise<boolean>;
 };
 
 let state: AuthState = {
@@ -31,23 +32,41 @@ function setState(partial: Partial<AuthState>) {
   emit();
 }
 
+function getEmailRedirectTo() {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
+  return `${window.location.origin}/login`;
+}
+
 /**
  * Maps Supabase Auth errors to user-friendly messages.
  * Uses `code` (stable) as primary signal, falls back to message substring matching.
  * Covers all documented error codes for signUp and signIn.
  * Reference: https://supabase.com/docs/reference/javascript/auth-error-codes
  */
-function mapAuthError(error: { message: string; code?: string; status?: number }): string {
+function mapAuthError(error: {
+  message: string;
+  code?: string;
+  status?: number;
+}): string {
   const code = error.code ?? "";
   const msg = error.message.toLowerCase();
 
   // ── Signup-specific errors ─────────────────────────────────────────────────
 
-  if (code === "user_already_exists" || msg.includes("user already registered")) {
+  if (
+    code === "user_already_exists" ||
+    msg.includes("user already registered")
+  ) {
     return "An account with this email already exists. Please sign in instead.";
   }
 
-  if (code === "email_exists" || msg.includes("email address is already registered")) {
+  if (
+    code === "email_exists" ||
+    msg.includes("email address is already registered")
+  ) {
     return "This email is already in use. Try signing in or use a different email.";
   }
 
@@ -55,11 +74,17 @@ function mapAuthError(error: { message: string; code?: string; status?: number }
     return "Your password is too weak. Use at least 8 characters with a mix of letters and numbers.";
   }
 
-  if (code === "validation_failed" || msg.includes("unable to validate email address")) {
+  if (
+    code === "validation_failed" ||
+    msg.includes("unable to validate email address")
+  ) {
     return "The email address you entered is invalid. Please check it and try again.";
   }
 
-  if (code === "email_address_invalid" || msg.includes("email address format is invalid")) {
+  if (
+    code === "email_address_invalid" ||
+    msg.includes("email address format is invalid")
+  ) {
     return "Please enter a valid email address.";
   }
 
@@ -95,11 +120,17 @@ function mapAuthError(error: { message: string; code?: string; status?: number }
     return "Your session has expired. Please sign in again.";
   }
 
-  if (code === "refresh_token_not_found" || msg.includes("refresh token not found")) {
+  if (
+    code === "refresh_token_not_found" ||
+    msg.includes("refresh token not found")
+  ) {
     return "Your session is invalid. Please sign in again.";
   }
 
-  if (code === "refresh_token_already_used" || msg.includes("token has already been used")) {
+  if (
+    code === "refresh_token_already_used" ||
+    msg.includes("token has already been used")
+  ) {
     return "Your session token was already used. Please sign in again.";
   }
 
@@ -130,11 +161,17 @@ function mapAuthError(error: { message: string; code?: string; status?: number }
 
   // ── Email / provider errors ────────────────────────────────────────────────
 
-  if (code === "email_provider_disabled" || msg.includes("email provider is not enabled")) {
+  if (
+    code === "email_provider_disabled" ||
+    msg.includes("email provider is not enabled")
+  ) {
     return "Email sign-in is currently unavailable. Please try another method.";
   }
 
-  if (code === "phone_provider_disabled" || msg.includes("phone provider is not enabled")) {
+  if (
+    code === "phone_provider_disabled" ||
+    msg.includes("phone provider is not enabled")
+  ) {
     return "Phone sign-in is currently unavailable. Please try another method.";
   }
 
@@ -142,13 +179,33 @@ function mapAuthError(error: { message: string; code?: string; status?: number }
     return "This sign-in method is currently disabled. Please try another option.";
   }
 
-  if (code === "provider_email_needs_verification" || msg.includes("email needs to be verified")) {
+  if (
+    code === "provider_email_needs_verification" ||
+    msg.includes("email needs to be verified")
+  ) {
     return "Please verify your email with your sign-in provider before continuing.";
+  }
+
+  if (
+    msg.includes("error sending confirmation email") ||
+    msg.includes("domain is not verified") ||
+    msg.includes("gomail: could not send email")
+  ) {
+    if (
+      msg.includes("you can only send testing emails to your own email address")
+    ) {
+      return "Resend test sender can only email your own Resend account address. Verify your domain and use a sender like no-reply@smartstock.com to email other users.";
+    }
+
+    return "Signup email cannot be sent yet because your sender domain is not verified. Verify your Resend domain and sender address, then try again.";
   }
 
   // ── SSO / SAML errors ─────────────────────────────────────────────────────
 
-  if (code === "sso_provider_not_found" || msg.includes("sso provider not found")) {
+  if (
+    code === "sso_provider_not_found" ||
+    msg.includes("sso provider not found")
+  ) {
     return "The single sign-on provider was not found. Check your email domain.";
   }
 
@@ -169,7 +226,10 @@ function mapAuthError(error: { message: string; code?: string; status?: number }
     return "MFA setup not found. Please set up two-factor authentication first.";
   }
 
-  if (code === "mfa_challenge_expired" || msg.includes("mfa challenge has expired")) {
+  if (
+    code === "mfa_challenge_expired" ||
+    msg.includes("mfa challenge has expired")
+  ) {
     return "The MFA challenge expired. Please restart the sign-in process.";
   }
 
@@ -219,14 +279,54 @@ export const authStore: AuthStore = {
   signUp: async ({ email, password, fullName, businessName }) => {
     setState({ loading: true, error: null });
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: getEmailRedirectTo(),
         data: {
           full_name: fullName,
           business_name: businessName,
         },
+      },
+    });
+
+    if (error) {
+      const code = error.code ?? "";
+      const msg = error.message.toLowerCase();
+      const isExistingUserSignupAttempt =
+        code === "user_already_exists" ||
+        code === "email_exists" ||
+        msg.includes("user already registered") ||
+        msg.includes("email address is already registered");
+
+      if (isExistingUserSignupAttempt) {
+        setState({ loading: false, error: null });
+        return { success: true, needsEmailVerification: true };
+      }
+
+      setState({ loading: false, error: mapAuthError(error) });
+      return { success: false, needsEmailVerification: false };
+    }
+
+    if (data.session) {
+      await supabase.auth.signOut();
+    }
+
+    setState({ loading: false, error: null });
+    return {
+      success: true,
+      needsEmailVerification: true,
+    };
+  },
+  resendVerificationEmail: async (email: string) => {
+    setState({ loading: true, error: null });
+
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: getEmailRedirectTo(),
       },
     });
 
@@ -251,6 +351,7 @@ export function useAuthStore() {
     ...snapshot,
     signIn: authStore.signIn,
     signUp: authStore.signUp,
+    resendVerificationEmail: authStore.resendVerificationEmail,
     clearError: authStore.clearError,
   };
 }

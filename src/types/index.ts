@@ -20,19 +20,24 @@ export type {
 // ─── Audit Logs ────────────────────────────────────────────────────────
 
 export interface AuditLogChanges {
-    [key: string]: {from: string | number | null; to: string | number | null};
+  [key: string]: { from: string | number | null; to: string | number | null };
 }
 
 export interface AuditLog {
-    id: string;
-    userId: string;
-    itemName: string;
-    action: 'INSERT' | 'UPDATE' | 'DELETE';
-    changes: AuditLogChanges | null;
-    createdAt: Date;
+  id: string;
+  userId: string;
+  itemName: string;
+  action: "INSERT" | "UPDATE" | "DELETE";
+  changes: AuditLogChanges | null;
+  createdAt: Date;
 }
 
-export type AuditLogKey = 'name' | 'category' | 'price' | 'quantity' | 'minStock';
+export type AuditLogKey =
+  | "name"
+  | "category"
+  | "price"
+  | "quantity"
+  | "minStock";
 
 // ─── Auth / User Types ────────────────────────────────────────────────────────
 
@@ -45,6 +50,20 @@ export interface UserProfile {
 export interface NotificationPreferences {
   lowStockAlerts: boolean;
   restockConfirmations: boolean;
+  emailNotifications: boolean;
+}
+
+export interface NotificationEmailItem {
+  id: string;
+  type: "low_stock" | "restock";
+  title: string;
+  message: string;
+  time: string;
+  link?: string;
+}
+
+export interface NotificationEmailPayload {
+  notifications: NotificationEmailItem[];
 }
 
 export interface SignUpPayload {
@@ -52,6 +71,11 @@ export interface SignUpPayload {
   password: string;
   fullName: string;
   businessName: string;
+}
+
+export interface SignUpResult {
+  success: boolean;
+  needsEmailVerification: boolean;
 }
 
 // ─── Router Types ─────────────────────────────────────────────────────────────

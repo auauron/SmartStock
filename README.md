@@ -17,17 +17,18 @@ Many small retail stores, mini groceries, and supply shops still rely on manual 
 
 ## Tech Stack
 
-| Layer          | Technology                                |
-| -------------- | ----------------------------------------- |
-| Framework      | React 19 + TypeScript 5.9                 |
-| Build Tool     | Vite 7                                    |
-| Styling        | Tailwind CSS v4 (via `@tailwindcss/vite`) |
-| Routing        | React Router v7                           |
-| Backend / Auth | Supabase (PostgreSQL + Auth + RLS)        |
-| Icons          | Lucide React                              |
-| Notifications  | Sonner                                    |
-| PWA            | vite-plugin-pwa (Workbox)                 |
-| Utilities      | tailwind-merge, tw-animate-css            |
+| Layer          | Technology                                                           |
+| -------------- | -------------------------------------------------------------------- |
+| Framework      | React 19 + TypeScript 5.9                                            |
+| Build Tool     | Vite 7                                                               |
+| Styling        | Tailwind CSS v4 (via `@tailwindcss/vite`)                            |
+| Routing        | React Router v7                                                      |
+| Backend / Auth | Supabase (PostgreSQL + Auth + RLS)                                   |
+| Email Delivery | Supabase Auth email confirmation + Resend-backed notification emails |
+| Icons          | Lucide React                                                         |
+| Notifications  | Sonner                                                               |
+| PWA            | vite-plugin-pwa (Workbox)                                            |
+| Utilities      | tailwind-merge, tw-animate-css                                       |
 
 ## Project Structure
 
@@ -140,6 +141,7 @@ smart-stock/
 
 - Supabase email/password sign-up and sign-in
 - Email confirmation enforcement with clear user-facing messages
+- Signup stays gated until the address is verified, which prevents notification emails from being sent to unconfirmed accounts
 - Comprehensive auth error mapping: 25+ Supabase error codes translated to friendly messages (rate limits, MFA, SSO, etc.)
 - User profile (full name, email, business name) loaded from Supabase user metadata
 - Profile cached in `localStorage` with a 10-minute TTL to reduce redundant API calls
@@ -162,6 +164,7 @@ The Supabase PostgreSQL schema contains:
 - `create_restock_transaction` — atomic RPC that updates product quantity and inserts a restock record in a single transaction, preventing lost updates
 - Automatic `updated_at` triggers on mutable tables
 - Indexed columns for `user_id`, `name`, `category`, and `restocked_at`
+- `notification_preferences.email_notifications` controls whether verified users receive email alerts for newly discovered notifications
 
 ## Testing
 
@@ -227,7 +230,7 @@ This section is aligned to the SCD final-project requirements by showing pattern
 ## Planned / In Progress
 
 - [ ] Implement `generateReport` server function for downloadable inventory reports
-- [ ] Implement `sendLowStockAlert` email notifications via the `emailService` utility
+- [ ] Implement background low-stock alert automation for inventory changes outside the active app session
 - [ ] Real-time stock updates using Supabase subscriptions
 
 ## Getting Started
@@ -255,6 +258,8 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
 For integration/E2E tests, create a `.env.test` with test credentials.
+
+For notification emails, configure the Supabase Edge Function secret values `RESEND_API_KEY` and `RESEND_FROM_EMAIL` in your Supabase project, and keep Supabase Auth email confirmation enabled so signup verification stays mandatory.
 
 ### Development
 

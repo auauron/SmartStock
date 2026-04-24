@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { notificationService } from "../services/notificationService";
+import { sendNotificationEmail } from "../services/notificationEmailService";
 import {
   notificationSubject,
   type NotificationObserver,
 } from "../services/notificationObserver";
+import type { NotificationEmailItem } from "../types";
 
 export interface AppNotification {
   id: string;
@@ -17,13 +19,35 @@ export interface AppNotification {
 }
 
 const POLLING_INTERVAL = 30000; // 30 seconds
+const EMAILED_NOTIFICATIONS_KEY = "smart-stock:emailed-notifications";
+
+function readBooleanMap(key: string): Record<string, boolean> {
+  const saved = localStorage.getItem(key);
+  if (!saved) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(saved) as Record<string, boolean>;
+  } catch {
+    return {};
+  }
+}
+
+function persistBooleanMap(key: string, value: Record<string, boolean>) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   const fetchNotifications = useCallback(async () => {
     // 1. Get user preferences from Supabase
-    let prefs = { lowStockAlerts: true, restockConfirmations: true };
+    let prefs = {
+      lowStockAlerts: true,
+      restockConfirmations: true,
+      emailNotifications: true,
+    };
     try {
       prefs = await notificationService.getPreferences();
     } catch (err) {
@@ -31,26 +55,11 @@ export function useNotifications() {
     }
 
     // 2. Get local read states
-    const savedReadState = localStorage.getItem(
-      "smart-stock:read-notifications",
-    );
-    let readState: Record<string, boolean> = {};
-    if (savedReadState) {
-      try {
-        readState = JSON.parse(savedReadState);
-      } catch (e) {}
-    }
+    const readState = readBooleanMap("smart-stock:read-notifications");
 
     // 3. Get cleared notifications
-    const savedClearedState = localStorage.getItem(
-      "smart-stock:cleared-notifications",
-    );
-    let clearedState: Record<string, boolean> = {};
-    if (savedClearedState) {
-      try {
-        clearedState = JSON.parse(savedClearedState);
-      } catch (e) {}
-    }
+    const clearedState = readBooleanMap("smart-stock:cleared-notifications");
+    const emailedState = readBooleanMap(EMAILED_NOTIFICATIONS_KEY);
 
     const {
       data: { user },
@@ -129,6 +138,35 @@ export function useNotifications() {
 
     // Sort by time descending (newest first)
     newNotifications.sort((a, b) => b.time.getTime() - a.time.getTime());
+
+    const emailCandidates = newNotifications.filter(
+      (notification) => !emailedState[notification.id],
+    );
+
+    if (prefs.emailNotifications && emailCandidates.length > 0) {
+      const payload: NotificationEmailItem[] = emailCandidates.map(
+        (notification) => ({
+          id: notification.id,
+          type: notification.type,
+          title: notification.title,
+          message: notification.message,
+          time: notification.time.toISOString(),
+          link: notification.link,
+        }),
+      );
+
+      void sendNotificationEmail(payload)
+        .then(() => {
+          const nextState = { ...emailedState };
+          emailCandidates.forEach((notification) => {
+            nextState[notification.id] = true;
+          });
+          persistBooleanMap(EMAILED_NOTIFICATIONS_KEY, nextState);
+        })
+        .catch((err) => {
+          console.error("Failed to send notification email:", err);
+        });
+    }
 
     setNotifications(newNotifications);
   }, []);
