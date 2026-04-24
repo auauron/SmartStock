@@ -2,6 +2,15 @@
 
 A responsive web-based inventory and restock management system built for small businesses. SmartStock replaces handwritten logs and spreadsheets with a centralized digital platform that lets business owners and staff monitor stock levels, manage products, and track restocking activity from any device.
 
+## Current Status (April 2026)
+
+- Core product pages are implemented: landing, authentication, dashboard, inventory, restock, settings, and 404 fallback.
+- Inventory and restock flows are connected to Supabase tables and an atomic restock RPC.
+- Notification preferences are persisted in Supabase; read/cleared notification state is cached locally.
+- Unit, integration, Storybook, and Playwright test suites are present in the repository.
+- Server-side report generation, low-stock email automation, and realtime subscriptions are still planned.
+- Client-side route guarding for protected pages is still in progress.
+
 ## Overview
 
 Many small retail stores, mini groceries, and supply shops still rely on manual methods to track inventory — leading to inaccurate records, delayed restocking, and lost sales. SmartStock addresses this by providing a modern dashboard where users can:
@@ -41,12 +50,6 @@ smart-stock/
 │   ├── scd-final-project-guide.md
 │   ├── supabase-schema-rls.sql
 │   └── testing.md
-├── server/
-│   ├── functions/              # Server-side functions (planned)
-│   │   ├── generateReport.ts
-│   │   └── sendLowStockAlert.ts
-│   └── utils/
-│       └── emailService.ts
 ├── src/
 │   ├── __tests__/              # Unit & integration tests (Vitest)
 │   │   ├── inventoryFactory.test.ts
@@ -226,9 +229,10 @@ This section is aligned to the SCD final-project requirements by showing pattern
 
 ## Planned / In Progress
 
-- [ ] Implement `generateReport` server function for downloadable inventory reports
-- [ ] Implement `sendLowStockAlert` email notifications via the `emailService` utility
+- [ ] Implement backend report generation for downloadable inventory reports
+- [ ] Implement automated low-stock email alerts
 - [ ] Real-time stock updates using Supabase subscriptions
+- [ ] Add strict client-side route guards for authenticated pages
 
 ## Getting Started
 
