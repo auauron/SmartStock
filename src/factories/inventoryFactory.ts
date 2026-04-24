@@ -36,6 +36,6 @@ static toDb(product: Omit<Inventory, "id"> & { id?: string }, userId: string): P
         quantity: product.quantity,
         min_stock: product.minStock,
         user_id: userId,
-        };
+        }; 
     }
 }

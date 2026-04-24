@@ -37,7 +37,4 @@ export const EditItem: Story = {
   },
 };
 
-// TODO: implement restock story — track in issue tracker (e.g. ISSUE-001)
-// TODO: implement delete story — track in issue tracker (e.g. ISSUE-002)
-// TODO: implement filter categories story — track in issue tracker (e.g. ISSUE-003)
-// TODO: implement search inventory item story — track in issue tracker (e.g. ISSUE-004)
+

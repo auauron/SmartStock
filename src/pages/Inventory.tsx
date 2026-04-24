@@ -1,17 +1,15 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { Plus, Edit2, Trash2, Search, Filter, ArrowUpDown } from "lucide-react";
+import { Plus, Search, Filter, ArrowUpDown } from "lucide-react";
 import { InventoryModal } from "../components/inventory/InventoryModal";
 import type { Inventory } from "../types";
 import { Button } from "../components/ui/Button";
 import { InputField } from "../components/ui/InputField";
 import { DropdownField } from "../components/ui/DropdownField";
 import { useInventory } from "../hooks/useInventory";
-import { DeleteConfirmationModal } from "../components/inventory/DeleteConfirmationModal";
-import { InventorySkeleton } from "../components/inventory/InventorySkeleton";
+import { DeleteConfirmationModal } from "../components/inventory/InventoryDeleteModal";
 import { ToastContainer, useToast } from "../components/ui/Toast";
 import { useAuditLogs } from "../hooks/useAuditLog";
-import { Pagination } from "../components/ui/Pagination";
-import { ActionMenu } from "../components/ui/ActionMenu";
+import { InventoryTable } from "../components/inventory/InventoryTable";
 
 const UNDO_DELAY_MS = 5000;
 
@@ -33,10 +31,10 @@ export function Inventory() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Inventory | null>(null);
   const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const pendingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(
-    new Map(),
+    new Map()
   );
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,11 +57,6 @@ export function Inventory() {
       console.error("UI Error Catch:", err);
       throw err;
     }
-  };
-
-  const openDeleteConfirm = (item: Inventory) => {
-    setItemToDelete(item);
-    setIsDeleteModalOpen(true);
   };
 
   const undoDelete = useCallback((id: string) => {
@@ -116,7 +109,7 @@ export function Inventory() {
 
   const visibleItems = useMemo(
     () => inventory.filter((item) => !pendingDeleteIds.has(item.id)),
-    [inventory, pendingDeleteIds],
+    [inventory, pendingDeleteIds]
   );
 
   const filteredItems = useMemo(() => {
@@ -155,16 +148,16 @@ export function Inventory() {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredItems.length / ITEMS_PER_PAGE),
+    Math.ceil(filteredItems.length / ITEMS_PER_PAGE)
   );
   const paginatedItems = filteredItems.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
   );
 
   const categories = useMemo(
     () => Array.from(new Set(inventory.map((p) => p.category))),
-    [inventory],
+    [inventory]
   );
 
   return (
@@ -243,112 +236,21 @@ export function Inventory() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Item Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Quantity
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {loading ? (
-                <InventorySkeleton rows={5} />
-              ) : paginatedItems.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-10 text-center text-sm text-gray-500"
-                  >
-                    No items match your filters
-                  </td>
-                </tr>
-              ) : (
-                paginatedItems.map((item) => {
-                  const status = getStatus(item);
-                  return (
-                    <tr key={item.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900 capitalize">
-                        {item.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600 capitalize">
-                        {item.category}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                        {item.price.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                        {item.quantity}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}
-                        >
-                          {status.label}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                        <ActionMenu
-                          items={[
-                            {
-                              label: "Edit Item",
-                              icon: Edit2,
-                              onClick: () => {
-                                setEditingItem(item);
-                                setIsModalOpen(true);
-                              },
-                            },
-                            {
-                              label: "Delete Item",
-                              icon: Trash2,
-                              onClick: () => openDeleteConfirm(item),
-                              variant: "danger",
-                            },
-                          ]}
-                          ariaLabel={`Actions for ${item.name}`}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {!loading && filteredItems.length > 0 && (
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between text-sm bg-gray-50/50">
-            <span className="text-gray-500 font-medium">
-              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
-              {Math.min(currentPage * ITEMS_PER_PAGE, filteredItems.length)} of{" "}
-              {filteredItems.length} items
-            </span>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        )}
-      </div>
+      <InventoryTable
+        items={paginatedItems}
+        loading={loading}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        onEdit={(item) => {
+          setEditingItem(item);
+          setIsModalOpen(true);
+        }}
+        onDelete={(item) => {
+          setItemToDelete(item);
+          setIsDeleteModalOpen(true);
+        }}
+      />
 
       <InventoryModal
         key={editingItem?.id || "new-item"}
@@ -374,12 +276,4 @@ export function Inventory() {
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
-}
-
-function getStatus(item: Inventory) {
-  if (item.quantity === 0)
-    return { label: "Out of Stock", color: "bg-red-100 text-red-700" };
-  if (item.quantity < item.minStock)
-    return { label: "Low Stock", color: "bg-yellow-100 text-yellow-700" };
-  return { label: "In Stock", color: "bg-green-100 text-green-700" };
 }
