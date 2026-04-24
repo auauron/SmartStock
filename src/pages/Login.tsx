@@ -8,13 +8,25 @@ import { CheckboxField } from "../components/ui/CheckboxField";
 import { InputField } from "../components/ui/InputField";
 import { useAuthStore } from "../stores/authStore";
 
+const REMEMBER_ME_KEY = "smart-stock:remember-me";
+const REMEMBERED_EMAIL_KEY = "smart-stock:remembered-email";
+
 export function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const { loading, error, signIn, clearError } = useAuthStore();
 
   useEffect(() => {
+    const savedRememberMe = localStorage.getItem(REMEMBER_ME_KEY) === "true";
+    const savedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY) ?? "";
+
+    if (savedRememberMe && savedEmail) {
+      setRememberMe(true);
+      setEmail(savedEmail);
+    }
+
     return () => {
       clearError();
     };
@@ -26,6 +38,14 @@ export function Login() {
 
     if (!success) {
       return;
+    }
+
+    if (rememberMe) {
+      localStorage.setItem(REMEMBER_ME_KEY, "true");
+      localStorage.setItem(REMEMBERED_EMAIL_KEY, email);
+    } else {
+      localStorage.removeItem(REMEMBER_ME_KEY);
+      localStorage.removeItem(REMEMBERED_EMAIL_KEY);
     }
 
     navigate("/dashboard");
@@ -101,6 +121,8 @@ export function Login() {
                   id="remember-me"
                   name="remember-me"
                   label="Remember me"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                 />
 
                 <div className="text-sm">
