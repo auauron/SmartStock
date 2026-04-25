@@ -4,8 +4,6 @@ import {
   BarChart3,
   Bell,
   Shield,
-  AlertTriangle,
-  RefreshCw,
   CheckCircle2,
   ArrowRight,
 } from "lucide-react";

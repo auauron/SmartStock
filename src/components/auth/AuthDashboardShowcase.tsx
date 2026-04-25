@@ -5,7 +5,6 @@ import {
   Package,
   PhilippinePeso,
   RefreshCw,
-  TrendingUp,
 } from "lucide-react";
 import { cn } from "../../lib/cn";
 
