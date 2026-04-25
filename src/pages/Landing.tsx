@@ -437,9 +437,6 @@ function LandingShowcase() {
               <div className="rounded-2xl border border-white/80 bg-white/72 p-3">
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-xs font-semibold text-[#1A221D]">Performance chart</p>
-                  <span className="rounded-full bg-[#F2E9C8] px-2 py-0.5 text-[10px] font-semibold text-[#8A6C20]">
-                    Low Stock
-                  </span>
                 </div>
 
                 <div className="flex h-36 items-end gap-1.5 rounded-xl bg-emerald-50 p-2">

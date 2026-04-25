@@ -96,19 +96,19 @@ const TRANSITION_DURATION_MS = 320;
 const snapshots: ShowcaseSnapshot[] = [
   {
     id: "inventory-overview",
-    badge: "Dashboard Preview",
+    badge: "Dashboard Overview",
     title: "Live Inventory Summary",
     subtitle: "See all key metrics at a glance.",
     hook: "Know exactly what's in stock and what needs attention.",
     insight:
       "Dashboard shows total items, healthy stock, and items needing restock in real-time.",
     icon: Package,
-    iconBgClass: "bg-blue-50",
-    iconColorClass: "text-blue-600",
+    iconBgClass: "bg-emerald-50",
+    iconColorClass: "text-emerald-600",
     metrics: [
-      { label: "Total Products", value: "142", toneClass: "text-gray-900" },
-      { label: "In Stock", value: "118", toneClass: "text-emerald-700" },
-      { label: "Low Stock", value: "24", toneClass: "text-amber-700" },
+      { label: "Total Inventory", value: "1,245", toneClass: "text-gray-900" },
+      { label: "Stock Alerts", value: "12", toneClass: "text-amber-700" },
+      { label: "Weekly Restocks", value: "340", toneClass: "text-emerald-700" },
     ],
   },
   {
@@ -123,9 +123,9 @@ const snapshots: ShowcaseSnapshot[] = [
     iconBgClass: "bg-amber-50",
     iconColorClass: "text-amber-600",
     metrics: [
-      { label: "Critical", value: "3", toneClass: "text-red-700" },
-      { label: "Warning", value: "12", toneClass: "text-amber-700" },
-      { label: "Safe", value: "125", toneClass: "text-emerald-700" },
+      { label: "Low Stock Items", value: "12", toneClass: "text-amber-700" },
+      { label: "Healthy Stock", value: "1,233", toneClass: "text-emerald-700" },
+      { label: "Total Tracked", value: "1,245", toneClass: "text-gray-900" },
     ],
   },
   {
@@ -137,12 +137,12 @@ const snapshots: ShowcaseSnapshot[] = [
     insight:
       "Weekly trends show how much you're restocking and how patterns compare over time.",
     icon: RefreshCw,
-    iconBgClass: "bg-emerald-50",
-    iconColorClass: "text-emerald-600",
+    iconBgClass: "bg-gray-100",
+    iconColorClass: "text-gray-700",
     metrics: [
-      { label: "This Week", value: "156 units", toneClass: "text-gray-900" },
+      { label: "This Week", value: "340 units", toneClass: "text-gray-900" },
       { label: "Trend", value: "+12%", toneClass: "text-emerald-700" },
-      { label: "Avg/Day", value: "22 units", toneClass: "text-blue-700" },
+      { label: "Total Restocks", value: "1,520", toneClass: "text-gray-700" },
     ],
   },
   {
@@ -153,17 +153,17 @@ const snapshots: ShowcaseSnapshot[] = [
     hook: "See exactly how much capital is tied up in inventory.",
     insight: "Analytics show category breakdown and inventory value trends.",
     icon: PhilippinePeso,
-    iconBgClass: "bg-violet-50",
-    iconColorClass: "text-violet-600",
+    iconBgClass: "bg-gray-100",
+    iconColorClass: "text-gray-700",
     metrics: [
       {
         label: "Total Value",
-        value: "PHP 125,450",
+        value: "₱145.2K",
         toneClass: "text-gray-900",
       },
       {
         label: "Top Category",
-        value: "Foods",
+        value: "Electronics",
         toneClass: "text-emerald-700",
       },
       {
@@ -204,14 +204,16 @@ export function SignupDashboardShowcase() {
   const Icon = activeSnapshot.icon;
 
   return (
-    <div className="relative hidden min-h-screen overflow-hidden lg:flex lg:flex-col lg:justify-center lg:px-14 xl:px-20">
+    <div className="relative hidden min-h-screen lg:flex lg:flex-col lg:items-center lg:justify-center p-2">
       <style>{animationStyles}</style>
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/60 via-sky-100/40 to-white" />
-      <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_1px_1px,rgba(15,23,42,0.32)_1px,transparent_0)] [background-size:22px_22px]" />
-      <div className="absolute -left-24 top-16 h-72 w-72 rounded-full bg-emerald-200/30 blur-3xl" />
-      <div className="absolute -right-20 bottom-10 h-80 w-80 rounded-full bg-sky-200/35 blur-3xl" />
+      
+      <div className="absolute inset-4 lg:inset-6 rounded-[2rem] overflow-hidden bg-gradient-to-br from-emerald-100/60 via-sky-100/40 to-white">
+        <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_1px_1px,rgba(15,23,42,0.32)_1px,transparent_0)] [background-size:22px_22px]" />
+        <div className="absolute -left-24 top-16 h-72 w-72 rounded-full bg-emerald-200/30 blur-3xl" />
+        <div className="absolute -right-20 bottom-10 h-80 w-80 rounded-full bg-sky-200/35 blur-3xl" />
+      </div>
 
-      <div className="relative z-10 max-w-xl">
+      <div className="relative z-10 w-full max-w-xl">
         <h2 className="mt-5 text-4xl font-semibold leading-tight text-gray-900 xl:text-5xl">
           Build inventory confidence from day one.
         </h2>
