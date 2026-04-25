@@ -136,8 +136,8 @@ export function Landing() {
             </h1>
 
             <p className="mt-5 max-w-xl text-lg text-gray-600">
-              Smart Stock gives you one operational view for alerts, movement,
-              and restock planning so decisions feel fast and clear.
+              Smart Stock gives you one operational view for inventory value,
+              stock alerts, and weekly restocks so decisions feel fast and clear.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -162,26 +162,26 @@ export function Landing() {
             <div className="mt-9 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="rounded-xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Operational status
+                  Total Inventory
                 </p>
                 <p className="mt-1 text-lg font-bold text-emerald-700">
-                  Live now
+                  Live tracking
                 </p>
               </div>
               <div className="rounded-xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Critical alerts
+                  Stock Alerts
                 </p>
                 <p className="mt-1 text-lg font-bold text-amber-700">
-                  Prioritized
+                  Automated
                 </p>
               </div>
               <div className="rounded-xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Restock planning
+                  Inventory Value
                 </p>
                 <p className="mt-1 text-lg font-bold text-gray-900">
-                  Trend-based
+                  Real-time
                 </p>
               </div>
             </div>
