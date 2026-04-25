@@ -58,10 +58,9 @@ const animationStyles = `
   .metric-item-1 { animation-delay: 60ms; }
   .activity-item-0 { animation-delay: 120ms; }
   .activity-item-1 { animation-delay: 180ms; }
-  .activity-item-2 { animation-delay: 240ms; }
-  .action-item-0 { animation-delay: 300ms; }
-  .action-item-1 { animation-delay: 360ms; }
-  .action-item-2 { animation-delay: 420ms; }
+  .action-item-0 { animation-delay: 240ms; }
+  .action-item-1 { animation-delay: 300ms; }
+  .action-item-2 { animation-delay: 360ms; }
 `;
 
 interface OperationSnapshot {
@@ -218,7 +217,7 @@ export function LoginOpsShowcase() {
     <div className="relative hidden min-h-screen lg:flex lg:items-center lg:justify-center p-2">
       <style>{animationStyles}</style>
 
-      <div className="absolute inset-4 lg:inset-6 rounded-[2rem] overflow-hidden bg-gradient-to-br from-emerald-100/55 via-white to-sky-100/45">
+      <div className="absolute inset-4 lg:inset-6 rounded-[2rem] overflow-hidden bg-linear-to-br from-emerald-100/55 via-white to-sky-100/45">
         <div className="absolute inset-0 opacity-24 [background-image:radial-gradient(circle_at_1px_1px,rgba(15,23,42,0.32)_1px,transparent_0)] [background-size:22px_22px]" />
         <div className="absolute right-8 top-20 h-56 w-56 rounded-full bg-emerald-200/40 blur-3xl" />
         <div className="absolute left-8 bottom-14 h-64 w-64 rounded-full bg-sky-200/35 blur-3xl" />

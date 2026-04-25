@@ -153,8 +153,8 @@ const snapshots: ShowcaseSnapshot[] = [
     hook: "See exactly how much capital is tied up in inventory.",
     insight: "Analytics show category breakdown and inventory value trends.",
     icon: PhilippinePeso,
-    iconBgClass: "bg-gray-100",
-    iconColorClass: "text-gray-700",
+    iconBgClass: "bg-sky-100",
+    iconColorClass: "text-sky-700",
     metrics: [
       {
         label: "Total Value",
@@ -207,7 +207,7 @@ export function SignupDashboardShowcase() {
     <div className="relative hidden min-h-screen lg:flex lg:flex-col lg:items-center lg:justify-center p-2">
       <style>{animationStyles}</style>
       
-      <div className="absolute inset-4 lg:inset-6 rounded-[2rem] overflow-hidden bg-gradient-to-br from-emerald-100/60 via-sky-100/40 to-white">
+      <div className="absolute inset-4 lg:inset-6 rounded-[2rem] overflow-hidden bg-linear-to-br from-emerald-100/60 via-sky-100/40 to-white">
         <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_1px_1px,rgba(15,23,42,0.32)_1px,transparent_0)] [background-size:22px_22px]" />
         <div className="absolute -left-24 top-16 h-72 w-72 rounded-full bg-emerald-200/30 blur-3xl" />
         <div className="absolute -right-20 bottom-10 h-80 w-80 rounded-full bg-sky-200/35 blur-3xl" />

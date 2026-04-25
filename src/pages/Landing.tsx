@@ -300,7 +300,7 @@ export function Landing() {
                 ))}
               </div>
             </div>
-            <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-sky-50 p-8 lg:p-10">
+            <div className="rounded-2xl border border-emerald-100 bg-linear-to-br from-emerald-50 to-sky-50 p-8 lg:p-10">
               <div className="rounded-xl border border-white/90 bg-white/95 p-6 shadow-lg shadow-emerald-100/60">
                 <p className="text-sm font-semibold text-gray-500">
                   At a glance
@@ -402,9 +402,9 @@ export function Landing() {
   );
 }
 
-const chartHeights = [30, 56, 50, 78, 52, 74, 66, 44];
-
 function LandingShowcase() {
+  const chartHeights = [30, 56, 50, 78, 52, 74, 66, 44];
+
   return (
     <div className="relative h-full w-full overflow-visible p-2 sm:p-6">
       <div
