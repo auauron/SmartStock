@@ -136,8 +136,8 @@ export function Landing() {
             </h1>
 
             <p className="mt-5 max-w-xl text-lg text-gray-600">
-              Smart Stock gives you one operational view for alerts, movement,
-              and restock planning so decisions feel fast and clear.
+              Smart Stock gives you one operational view for inventory value,
+              stock alerts, and weekly restocks so decisions feel fast and clear.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -162,110 +162,33 @@ export function Landing() {
             <div className="mt-9 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="rounded-xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Operational status
+                  Total Inventory
                 </p>
                 <p className="mt-1 text-lg font-bold text-emerald-700">
-                  Live now
+                  Live tracking
                 </p>
               </div>
               <div className="rounded-xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Critical alerts
+                  Stock Alerts
                 </p>
                 <p className="mt-1 text-lg font-bold text-amber-700">
-                  Prioritized
+                  Automated
                 </p>
               </div>
               <div className="rounded-xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Restock planning
+                  Inventory Value
                 </p>
                 <p className="mt-1 text-lg font-bold text-gray-900">
-                  Trend-based
+                  Real-time
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="relative">
-            <div className="absolute -left-5 top-4 hidden h-full w-full rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-cyan-50 lg:block" />
-
-            <div className="relative rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_20px_45px_-24px_rgba(17,24,39,0.4)] sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
-                    Live Operations
-                  </p>
-                  <h2 className="mt-1.5 text-xl font-semibold text-gray-900">
-                    Today&apos;s board
-                  </h2>
-                </div>
-                <div className="inline-flex items-center gap-2 rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                  </span>
-                  Synced
-                </div>
-              </div>
-
-              <div className="mt-5 space-y-3">
-                <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
-                  <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="inline-flex items-center gap-2 font-medium text-gray-700">
-                      <AlertTriangle className="h-4 w-4 text-amber-600" />
-                      Low-stock queue
-                    </span>
-                    <span className="font-semibold text-amber-700">
-                      17 items
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full bg-gray-200">
-                    <div className="h-2 w-[58%] rounded-full bg-amber-500" />
-                  </div>
-                </div>
-
-                <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
-                  <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="inline-flex items-center gap-2 font-medium text-gray-700">
-                      <RefreshCw className="h-4 w-4 text-emerald-600" />
-                      Restock completion
-                    </span>
-                    <span className="font-semibold text-emerald-700">
-                      84 units
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full bg-gray-200">
-                    <div className="h-2 w-[74%] rounded-full bg-emerald-500" />
-                  </div>
-                </div>
-
-                <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
-                  <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="inline-flex items-center gap-2 font-medium text-gray-700">
-                      <BarChart3 className="h-4 w-4 text-blue-600" />
-                      Inventory value
-                    </span>
-                    <span className="font-semibold text-gray-900">
-                      PHP 245,400
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full bg-gray-200">
-                    <div className="h-2 w-[66%] rounded-full bg-blue-500" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-lg border border-gray-100 bg-white px-3 py-2.5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Board summary
-                </p>
-                <p className="mt-1 text-sm text-gray-700">
-                  View your current stock status, restock history, and inventory
-                  in one panel.
-                </p>
-              </div>
-            </div>
+          <div className="relative hidden lg:block">
+            <LandingShowcase />
           </div>
         </div>
       </section>
@@ -377,7 +300,7 @@ export function Landing() {
                 ))}
               </div>
             </div>
-            <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-sky-50 p-8 lg:p-10">
+            <div className="rounded-2xl border border-emerald-100 bg-linear-to-br from-emerald-50 to-sky-50 p-8 lg:p-10">
               <div className="rounded-xl border border-white/90 bg-white/95 p-6 shadow-lg shadow-emerald-100/60">
                 <p className="text-sm font-semibold text-gray-500">
                   At a glance
@@ -475,6 +398,87 @@ export function Landing() {
           <p className="text-sm">© 2026 Smart Stock. All rights reserved.</p>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function LandingShowcase() {
+  const chartHeights = [30, 56, 50, 78, 52, 74, 66, 44];
+
+  return (
+    <div className="relative h-full w-full overflow-visible p-2 sm:p-6">
+      <div
+        aria-hidden="true"
+        className="absolute right-[-2%] top-[5%] h-72 w-72 rounded-full bg-emerald-100/70 blur-[90px]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute bottom-[10%] right-[12%] h-80 w-80 rounded-full bg-emerald-200/60 blur-[95px]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute left-[8%] top-[16%] h-96 w-72 rounded-[44%] bg-emerald-200/70"
+      />
+
+      <div className="relative z-10 flex h-full items-center justify-center">
+        <div className="relative w-full max-w-184 -rotate-6 rounded-[1.75rem] border border-white/45 bg-white/45 p-3 shadow-[0_30px_70px_-30px_rgba(70,90,68,0.55)] backdrop-blur-lg transition-transform duration-500 hover:-rotate-3">
+          <div className="grid gap-2 rounded-3xl bg-white/62 p-3 sm:grid-cols-[3.2rem_1fr_13rem]">
+            <div className="rounded-2xl border border-white/70 bg-white/65 p-2">
+              <div className="h-6 w-6 rounded-md bg-emerald-400" />
+              <div className="mt-4 space-y-2">
+                <div className="h-5 w-5 rounded bg-emerald-100/90" />
+                <div className="h-5 w-5 rounded bg-emerald-100/90" />
+                <div className="h-5 w-5 rounded bg-emerald-100/90" />
+              </div>
+              <div className="mt-10 h-5 w-5 rounded bg-emerald-100/90" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="rounded-2xl border border-white/80 bg-white/72 p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-xs font-semibold text-[#1A221D]">Performance chart</p>
+                </div>
+
+                <div className="flex h-36 items-end gap-1.5 rounded-xl bg-emerald-50 p-2">
+                  {chartHeights.map((height, index) => (
+                    <div key={index} className="flex-1 rounded-t-sm bg-emerald-100">
+                      <div
+                        style={{ height: `${height}%` }}
+                        className="w-full rounded-t-sm bg-emerald-400"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="h-20 rounded-2xl border border-white/75 bg-linear-to-br from-emerald-100/80 to-white/75" />
+                <div className="h-20 rounded-2xl border border-white/75 bg-linear-to-br from-emerald-100/80 to-white/75" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="h-[7.2rem] rounded-2xl border border-white/80 bg-white/75 p-2">
+                <div className="h-full w-full rounded-xl bg-linear-to-br from-emerald-200/55 via-emerald-100/45 to-transparent" />
+              </div>
+              <div className="rounded-2xl border border-white/80 bg-white/78 p-3">
+                <p className="text-xs font-semibold text-[#1A221D]">Recent activity</p>
+                <div className="mt-2 space-y-2.5">
+                  {[1, 2, 3, 4].map((item) => (
+                    <div key={item} className="flex items-center gap-2">
+                      <div className="h-5 w-5 rounded-full bg-emerald-200" />
+                      <div className="flex-1 space-y-1">
+                        <div className="h-1.5 w-full rounded bg-emerald-100" />
+                        <div className="h-1.5 w-2/3 rounded bg-emerald-100/80" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
