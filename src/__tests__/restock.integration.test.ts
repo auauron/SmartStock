@@ -1,14 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { testClient, clearDatabase } from "./utils/db";
-
-const TEST_USER_ID = "11111111-1111-1111-1111-111111111111";
+import { describe, it, expect, beforeAll } from "vitest";
+import { testClient, TEST_USER_ID } from "./utils/db";
 
 let createdInventoryId: string;
 let createdRestockId: string;
 
 beforeAll(async () => {
-  await clearDatabase();
-
   const { data, error } = await testClient
     .from("inventories")
     .insert({
@@ -26,9 +22,7 @@ beforeAll(async () => {
   createdInventoryId = data.id;
 });
 
-afterAll(async () => {
-  await clearDatabase();
-});
+
 
 
 describe("Restocks API", () => {

@@ -1,17 +1,7 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { testClient, clearDatabase } from "./utils/db";
-
-const TEST_USER_ID = "11111111-1111-1111-1111-111111111111";
+import { describe, it, expect, } from "vitest";
+import { testClient, TEST_USER_ID } from "./utils/db";
 
 let createdInventoryId: string;
-
-beforeAll(async () => {
-  await clearDatabase();
-});
-
-afterAll(async () => {
-  await clearDatabase();
-});
 
 describe("Inventory API", () => {
   it("POST inventories - should create a new inventory row", async () => {

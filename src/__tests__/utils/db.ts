@@ -1,4 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env.test" });
+const testEmail = process.env.TEST_USER_EMAIL as string;
+const testPassword = process.env.TEST_USER_PASSWORD as string;
 
 // Vitest + Vite automatically loads .env.test during tests —
 // no dotenv needed.
@@ -7,32 +12,14 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 export const testClient = createClient(supabaseUrl, supabaseKey);
 
-export const clearDatabase = async () => {
-  const { error: restockError } = await testClient
-    .from("restocks")
-    .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000");
+// Authenticate so we don't violate RLS policies during testing
+const { data, error } = await testClient.auth.signInWithPassword({
+  email: testEmail,
+  password: testPassword,
+});
 
-  if (restockError) {
-    throw new Error(`Failed to clear restocks: ${restockError.message}`);
-  }
+if (error || !data.user) {
+  throw new Error(`Failed to authenticate testClient: ${error?.message || "No user returned"}. Email: ${testEmail}`);
+}
 
-  const { error: productError } = await testClient
-    .from("inventories")
-    .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000");
-
-  if (productError) {
-    throw new Error(`Failed to clear inventories: ${productError.message}`);
-  }
-
-  // Also clear legacy products table if it exists
-  try {
-    await testClient
-      .from("products")
-      .delete()
-      .neq("id", "00000000-0000-0000-0000-000000000000");
-  } catch (e) {
-    // Ignore if table doesn't exist
-  }
-};
+export const TEST_USER_ID = data.user.id;

@@ -16,6 +16,8 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
  */
 export default defineConfig({
   testDir: './E2E',
+  /* Run this script after all tests complete */
+  globalTeardown: './E2E/helpers/globalTeardown.ts',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */

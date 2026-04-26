@@ -107,39 +107,39 @@ export async function seedRestockEntry(
   return data as { id: string };
 }
 
-// export async function clearDatabase() {
-//   const { client, userId } = await getAuthedSeedClient();
+export async function clearDatabase() {
+  const { client, userId } = await getAuthedSeedClient();
 
-//   // 1. Clear audit logs
-//   const { error: auditError } = await client
-//     .from("audit_logs")
-//     .delete()
-//     .eq("user_id", userId);
+  // 1. Clear audit logs
+  const { error: auditError } = await client
+    .from("audit_logs")
+    .delete()
+    .eq("user_id", userId);
 
-//   if (auditError) {
-//     console.error(`Warning: Failed to clear audit_logs: ${auditError.message}`);
-//   }
+  if (auditError) {
+    console.error(`Warning: Failed to clear audit_logs: ${auditError.message}`);
+  }
 
-//   // 2. Clear restocks (must be before inventories due to FK)
-//   const { error: restockError } = await client
-//     .from("restocks")
-//     .delete()
-//     .eq("user_id", userId);
+  // 2. Clear restocks (must be before inventories due to FK)
+  const { error: restockError } = await client
+    .from("restocks")
+    .delete()
+    .eq("user_id", userId);
 
-//   if (restockError) {
-//     throw new Error(`Failed to clear restocks: ${restockError.message}`);
-//   }
+  if (restockError) {
+    throw new Error(`Failed to clear restocks: ${restockError.message}`);
+  }
 
-//   // 3. Clear inventories
-//   const { error: inventoryError } = await client
-//     .from("inventories")
-//     .delete()
-//     .eq("user_id", userId);
+  // 3. Clear inventories
+  const { error: inventoryError } = await client
+    .from("inventories")
+    .delete()
+    .eq("user_id", userId);
 
-//   if (inventoryError) {
-//     throw new Error(`Failed to clear inventories: ${inventoryError.message}`);
-//   }
-// }
+  if (inventoryError) {
+    throw new Error(`Failed to clear inventories: ${inventoryError.message}`);
+  }
+}
 
 export async function deleteRestocksForInventory(inventoryId: string) {
   const { client } = await getAuthedSeedClient();
