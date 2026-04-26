@@ -110,7 +110,6 @@ export default defineConfig({
           environment: 'node',
           include: ['src/__tests__/**/*.test.ts'],
           exclude: ['src/__tests__/**/*.integration.test.ts'],
-          setupFiles: ['./src/__tests__/setup.ts'],
         }
       },
       {
