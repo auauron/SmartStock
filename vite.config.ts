@@ -118,6 +118,7 @@ export default defineConfig({
           name: 'integration',
           environment: 'node',
           include: ['src/__tests__/**/*.integration.test.ts'],
+          globalSetup: ['./src/__tests__/utils/globalTeardown.ts'],
           // No setupFiles — intentionally no MSW so real Supabase HTTP calls go through
         }
       },
