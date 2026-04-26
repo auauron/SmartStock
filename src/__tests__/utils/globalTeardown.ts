@@ -25,10 +25,9 @@ export async function teardown() {
     return;
   }
 
-  // Must delete in correct dependency order to satisfy foreign keys
-  await testClient.from("audit_logs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   await testClient.from("restocks").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   await testClient.from("inventories").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+  await testClient.from("audit_logs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
 
 
   console.log("Integration test database cleared successfully, yaaayyy!\n");
