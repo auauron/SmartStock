@@ -55,7 +55,14 @@ export function useInventory() {
       if (exists) {
         updated = prev.map((i) => (i.id === item.id ? { ...i, ...item } : i));
       } else {
-        updated = [...prev, { ...item, id: savedId as string }];
+        updated = [
+          {
+            ...item,
+            id: savedId as string,
+            createdAt: item.createdAt ?? new Date(),
+          },
+          ...prev,
+        ];
       }
 
       cache = updated;

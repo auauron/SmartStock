@@ -18,7 +18,8 @@ class InventoryService {
         const { data, error } = await supabase
             .from("inventories")
             .select("*")
-            .eq("user_id", userId);
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false });
 
         if (error) throw error;
         return (data || []).map(InventoryFactory.createFromDb);

@@ -130,6 +130,12 @@ export function Inventory() {
     });
 
     switch (sortBy) {
+      case "latest":
+        result.sort(
+          (a, b) =>
+            (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0),
+        );
+        break;
       case "name-asc":
         result.sort((a, b) => a.name.localeCompare(b.name));
         break;
