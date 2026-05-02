@@ -29,6 +29,7 @@ const emptyProfile: UserProfile = {
   fullName: "",
   email: "",
   businessName: "",
+  avatarUrl: "",
 };
 
 export function Layout() {
@@ -82,6 +83,7 @@ export function Layout() {
         fullName: String(user.user_metadata?.full_name ?? ""),
         email: user.email ?? "",
         businessName: String(user.user_metadata?.business_name ?? ""),
+        avatarUrl: String(user.user_metadata?.avatar_url ?? ""),
       };
 
       if (isMounted) {
@@ -228,8 +230,12 @@ export function Layout() {
           {/* User Profile */}
           <div className="px-3 pb-6 pt-2">
             <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors hover:bg-white/80 cursor-pointer">
-              <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-emerald-700" />
+              <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center overflow-hidden shrink-0">
+                {profile.avatarUrl ? (
+                  <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-4 h-4 text-emerald-700" />
+                )}
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate leading-tight">
@@ -356,8 +362,12 @@ export function Layout() {
                     </div>
                   )}
                 </div>
-                <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-emerald-100 bg-emerald-50">
-                  <User className="w-4 h-4 text-emerald-700" />
+                <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 overflow-hidden shrink-0">
+                  {profile.avatarUrl ? (
+                    <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-4 h-4 text-emerald-700" />
+                  )}
                 </div>
               </div>
             </div>

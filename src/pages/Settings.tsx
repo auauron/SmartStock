@@ -37,6 +37,7 @@ export function Settings() {
     fullName: "",
     email: "",
     businessName: "",
+    avatarUrl: "",
   });
 
   useEffect(() => {
