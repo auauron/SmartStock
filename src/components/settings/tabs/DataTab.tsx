@@ -2,6 +2,14 @@ import { Download } from "lucide-react";
 import { Button } from "../../ui/Button";
 import { useInventory } from "../../../hooks/useInventory";
 
+const FORMULA_PREFIX_PATTERN = /^[=+\-@\t\r]/;
+
+function escapeCsvCell(value: string | number): string {
+  const text = String(value);
+  const safeText = FORMULA_PREFIX_PATTERN.test(text) ? `'${text}` : text;
+  return `"${safeText.replace(/"/g, '""')}"`;
+}
+
 export function DataTab() {
   const { inventory } = useInventory();
 
@@ -15,9 +23,16 @@ export function DataTab() {
       "Minimum Stock Level",
     ];
     
-    const rows = inventory.map(
-      (item) =>
-        `"${item.name}","${item.category}",${item.price},${item.quantity},${item.minStock}`,
+    const rows = inventory.map((item) =>
+      [
+        item.name,
+        item.category,
+        item.price,
+        item.quantity,
+        item.minStock,
+      ]
+        .map(escapeCsvCell)
+        .join(","),
     );
     
     const csvContent =

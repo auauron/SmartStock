@@ -37,6 +37,24 @@ export function SecurityTab() {
     setLoading(true);
     setMessage(null);
     try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user?.email) {
+        throw new Error("Please sign in again before updating your password.");
+      }
+
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+
+      if (verifyError) {
+        throw new Error("Current password is incorrect.");
+      }
+
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
