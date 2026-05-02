@@ -16,16 +16,17 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
  */
 export default defineConfig({
   testDir: './E2E',
+  /* The E2E suite shares one Supabase test user/database, so keep tests serialized. */
+  workers: 1,
+  fullyParallel: false,
+  /* Clear any leftover data from aborted/manual runs before tests start. */
+  globalSetup: './E2E/helpers/globalSetup.ts',
   /* Run this script after all tests complete */
   globalTeardown: './E2E/helpers/globalTeardown.ts',
-  /* Run tests in files in parallel */
-  fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */

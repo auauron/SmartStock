@@ -4,6 +4,7 @@ import {
   RestockFactory,
   RestockRow,
 } from "../factories/restockFactory";
+import { getCurrentUser } from "./currentUser";
 import type {
   CreateRestockInput,
   RestockEntry,
@@ -14,7 +15,7 @@ async function requireUserId(): Promise<string> {
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser();
+  } = await getCurrentUser();
 
   if (error || !user) {
     throw new Error("You must be signed in to manage restocks.");

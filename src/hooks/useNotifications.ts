@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { getCurrentUser } from "../services/currentUser";
 import { notificationService } from "../services/notificationService";
 import {
   notificationSubject,
@@ -22,10 +23,15 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   const fetchNotifications = useCallback(async () => {
+    const {
+      data: { user },
+    } = await getCurrentUser();
+    if (!user) return;
+
     // 1. Get user preferences from Supabase
     let prefs = { lowStockAlerts: true, restockConfirmations: true };
     try {
-      prefs = await notificationService.getPreferences();
+      prefs = await notificationService.getPreferences(user.id);
     } catch (err) {
       console.error("Failed to fetch notification preferences:", err);
     }
@@ -51,11 +57,6 @@ export function useNotifications() {
         clearedState = JSON.parse(savedClearedState);
       } catch (e) {}
     }
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
 
     let newNotifications: AppNotification[] = [];
 

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { UserProfile, LayoutOutletContext } from "../types";
 import { supabase } from "../lib/supabaseClient";
+import { getCurrentUser } from "../services/currentUser";
 import {
   clearCachedProfile,
   readCachedProfile,
@@ -92,7 +93,7 @@ export function Layout() {
     const getInitialUser = async () => {
       const {
         data: { user },
-      } = await supabase.auth.getUser();
+      } = await getCurrentUser();
       if (user && isMounted) {
         updateProfile(user);
       }
