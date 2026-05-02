@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Save, Camera, X, Upload } from "lucide-react";
+import { Save, Camera } from "lucide-react";
 import ReactCrop, { centerCrop, makeAspectCrop, Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 
