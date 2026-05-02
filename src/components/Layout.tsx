@@ -22,6 +22,7 @@ import {
 import { clearCachedLogs } from "../hooks/useAuditLog";
 import { clearInventoryCache } from "../hooks/useInventory";
 import { useNotifications } from "../hooks/useNotifications";
+import { SmartStockOnboarding } from "./onboarding/SmartStockOnboarding";
 
 export type { LayoutOutletContext };
 
@@ -379,6 +380,8 @@ export function Layout() {
           <Outlet context={{ profile }} />
         </main>
       </div>
+
+      <SmartStockOnboarding profile={profile} />
     </div>
   );
 }

@@ -1,9 +1,10 @@
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { LayoutOutletContext } from "../types";
 import { useInventory } from "../hooks/useInventory";
 import { useMemo, useState } from "react";
 import {
   AlertTriangle,
+  CheckCircle2,
   Package,
   PhilippinePeso,
   RefreshCw,
@@ -20,6 +21,7 @@ import { LowStockWidget } from "../components/dashboard/LowStockWidget";
 
 export function Dashboard() {
   const { profile } = useOutletContext<LayoutOutletContext>();
+  const navigate = useNavigate();
   const {
     inventory,
     loading: inventoryLoading,
@@ -168,6 +170,44 @@ export function Dashboard() {
           inventory.
         </p>
       </div>
+
+      {!inventoryLoading && inventory.length === 0 && (
+        <section className="rounded-lg border border-emerald-200 bg-white px-5 py-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">
+                Get your first inventory win
+              </h2>
+              <p className="mt-1 text-sm text-gray-600">
+                Add one product, see it in inventory, and SmartStock will start
+                tracking its stock status.
+              </p>
+              <div className="mt-3 grid gap-2 text-xs text-gray-600 sm:grid-cols-3">
+                {[
+                  "Add a stock item",
+                  "View it in inventory",
+                  "Watch stock status",
+                ].map((item) => (
+                  <span
+                    key={item}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-100 bg-emerald-50 px-2.5 py-1.5 text-emerald-800"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate("/inventory?newItem=1")}
+              className="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+            >
+              Add first item
+            </button>
+          </div>
+        </section>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard {...stats[0]} loading={inventoryLoading} />
