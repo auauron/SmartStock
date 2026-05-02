@@ -35,6 +35,7 @@ smartstock_bundle.txt
 *storybook.log
 storybook-static
 .github/copilot-instructions.md
+*.sql
 
 # Playwright
 /test-results/

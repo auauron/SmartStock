@@ -117,7 +117,7 @@ export async function clearDatabase() {
     .eq("user_id", userId);
 
   if (auditError) {
-    console.error(`Warning: Failed to clear audit_logs: ${auditError.message}`);
+    throw new Error(`Failed to clear audit_logs: ${auditError.message}`);
   }
 
   // 2. Clear restocks (must be before inventories due to FK)

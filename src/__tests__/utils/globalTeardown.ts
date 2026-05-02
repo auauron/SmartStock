@@ -25,10 +25,11 @@ export async function teardown() {
     return;
   }
 
-  await testClient.from("restocks").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  await testClient.from("inventories").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  await testClient.from("audit_logs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+  const userId = data.user.id;
 
+  await testClient.from("audit_logs").delete().eq("user_id", userId);
+  await testClient.from("restocks").delete().eq("user_id", userId);
+  await testClient.from("inventories").delete().eq("user_id", userId);
 
   console.log("Integration test database cleared successfully, yaaayyy!\n");
 }
