@@ -6,11 +6,8 @@ import {
   BarChart3,
   CheckCircle2,
   ClipboardList,
-  Eye,
   PackagePlus,
-  Search,
   Sparkles,
-  Target,
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -48,14 +45,6 @@ const goals = [
   "View current inventory",
   "Check low-stock products",
   "Explore the dashboard",
-];
-
-const checklistItems = [
-  "Choose your role",
-  "Preview the dashboard",
-  "Add one stock item",
-  "Find it in inventory",
-  "Know where stock status lives",
 ];
 
 interface OnboardingPanel {
@@ -104,10 +93,6 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
   const progress = Math.round(((stepIndex + 1) / steps.length) * 100);
   const isDashboard = location.pathname.startsWith("/dashboard");
   const isInventory = location.pathname.startsWith("/inventory");
-  const completedChecklistCount =
-    step === "success"
-      ? checklistItems.length
-      : Math.min(stepIndex + 1, checklistItems.length - 1);
 
   useEffect(() => {
     if (!hasAccountIdentity) {
@@ -285,32 +270,26 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
       panel = {
           icon: Sparkles,
           title: "Welcome to SmartStock",
-          body: "We'll get you to one useful win: add a product, find it in inventory, and know where to watch stock levels.",
+          body: "Let's get your inventory ready in a few quick steps.",
           content: (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                {roles.map((role) => (
-                  <button
-                    key={role}
-                    type="button"
-                    onClick={() => {
-                      setSelectedRole(role);
-                      trackOnboarding("role_selected", { role });
-                    }}
-                    className={`rounded-lg border px-3 py-2 text-left text-sm font-medium transition-colors ${
-                      selectedRole === role
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-800"
-                        : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
-                    }`}
-                  >
-                    {role}
-                  </button>
-                ))}
-              </div>
-              <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600">
-                SmartStock will keep tips focused on inventory work, not every
-                feature at once.
-              </div>
+            <div className="grid grid-cols-2 gap-2">
+              {roles.map((role) => (
+                <button
+                  key={role}
+                  type="button"
+                  onClick={() => {
+                    setSelectedRole(role);
+                    trackOnboarding("role_selected", { role });
+                  }}
+                  className={`rounded-lg border px-3 py-2 text-left text-sm font-medium transition-colors ${
+                    selectedRole === role
+                      ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+                      : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  {role}
+                </button>
+              ))}
             </div>
           ),
           primaryLabel: "Continue",
@@ -325,7 +304,7 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
       panel = {
           icon: ClipboardList,
           title: "What do you want to do first?",
-          body: "Pick the first action that would make SmartStock useful today.",
+          body: "We'll keep the guide focused on the action that matters most.",
           content: (
             <div className="space-y-2">
               {goals.map((goal) => (
@@ -364,20 +343,11 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
       panel = {
           icon: BarChart3,
           title: "Your dashboard shows what needs attention",
-          body: "Use it as your daily inventory pulse: what exists, what is low, what changed, and what needs restocking.",
+          body: "Start with total inventory, stock alerts, recent activity, and restock trends.",
           content: (
-            <div className="grid gap-2 text-sm">
-              <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-blue-900">
-                Total Inventory tells you how many products SmartStock is
-                tracking.
-              </div>
-              <div className="rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-amber-900">
-                Stock Alerts is where low-stock items become visible.
-              </div>
-              <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-emerald-900">
-                Recent Activity helps you audit changes after products are
-                added, edited, or restocked.
-              </div>
+            <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+              Tip: stock alerts only need attention when items reach their
+              minimum stock level.
             </div>
           ),
           primaryLabel: "Add first stock item",
@@ -393,21 +363,11 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
       panel = {
           icon: PackagePlus,
           title: "Add your first stock item",
-          body: "Use the real item form. Start with the basics and SmartStock will do the status tracking.",
+          body: "Use the real item form. You only need the basics now: name, category, price, quantity, and minimum stock.",
           content: (
-            <div className="space-y-2">
-              <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
-                Minimum stock is the alert point. If quantity falls below it,
-                the item appears as low stock.
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                <div className="rounded-lg border border-gray-200 px-3 py-2">
-                  Example item: Rice 5kg
-                </div>
-                <div className="rounded-lg border border-gray-200 px-3 py-2">
-                  Example minimum: 10
-                </div>
-              </div>
+            <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+              After saving, SmartStock will show the item in your inventory list
+              with its stock status.
             </div>
           ),
           primaryLabel: isInventory ? "Open item form" : "Go to inventory",
@@ -422,23 +382,17 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
       panel = {
           icon: CheckCircle2,
           title: "First item added!",
-          body: "That is the first win. Your item is now trackable, searchable, and connected to stock status.",
+          body: "Inventory is ready to track. You can now find this item in the list and watch its stock status.",
           content: (
-            <div className="space-y-3">
-              <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
-                <div className="rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">
-                  Item saved
-                </div>
-                <div className="rounded-lg bg-blue-50 px-3 py-2 text-blue-800">
-                  List updated
-                </div>
-                <div className="rounded-lg bg-amber-50 px-3 py-2 text-amber-800">
-                  Status visible
-                </div>
+            <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
+              <div className="rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">
+                Item saved
               </div>
-              <div className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700">
-                Next best move: add a few more products, then check Stock
-                Alerts after quantities change.
+              <div className="rounded-lg bg-blue-50 px-3 py-2 text-blue-800">
+                List updated
+              </div>
+              <div className="rounded-lg bg-amber-50 px-3 py-2 text-amber-800">
+                Status visible
               </div>
             </div>
           ),
@@ -499,39 +453,6 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
 
               <div className="mt-4">{panel.content}</div>
 
-              <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 px-3 py-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    <Target className="h-3.5 w-3.5" />
-                    First win
-                  </div>
-                  <span className="text-xs font-medium text-gray-500">
-                    {completedChecklistCount}/{checklistItems.length}
-                  </span>
-                </div>
-                <div className="mt-3 space-y-2">
-                  {checklistItems.map((item, index) => {
-                    const done = index < completedChecklistCount;
-
-                    return (
-                      <div
-                        key={item}
-                        className="flex items-center gap-2 text-xs text-gray-700"
-                      >
-                        <CheckCircle2
-                          className={`h-4 w-4 shrink-0 ${
-                            done ? "text-emerald-600" : "text-gray-300"
-                          }`}
-                        />
-                        <span className={done ? "text-gray-700" : "text-gray-500"}>
-                          {item}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
               {step === "dashboard" && isDashboard && (
                 <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-gray-600">
                   <p className="rounded-lg border border-gray-200 px-3 py-2">
@@ -542,19 +463,6 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
                   </p>
                   <p className="rounded-lg border border-gray-200 px-3 py-2">
                     Recent Activity: edits and restocks.
-                  </p>
-                </div>
-              )}
-
-              {step === "inventory" && isInventory && (
-                <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-gray-600">
-                  <p className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2">
-                    <Search className="h-3.5 w-3.5 text-gray-400" />
-                    Search helps you find products by name after your list grows.
-                  </p>
-                  <p className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2">
-                    <Eye className="h-3.5 w-3.5 text-gray-400" />
-                    Status shows whether an item is in stock, low, or out.
                   </p>
                 </div>
               )}

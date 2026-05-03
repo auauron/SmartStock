@@ -7,7 +7,6 @@ import {
   Search,
   Filter,
   ArrowUpDown,
-  CheckCircle2,
 } from "lucide-react";
 import { InventoryModal } from "../components/inventory/InventoryModal";
 import type { Inventory } from "../types";
@@ -351,23 +350,6 @@ export function Inventory() {
                           ? "Start by adding one product. You only need a name, category, price, quantity, and minimum stock level."
                           : "Try another name or category, or clear your filters."}
                       </p>
-                      {visibleItems.length === 0 && (
-                        <div className="mt-4 grid gap-2 text-left text-xs text-gray-600 sm:grid-cols-3">
-                          {[
-                            "Name the product",
-                            "Set quantity",
-                            "Choose alert level",
-                          ].map((item) => (
-                            <span
-                              key={item}
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5"
-                            >
-                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                              {item}
-                            </span>
-                          ))}
-                        </div>
-                      )}
                       <div className="mt-4 flex justify-center gap-2">
                         {visibleItems.length === 0 ? (
                           <Button

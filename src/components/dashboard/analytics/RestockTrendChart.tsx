@@ -100,10 +100,10 @@ export function RestockTrendChart({ history, loading }: RestockTrendChartProps) 
       <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <div>
           <h3 className="text-base font-semibold text-gray-900">
-            Restock Activity
+            Restock Trend
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
-            Units restocked per day (14-day window)
+            Quantity added each day over the last 14 days
           </p>
         </div>
         <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded">
@@ -115,7 +115,7 @@ export function RestockTrendChart({ history, loading }: RestockTrendChartProps) 
         {history.length === 0 ? (
           <div className="h-64 flex items-center justify-center">
             <p className="text-gray-500 text-sm text-center">
-              Start restocking items to see trend data
+              Add restock entries to see quantity trends
             </p>
           </div>
         ) : (

@@ -69,12 +69,22 @@ export function Layout() {
     0,
     Math.floor((nowTick - lastUpdatedAt) / 60000),
   );
+  const hoursSinceUpdate = Math.floor(minutesSinceUpdate / 60);
+  const remainingMinutes = minutesSinceUpdate % 60;
   const lastUpdatedLabel =
     minutesSinceUpdate === 0
       ? "Last updated: just now"
-      : minutesSinceUpdate === 1
-        ? "Last updated: 1 min ago"
-        : `Last updated: ${minutesSinceUpdate} mins ago`;
+      : hoursSinceUpdate > 0
+        ? `Last updated: ${hoursSinceUpdate} ${
+            hoursSinceUpdate === 1 ? "hr" : "hrs"
+          }${
+            remainingMinutes > 0
+              ? ` ${remainingMinutes} ${remainingMinutes === 1 ? "min" : "mins"}`
+              : ""
+          } ago`
+        : minutesSinceUpdate === 1
+          ? "Last updated: 1 min ago"
+          : `Last updated: ${minutesSinceUpdate} mins ago`;
 
   useEffect(() => {
     let isMounted = true;
