@@ -133,6 +133,7 @@ export function Dashboard() {
         icon: PhilippinePeso,
         iconBgColor: "bg-purple-50",
         iconColor: "text-purple-600",
+        valueClassName: "text-[clamp(1.25rem,2vw,1.875rem)]",
       },
     ];
 
@@ -169,7 +170,7 @@ export function Dashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,15rem),1fr))] gap-6">
         <StatsCard {...stats[0]} loading={inventoryLoading} />
         <StatsCard {...stats[1]} loading={inventoryLoading} />
         <StatsCard {...stats[2]} loading={restockLoading} />

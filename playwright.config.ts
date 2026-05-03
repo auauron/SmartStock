@@ -70,7 +70,8 @@ export default defineConfig({
   webServer: {
     command: 'npx vite --mode test --port 5174',
     url: 'http://localhost:5174',
-    reuseExistingServer: false,
+    reuseExistingServer:
+      !process.env.CI && process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === 'true',
   },
 
 });

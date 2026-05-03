@@ -208,7 +208,7 @@ export function RestockIntelligence({
             </p>
           ) : forecasts.every((f) => f.urgency === "healthy") ? (
             <p className="text-gray-500 text-sm text-center py-8">
-              All inventory levels are optimal! 🎉
+              All inventory levels are optimal! 
             </p>
           ) : (
             <div className="space-y-3">

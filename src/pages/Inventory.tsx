@@ -1,5 +1,13 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { Plus, Edit2, Trash2, Search, Filter, ArrowUpDown } from "lucide-react";
+import { useSearchParams } from "react-router";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Search,
+  Filter,
+  ArrowUpDown,
+} from "lucide-react";
 import { InventoryModal } from "../components/inventory/InventoryModal";
 import type { Inventory } from "../types";
 import { Button } from "../components/ui/Button";
@@ -14,6 +22,7 @@ import { Pagination } from "../components/ui/Pagination";
 import { ActionMenu } from "../components/ui/ActionMenu";
 
 const UNDO_DELAY_MS = 5000;
+const ONBOARDING_ACTIVE_KEY = "smartstock:onboarding-active";
 
 export function Inventory() {
   const {
@@ -41,20 +50,59 @@ export function Inventory() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, filterCategory, sortBy]);
 
+  useEffect(() => {
+    if (searchParams.get("newItem") !== "1") return;
+
+    const timer = window.setTimeout(() => {
+      setEditingItem(undefined);
+      setIsModalOpen(true);
+
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("newItem");
+      nextParams.delete("onboarding");
+      setSearchParams(nextParams, { replace: true });
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [searchParams, setSearchParams]);
+
   const { refresh: refreshLogs } = useAuditLogs();
   const { toasts, addToast, dismissToast } = useToast();
 
   const handleSave = async (itemData: Inventory): Promise<void> => {
+    const isNewItem = !itemData.id;
+
     try {
       await saveInventory(itemData);
       await refreshLogs();
       setIsModalOpen(false);
       setEditingItem(undefined);
+
+      if (isNewItem) {
+        const onboardingActive =
+          localStorage.getItem(ONBOARDING_ACTIVE_KEY) === "true";
+
+        addToast({
+          message: onboardingActive
+            ? "First item added! Inventory is ready to track."
+            : `"${itemData.name}" added to inventory.`,
+          durationMs: 4000,
+        });
+
+        if (onboardingActive) {
+          window.dispatchEvent(
+            new CustomEvent("smartstock:onboarding-item-added", {
+              detail: { name: itemData.name },
+            }),
+          );
+        }
+      }
     } catch (err) {
       console.error("UI Error Catch:", err);
       throw err;
@@ -176,9 +224,14 @@ export function Inventory() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 sm:px-5">
-        <p className="text-sm text-gray-600">
-          Track stock levels, pricing, and categories in one place.
-        </p>
+        <div>
+          <p className="text-sm font-medium text-gray-900">
+            Inventory is where every stock item lives.
+          </p>
+          <p className="text-xs text-gray-500">
+            Search, update quantities, and check stock status at a glance.
+          </p>
+        </div>
         <Button
           onClick={() => {
             setEditingItem(undefined);
@@ -269,6 +322,9 @@ export function Inventory() {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Status
+                  <span className="ml-1 normal-case text-gray-400">
+                    (In stock, low, or out)
+                  </span>
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
                   Actions
@@ -282,9 +338,45 @@ export function Inventory() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-6 py-10 text-center text-sm text-gray-500"
+                    className="px-6 py-12 text-center"
                   >
-                    No items match your filters
+                    <div className="mx-auto max-w-sm">
+                      <p className="text-sm font-semibold text-gray-900">
+                        {visibleItems.length === 0
+                          ? "Your inventory is empty"
+                          : "No matching products"}
+                      </p>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {visibleItems.length === 0
+                          ? "Start by adding one product. You only need a name, category, price, quantity, and minimum stock level."
+                          : "Try another name or category, or clear your filters."}
+                      </p>
+                      <div className="mt-4 flex justify-center gap-2">
+                        {visibleItems.length === 0 ? (
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              setEditingItem(undefined);
+                              setIsModalOpen(true);
+                            }}
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add product
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => {
+                              setSearchQuery("");
+                              setFilterCategory("");
+                            }}
+                          >
+                            Clear filters
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ) : (

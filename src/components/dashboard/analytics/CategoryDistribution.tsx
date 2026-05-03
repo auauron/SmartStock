@@ -104,6 +104,10 @@ export function CategoryDistribution({
       (a, b) => b.totalQuantity - a.totalQuantity
     );
   }, [inventory]);
+  const needsHorizontalScroll = chartData.length > 5;
+  const chartMinWidth = needsHorizontalScroll
+    ? `${Math.max(chartData.length * 88, 440)}px`
+    : "100%";
 
   if (loading) {
     return (
@@ -131,7 +135,7 @@ export function CategoryDistribution({
           </p>
         </div>
         <span className="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2 py-1 rounded">
-          {chartData.length} categories
+          {chartData.length} {chartData.length === 1 ? "category" : "categories"}
         </span>
       </div>
 
@@ -143,12 +147,20 @@ export function CategoryDistribution({
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto overflow-y-hidden pb-2" style={{ scrollbarWidth: 'thin' }}>
-            <div style={{ minWidth: `${Math.max(chartData.length * 80, 400)}px` }}>
-              <ResponsiveContainer width="100%" height={256}>
+          <div
+            className={
+              needsHorizontalScroll
+                ? "overflow-x-auto overflow-y-hidden pb-2"
+                : "overflow-hidden pb-2"
+            }
+            style={{ scrollbarWidth: "thin" }}
+          >
+            <div style={{ minWidth: chartMinWidth }}>
+              <ResponsiveContainer width="100%" height={232}>
                 <BarChart
                   data={chartData}
-                  margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
+                  margin={{ top: 12, right: 14, left: -12, bottom: 0 }}
+                  barCategoryGap={chartData.length === 1 ? "64%" : "28%"}
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"
@@ -172,7 +184,8 @@ export function CategoryDistribution({
                   <Tooltip content={<CustomTooltip />} />
                   <Bar
                     dataKey="totalQuantity"
-                    radius={[4, 4, 0, 0]}
+                    maxBarSize={72}
+                    radius={[6, 6, 0, 0]}
                     animationDuration={800}
                     animationBegin={300}
                   >
@@ -185,9 +198,14 @@ export function CategoryDistribution({
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-        </div>
-      </div>
-    )}
+              {chartData.length === 1 && (
+                <p className="mt-2 text-center text-xs text-gray-500">
+                  Add another category to compare stock distribution.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

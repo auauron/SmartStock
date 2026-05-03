@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "../lib/supabaseClient";
 import type { SignUpPayload } from "../types";
+import { createOnboardingForUser } from "../services/onboardingService";
 
 interface AuthState {
   loading: boolean;
@@ -219,7 +220,7 @@ export const authStore: AuthStore = {
   signUp: async ({ email, password, fullName, businessName }) => {
     setState({ loading: true, error: null });
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -233,6 +234,12 @@ export const authStore: AuthStore = {
     if (error) {
       setState({ loading: false, error: mapAuthError(error) });
       return false;
+    }
+
+    if (data.user) {
+      void createOnboardingForUser(data.user.id).catch((onboardingError) => {
+        console.error("Failed to create onboarding row:", onboardingError);
+      });
     }
 
     setState({ loading: false, error: null });
