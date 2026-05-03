@@ -7,7 +7,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
 } from "recharts";
 import type { Inventory } from "../../../types";
 
@@ -23,20 +22,7 @@ interface CategoryData {
   totalValue: number;
 }
 
-const COLORS = [
-  "#10b981",
-  "#3b82f6",
-  "#f59e0b",
-  "#ef4444",
-  "#ec4899",
-  "#06b6d4",
-  "#84cc16",
-  "#f97316",
-];
-
-function truncate(str: string, max: number) {
-  return str.length > max ? str.slice(0, max) + "…" : str;
-}
+const CATEGORY_GRADIENT_ID = "categoryDistributionGradient";
 
 function CustomTooltip({
   active,
@@ -104,10 +90,24 @@ export function CategoryDistribution({
       (a, b) => b.totalQuantity - a.totalQuantity
     );
   }, [inventory]);
-  const needsHorizontalScroll = chartData.length > 5;
-  const chartMinWidth = needsHorizontalScroll
-    ? `${Math.max(chartData.length * 88, 440)}px`
-    : "100%";
+  const visibleChartData = useMemo(() => {
+    if (chartData.length <= 5) return chartData;
+
+    const topCategories = chartData.slice(0, 5);
+    const otherCategories = chartData.slice(5);
+    const others = otherCategories.reduce<CategoryData>(
+      (total, item) => ({
+        name: "Others",
+        itemCount: total.itemCount + item.itemCount,
+        totalQuantity: total.totalQuantity + item.totalQuantity,
+        totalValue: total.totalValue + item.totalValue,
+      }),
+      { name: "Others", itemCount: 0, totalQuantity: 0, totalValue: 0 },
+    );
+
+    return [...topCategories, others];
+  }, [chartData]);
+  const chartHeight = 220;
 
   if (loading) {
     return (
@@ -134,12 +134,12 @@ export function CategoryDistribution({
             Inventory breakdown by category
           </p>
         </div>
-        <span className="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2 py-1 rounded">
+        <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded">
           {chartData.length} {chartData.length === 1 ? "category" : "categories"}
         </span>
       </div>
 
-      <div className="p-6">
+      <div className="px-4 py-3">
         {chartData.length === 0 ? (
           <div className="h-64 flex items-center justify-center">
             <p className="text-gray-500 text-sm text-center">
@@ -147,20 +147,13 @@ export function CategoryDistribution({
             </p>
           </div>
         ) : (
-          <div
-            className={
-              needsHorizontalScroll
-                ? "overflow-x-auto overflow-y-hidden pb-2"
-                : "overflow-hidden pb-2"
-            }
-            style={{ scrollbarWidth: "thin" }}
-          >
-            <div style={{ minWidth: chartMinWidth }}>
-              <ResponsiveContainer width="100%" height={232}>
+          <div className="overflow-hidden pb-2">
+            <div>
+              <ResponsiveContainer width="100%" height={chartHeight}>
                 <BarChart
-                  data={chartData}
-                  margin={{ top: 12, right: 14, left: -12, bottom: 0 }}
-                  barCategoryGap={chartData.length === 1 ? "64%" : "28%"}
+                  data={visibleChartData}
+                  margin={{ top: 4, right: 14, left: -12, bottom: 0 }}
+                  barCategoryGap={visibleChartData.length === 1 ? "52%" : "16%"}
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"
@@ -169,11 +162,11 @@ export function CategoryDistribution({
                   />
                   <XAxis
                     dataKey="name"
-                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    tick={{ fontSize: 11, fill: "#6b7280", angle: -20, textAnchor: "end" }}
                     axisLine={{ stroke: "#e5e7eb" }}
                     tickLine={false}
                     interval={0}
-                    tickFormatter={(v: string) => truncate(v, 11)}
+                    height={42}
                   />
                   <YAxis
                     tick={{ fontSize: 11, fill: "#6b7280" }}
@@ -184,18 +177,24 @@ export function CategoryDistribution({
                   <Tooltip content={<CustomTooltip />} />
                   <Bar
                     dataKey="totalQuantity"
-                    maxBarSize={72}
+                    fill={`url(#${CATEGORY_GRADIENT_ID})`}
+                    maxBarSize={96}
                     radius={[6, 6, 0, 0]}
                     animationDuration={800}
                     animationBegin={300}
-                  >
-                    {chartData.map((_, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Bar>
+                  />
+                  <defs>
+                    <linearGradient
+                      id={CATEGORY_GRADIENT_ID}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="0%" stopColor="#10b981" />
+                      <stop offset="100%" stopColor="#34d399" />
+                    </linearGradient>
+                  </defs>
                 </BarChart>
               </ResponsiveContainer>
               {chartData.length === 1 && (

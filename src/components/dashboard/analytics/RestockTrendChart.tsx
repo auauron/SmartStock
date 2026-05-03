@@ -111,7 +111,7 @@ export function RestockTrendChart({ history, loading }: RestockTrendChartProps) 
         </span>
       </div>
 
-      <div className="p-6">
+      <div className="px-4 py-3">
         {history.length === 0 ? (
           <div className="h-64 flex items-center justify-center">
             <p className="text-gray-500 text-sm text-center">
@@ -119,10 +119,10 @@ export function RestockTrendChart({ history, loading }: RestockTrendChartProps) 
             </p>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={256}>
+          <ResponsiveContainer width="100%" height={220}>
             <AreaChart
               data={chartData}
-              margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
+              margin={{ top: 4, right: 8, left: -16, bottom: 0 }}
             >
               <defs>
                 <linearGradient
