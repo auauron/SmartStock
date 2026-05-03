@@ -29,7 +29,7 @@ export async function getRestockInventory(): Promise<RestockInventoryOption[]> {
 
   const { data, error } = await supabase
     .from("inventories")
-    .select("id, name")
+    .select("id, name, quantity, min_stock")
     .eq("user_id", userId)
     .order("name", { ascending: true });
 
@@ -40,6 +40,8 @@ export async function getRestockInventory(): Promise<RestockInventoryOption[]> {
   return (data ?? []).map((row) => ({
     id: row.id,
     name: row.name,
+    quantity: row.quantity,
+    minStock: row.min_stock,
   })) as RestockInventoryOption[];
 }
 

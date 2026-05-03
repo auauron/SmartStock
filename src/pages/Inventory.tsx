@@ -322,9 +322,7 @@ export function Inventory() {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Status
-                  <span className="ml-1 normal-case text-gray-400">
-                    (In stock, low, or out)
-                  </span>
+                
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
                   Actions

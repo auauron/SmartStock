@@ -17,12 +17,18 @@ interface CategoryDistributionProps {
 
 interface CategoryData {
   name: string;
+  displayName: string;
   itemCount: number;
   totalQuantity: number;
   totalValue: number;
 }
 
 const CATEGORY_GRADIENT_ID = "categoryDistributionGradient";
+const MAX_VISIBLE_CATEGORIES = 5;
+
+function shortenChartLabel(label: string) {
+  return label.length > 11 ? `${label.slice(0, 8)}...` : label;
+}
 
 function CustomTooltip({
   active,
@@ -43,7 +49,11 @@ function CustomTooltip({
       <p className="text-xs font-semibold text-gray-900 mb-1">{d.name}</p>
       <div className="space-y-0.5 text-xs text-gray-600">
         <p>
-          <span className="text-gray-400">Items:</span>{" "}
+          <span className="text-gray-400">Full name:</span>{" "}
+          <span className="font-medium text-gray-900">{d.name}</span>
+        </p>
+        <p>
+          <span className="text-gray-400">Count:</span>{" "}
           <span className="font-medium text-gray-900">{d.itemCount}</span>
         </p>
         <p>
@@ -79,6 +89,7 @@ export function CategoryDistribution({
       } else {
         map.set(cat, {
           name: cat,
+          displayName: shortenChartLabel(cat),
           itemCount: 1,
           totalQuantity: item.quantity,
           totalValue: item.price * item.quantity,
@@ -87,22 +98,29 @@ export function CategoryDistribution({
     }
 
     return Array.from(map.values()).sort(
-      (a, b) => b.totalQuantity - a.totalQuantity
+      (a, b) => b.itemCount - a.itemCount
     );
   }, [inventory]);
   const visibleChartData = useMemo(() => {
-    if (chartData.length <= 5) return chartData;
+    if (chartData.length <= MAX_VISIBLE_CATEGORIES) return chartData;
 
-    const topCategories = chartData.slice(0, 5);
-    const otherCategories = chartData.slice(5);
+    const topCategories = chartData.slice(0, MAX_VISIBLE_CATEGORIES);
+    const otherCategories = chartData.slice(MAX_VISIBLE_CATEGORIES);
     const others = otherCategories.reduce<CategoryData>(
       (total, item) => ({
         name: "Others",
+        displayName: "Others",
         itemCount: total.itemCount + item.itemCount,
         totalQuantity: total.totalQuantity + item.totalQuantity,
         totalValue: total.totalValue + item.totalValue,
       }),
-      { name: "Others", itemCount: 0, totalQuantity: 0, totalValue: 0 },
+      {
+        name: "Others",
+        displayName: "Others",
+        itemCount: 0,
+        totalQuantity: 0,
+        totalValue: 0,
+      },
     );
 
     return [...topCategories, others];
@@ -131,11 +149,11 @@ export function CategoryDistribution({
             Category Distribution
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
-            Inventory breakdown by category
+            Top 5 categories by item count
           </p>
         </div>
         <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded">
-          {chartData.length} {chartData.length === 1 ? "category" : "categories"}
+          {chartData.length} total
         </span>
       </div>
 
@@ -161,12 +179,13 @@ export function CategoryDistribution({
                     vertical={false}
                   />
                   <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 11, fill: "#6b7280", angle: -20, textAnchor: "end" }}
+                    dataKey="displayName"
+                    tick={{ fontSize: 11, fill: "#6b7280" }}
                     axisLine={{ stroke: "#e5e7eb" }}
                     tickLine={false}
                     interval={0}
-                    height={42}
+                    height={28}
+                    tickFormatter={(value: string) => value}
                   />
                   <YAxis
                     tick={{ fontSize: 11, fill: "#6b7280" }}
@@ -176,7 +195,7 @@ export function CategoryDistribution({
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Bar
-                    dataKey="totalQuantity"
+                    dataKey="itemCount"
                     fill={`url(#${CATEGORY_GRADIENT_ID})`}
                     maxBarSize={96}
                     radius={[6, 6, 0, 0]}

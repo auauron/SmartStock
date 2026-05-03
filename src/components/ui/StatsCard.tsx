@@ -1,4 +1,10 @@
-import { LucideIcon, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import {
+  ArrowUpRight,
+  LucideIcon,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+} from "lucide-react";
 
 export interface StatsCardProps {
   title: string;
@@ -87,9 +93,10 @@ export function StatsCard({
                   type="button"
                   onClick={onAction}
                   disabled={actionDisabled}
-                  className="text-[11px] font-semibold text-emerald-700 transition-colors hover:text-emerald-800 disabled:cursor-not-allowed disabled:text-gray-400"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 transition-colors hover:text-amber-800 disabled:cursor-not-allowed disabled:text-gray-400"
                 >
                   {actionLabel}
+                  <ArrowUpRight className="h-3 w-3" />
                 </button>
               ) : null}
             </div>
