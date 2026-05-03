@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router";
 import {
@@ -85,6 +85,7 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
   const [statusLoading, setStatusLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState("Inventory manager");
   const [selectedGoal, setSelectedGoal] = useState("Add my first stock item");
+  const hasTrackedOpenRef = useRef(false);
 
   const hasAccountIdentity = Boolean(
     profile.email.trim() || profile.businessName.trim(),
@@ -151,17 +152,17 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
   }, [inventory.length, loading, onboarding?.status, statusLoading, step]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      hasTrackedOpenRef.current = false;
+      return;
+    }
 
     localStorage.setItem(ACTIVE_KEY, "true");
-    trackOnboarding("onboarding_started", { step });
-
-    return () => {
-      if (onboarding?.status === "completed") {
-        localStorage.removeItem(ACTIVE_KEY);
-      }
-    };
-  }, [isOpen, onboarding?.status, step]);
+    if (!hasTrackedOpenRef.current) {
+      trackOnboarding("onboarding_started", { step });
+      hasTrackedOpenRef.current = true;
+    }
+  }, [isOpen, step]);
 
   useEffect(() => {
     const handleFirstItemAdded = (event: Event) => {

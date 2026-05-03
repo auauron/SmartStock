@@ -198,10 +198,14 @@ export function CategoryDistribution({
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-              {chartData.length === 1}
-        </div>
-      </div>
-    )}
+              {chartData.length === 1 && (
+                <p className="mt-2 text-center text-xs text-gray-500">
+                  Add another category to compare stock distribution.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

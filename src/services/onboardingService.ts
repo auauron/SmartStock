@@ -49,7 +49,7 @@ async function getUserId() {
   } = await getCurrentUser();
 
   if (error) throw error;
-  if (!user) throw new Error("You must be signed in to update onboarding.");
+  if (!user) throw new Error("You must be signed in to access onboarding.");
 
   return user.id;
 }

@@ -41,7 +41,7 @@ test.describe("Inventory End-to-End Flow", () => {
     const categoryDropdown = modal.locator("#inventory-category");
     const customInput = modal.locator("#inventory-new-category");
 
-    if (await categoryDropdown.isVisible().catch(() => false)) {
+    if (await categoryDropdown.isVisible()) {
       await categoryDropdown.click();
       await modal.getByRole("option", { name: "+ Add New Category" }).click();
     }

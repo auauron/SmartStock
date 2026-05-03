@@ -237,11 +237,9 @@ export const authStore: AuthStore = {
     }
 
     if (data.user) {
-      try {
-        await createOnboardingForUser(data.user.id);
-      } catch (onboardingError) {
+      void createOnboardingForUser(data.user.id).catch((onboardingError) => {
         console.error("Failed to create onboarding row:", onboardingError);
-      }
+      });
     }
 
     setState({ loading: false, error: null });
