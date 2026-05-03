@@ -245,22 +245,44 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
     setIsOpen(false);
   };
 
-  const goToDashboard = async () => {
-    try {
-      const nextOnboarding = await startOnboarding(selectedRole, selectedGoal);
-      setOnboarding(nextOnboarding);
-    } catch (error) {
-      console.error("Failed to start onboarding:", error);
-    }
-    setStep("dashboard");
-    trackOnboarding("dashboard_intro_viewed");
-    navigate("/dashboard");
-  };
-
   const goToInventoryAdd = () => {
     setStep("inventory");
     trackOnboarding("first_item_started");
-    navigate("/inventory?newItem=1");
+    navigate(`/inventory?newItem=1&onboarding=${Date.now()}`);
+  };
+
+  const startSelectedGoal = () => {
+    void startOnboarding(selectedRole, selectedGoal)
+      .then((nextOnboarding) => {
+        setOnboarding(nextOnboarding);
+      })
+      .catch((error) => {
+        console.error("Failed to start onboarding:", error);
+      });
+
+    trackOnboarding("goal_started", { goal: selectedGoal });
+
+    if (selectedGoal === "Add my first stock item") {
+      goToInventoryAdd();
+      return;
+    }
+
+    if (selectedGoal === "View current inventory") {
+      setStep("inventory");
+      navigate("/inventory");
+      return;
+    }
+
+    if (selectedGoal === "Check low-stock products") {
+      setStep("dashboard");
+      navigate("/dashboard");
+      trackOnboarding("low_stock_intro_viewed");
+      return;
+    }
+
+    setStep("dashboard");
+    trackOnboarding("dashboard_intro_viewed");
+    navigate("/dashboard");
   };
 
   let panel: OnboardingPanel;
@@ -331,7 +353,7 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
           ),
           primaryLabel: "Start",
           primaryAction: () => {
-            void goToDashboard();
+            startSelectedGoal();
           },
           secondaryLabel: "Explore on my own",
           secondaryAction: () => {
@@ -404,7 +426,7 @@ export function SmartStockOnboarding({ profile }: SmartStockOnboardingProps) {
           secondaryLabel: "Add more items",
           secondaryAction: () => {
             void complete();
-            navigate("/inventory?newItem=1");
+            navigate(`/inventory?newItem=1&onboarding=${Date.now()}`);
           },
       };
       break;

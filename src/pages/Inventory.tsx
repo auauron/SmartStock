@@ -65,6 +65,7 @@ export function Inventory() {
 
       const nextParams = new URLSearchParams(searchParams);
       nextParams.delete("newItem");
+      nextParams.delete("onboarding");
       setSearchParams(nextParams, { replace: true });
     }, 0);
 

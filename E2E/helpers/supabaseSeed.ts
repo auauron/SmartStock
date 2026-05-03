@@ -141,6 +141,28 @@ export async function clearDatabase() {
   }
 }
 
+export async function resetOnboarding(status = "not_started") {
+  const { client, userId } = await getAuthedSeedClient();
+
+  const { error } = await client.from("user_onboarding").upsert(
+    {
+      user_id: userId,
+      status,
+      role: null,
+      first_goal: null,
+      started_at: null,
+      completed_at: null,
+      skipped_at: null,
+      first_item_added_at: null,
+    },
+    { onConflict: "user_id" },
+  );
+
+  if (error) {
+    throw new Error(`Failed to reset onboarding state: ${error.message}`);
+  }
+}
+
 export async function deleteRestocksForInventory(inventoryId: string) {
   const { client } = await getAuthedSeedClient();
 
