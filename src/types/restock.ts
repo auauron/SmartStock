@@ -10,6 +10,8 @@ export interface RestockEntry {
 export interface RestockInventoryOption {
   id: string;
   name: string;
+  quantity: number;
+  minStock: number;
 }
 
 export interface CreateRestockInput {

@@ -16,7 +16,6 @@ import { ActivityModal } from "../components/dashboard/ActivityModal";
 import { SmartAnalytics } from "../components/dashboard/SmartAnalytics";
 import { LowStockModal } from "../components/dashboard/LowStockModal";
 import { RecentActivityWidget } from "../components/dashboard/RecentActivityWidget";
-import { LowStockWidget } from "../components/dashboard/LowStockWidget";
 
 export function Dashboard() {
   const { profile } = useOutletContext<LayoutOutletContext>();
@@ -101,6 +100,8 @@ export function Dashboard() {
         icon: AlertTriangle,
         iconBgColor: "bg-amber-50",
         iconColor: "text-amber-600",
+        actionLabel: "Review",
+        onAction: () => setIsLowStockModalOpen(true),
         actionDisabled: lowStock.length === 0,
       },
       {
@@ -183,19 +184,11 @@ export function Dashboard() {
         loading={inventoryLoading || restockLoading}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <LowStockWidget
-          items={lowStockItems}
-          loading={inventoryLoading}
-          onViewAll={() => setIsLowStockModalOpen(true)}
-        />
-
-        <RecentActivityWidget
-          activities={recentActivity}
-          loading={logsLoading || restockLoading}
-          onViewAll={() => setIsActivityModalOpen(true)}
-        />
-      </div>
+      <RecentActivityWidget
+        activities={recentActivity}
+        loading={logsLoading || restockLoading}
+        onViewAll={() => setIsActivityModalOpen(true)}
+      />
 
       <ActivityModal
         isOpen={isActivityModalOpen}
