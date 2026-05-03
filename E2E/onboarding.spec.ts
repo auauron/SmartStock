@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { resetOnboarding } from "./helpers/supabaseSeed";
+import { clearDatabase, resetOnboarding } from "./helpers/supabaseSeed";
 
 const LOGIN_URL = "/login";
 const DASHBOARD_URL = "/dashboard";
@@ -35,6 +35,7 @@ async function openGoalStep(page: Page) {
 
 test.describe("Onboarding End-to-End Flow", () => {
   test.beforeEach(async ({ page }) => {
+    await clearDatabase();
     await resetOnboarding();
     await login(page);
     await page.goto(DASHBOARD_URL, { waitUntil: "domcontentloaded" });
