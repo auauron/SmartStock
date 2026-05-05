@@ -1,5 +1,12 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { Plus, Search, Filter, ArrowUpDown } from "lucide-react";
+import { useSearchParams } from "react-router";
+import {
+  Plus,
+  Search,
+  Filter,
+  ArrowUpDown,
+  Download,
+} from "lucide-react";
 import { InventoryModal } from "../components/inventory/InventoryModal";
 import type { Inventory } from "../types";
 import { Button } from "../components/ui/Button";
@@ -12,6 +19,87 @@ import { useAuditLogs } from "../hooks/useAuditLog";
 import { InventoryTable } from "../components/inventory/InventoryTable";
 
 const UNDO_DELAY_MS = 5000;
+const ONBOARDING_ACTIVE_KEY = "smartstock:onboarding-active";
+const FORMULA_PREFIX_PATTERN = /^[=+\-@\t\r]/;
+
+export type SortField = "latest" | "name" | "price" | "quantity";
+export type SortDirection = "asc" | "desc";
+
+function escapeCsvCell(value: string | number): string {
+  const text = String(value);
+  const safeText = FORMULA_PREFIX_PATTERN.test(text) ? `'${text}` : text;
+  return `"${safeText.replace(/"/g, '""')}"`;
+}
+
+function getDefaultDirection(field: SortField): SortDirection {
+  return field === "latest" ? "desc" : "asc";
+}
+
+export function getNextSortState(
+  currentField: SortField,
+  currentDirection: SortDirection,
+  nextField: SortField,
+): { field: SortField; direction: SortDirection } {
+  if (currentField === nextField) {
+    return {
+      field: nextField,
+      direction: currentDirection === "asc" ? "desc" : "asc",
+    };
+  }
+
+  return {
+    field: nextField,
+    direction: getDefaultDirection(nextField),
+  };
+}
+
+export function getSortOptionLabel(
+  optionField: SortField,
+  activeField: SortField,
+  direction: SortDirection,
+) {
+  const baseLabels: Record<SortField, string> = {
+    latest: "Latest",
+    name: "Name",
+    price: "Price",
+    quantity: "Quantity",
+  };
+
+  if (optionField !== activeField) return baseLabels[optionField];
+
+  const directionLabels: Record<SortField, Record<SortDirection, string>> = {
+    latest: { asc: "Oldest", desc: "Newest" },
+    name: { asc: "A-Z", desc: "Z-A" },
+    price: { asc: "Low-High", desc: "High-Low" },
+    quantity: { asc: "Low-High", desc: "High-Low" },
+  };
+
+  return `${baseLabels[optionField]} (${directionLabels[optionField][direction]})`;
+}
+
+export function sortInventoryItems(
+  items: Inventory[],
+  field: SortField,
+  direction: SortDirection,
+) {
+  const directionMultiplier = direction === "asc" ? 1 : -1;
+
+  return [...items].sort((a, b) => {
+    switch (field) {
+      case "latest":
+        return (
+          ((a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0)) *
+          directionMultiplier
+        );
+      case "name":
+        return a.name.localeCompare(b.name) * directionMultiplier;
+      case "price":
+        return (a.price - b.price) * directionMultiplier;
+      case "quantity":
+        return (a.quantity - b.quantity) * directionMultiplier;
+    }
+  });
+}
 
 export function Inventory() {
   const {
@@ -27,7 +115,8 @@ export function Inventory() {
   const [editingItem, setEditingItem] = useState<Inventory | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
-  const [sortBy, setSortBy] = useState("latest");
+  const [sortBy, setSortBy] = useState<SortField>("latest");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Inventory | null>(null);
   const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(
@@ -39,20 +128,59 @@ export function Inventory() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, filterCategory, sortBy]);
+  }, [searchQuery, filterCategory, sortBy, sortDirection]);
+
+  useEffect(() => {
+    if (searchParams.get("newItem") !== "1") return;
+
+    const timer = window.setTimeout(() => {
+      setEditingItem(undefined);
+      setIsModalOpen(true);
+
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("newItem");
+      nextParams.delete("onboarding");
+      setSearchParams(nextParams, { replace: true });
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [searchParams, setSearchParams]);
 
   const { refresh: refreshLogs } = useAuditLogs();
   const { toasts, addToast, dismissToast } = useToast();
 
   const handleSave = async (itemData: Inventory): Promise<void> => {
+    const isNewItem = !itemData.id;
+
     try {
       await saveInventory(itemData);
       await refreshLogs();
       setIsModalOpen(false);
       setEditingItem(undefined);
+
+      if (isNewItem) {
+        const onboardingActive =
+          localStorage.getItem(ONBOARDING_ACTIVE_KEY) === "true";
+
+        addToast({
+          message: onboardingActive
+            ? "First item added! Inventory is ready to track."
+            : `"${itemData.name}" added to inventory.`,
+          durationMs: 4000,
+        });
+
+        if (onboardingActive) {
+          window.dispatchEvent(
+            new CustomEvent("smartstock:onboarding-item-added", {
+              detail: { name: itemData.name },
+            }),
+          );
+        }
+      }
     } catch (err) {
       console.error("UI Error Catch:", err);
       throw err;
@@ -122,29 +250,8 @@ export function Inventory() {
       return matchesSearch && matchesCategory;
     });
 
-    switch (sortBy) {
-      case "name-asc":
-        result.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "name-desc":
-        result.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-      case "price-asc":
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case "price-desc":
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case "quantity-asc":
-        result.sort((a, b) => a.quantity - b.quantity);
-        break;
-      case "quantity-desc":
-        result.sort((a, b) => b.quantity - a.quantity);
-        break;
-    }
-
-    return result;
-  }, [visibleItems, searchQuery, filterCategory, sortBy]);
+    return sortInventoryItems(result, sortBy, sortDirection);
+  }, [visibleItems, searchQuery, filterCategory, sortBy, sortDirection]);
 
   const totalPages = Math.max(
     1,
@@ -160,21 +267,64 @@ export function Inventory() {
     [inventory]
   );
 
+  const handleExport = () => {
+    const headers = [
+      "Product Name",
+      "Category",
+      "Unit Price",
+      "Current Stock",
+      "Minimum Stock Level",
+    ];
+
+    const rows = inventory.map((item) =>
+      [item.name, item.category, item.price, item.quantity, item.minStock]
+        .map(escapeCsvCell)
+        .join(","),
+    );
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "inventory_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 sm:px-5">
-        <p className="text-sm text-gray-600">
-          Track stock levels, pricing, and categories in one place.
-        </p>
-        <Button
-          onClick={() => {
-            setEditingItem(undefined);
-            setIsModalOpen(true);
-          }}
-        >
-          <Plus className="w-5 h-5" />
-          Add Item
-        </Button>
+        <div>
+          <p className="text-sm font-medium text-gray-900">
+            Inventory is where every stock item lives.
+          </p>
+          <p className="text-xs text-gray-500">
+            Search, update quantities, and check stock status at a glance.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            onClick={handleExport}
+            disabled={loading || inventory.length === 0}
+            className="h-11 rounded-lg px-4 text-sm font-semibold"
+          >
+            <Download className="w-5 h-5" />
+            Export CSV
+          </Button>
+          <Button
+            onClick={() => {
+              setEditingItem(undefined);
+              setIsModalOpen(true);
+            }}
+            className="h-11 rounded-lg px-4 text-sm font-semibold"
+          >
+            <Plus className="w-5 h-5" />
+            Add Item
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -205,17 +355,30 @@ export function Inventory() {
           <div className="sm:w-48 relative">
             <DropdownField
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => {
+                const next = getNextSortState(
+                  sortBy,
+                  sortDirection,
+                  e.target.value as SortField,
+                );
+                setSortBy(next.field);
+                setSortDirection(next.direction);
+              }}
               icon={ArrowUpDown}
               className="py-2"
             >
-              <option value="latest">Latest</option>
-              <option value="name-asc">Name (A to Z)</option>
-              <option value="name-desc">Name (Z to A)</option>
-              <option value="price-asc">Price (Low - High)</option>
-              <option value="price-desc">Price (High - Low)</option>
-              <option value="quantity-asc">Quantity (Low - High)</option>
-              <option value="quantity-desc">Quantity (High - Low)</option>
+              <option value="latest">
+                {getSortOptionLabel("latest", sortBy, sortDirection)}
+              </option>
+              <option value="name">
+                {getSortOptionLabel("name", sortBy, sortDirection)}
+              </option>
+              <option value="price">
+                {getSortOptionLabel("price", sortBy, sortDirection)}
+              </option>
+              <option value="quantity">
+                {getSortOptionLabel("quantity", sortBy, sortDirection)}
+              </option>
             </DropdownField>
           </div>
           <div className="sm:w-48 relative">

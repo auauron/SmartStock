@@ -40,6 +40,7 @@ export interface UserProfile {
   fullName: string;
   email: string;
   businessName: string;
+  avatarUrl?: string;
 }
 
 export interface NotificationPreferences {

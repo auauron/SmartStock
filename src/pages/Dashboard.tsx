@@ -17,6 +17,7 @@ import { SmartAnalytics } from "../components/dashboard/SmartAnalytics";
 import { LowStockModal } from "../components/dashboard/LowStockModal";
 import { LowStockList } from "../components/dashboard/LowStockList";
 import { RecentActivityList } from "../components/dashboard/RecentActivityList";
+import { RecentActivityWidget } from "../components/dashboard/RecentActivityWidget";
 
 export function Dashboard() {
   const { profile } = useOutletContext<LayoutOutletContext>();
@@ -101,7 +102,7 @@ export function Dashboard() {
         icon: AlertTriangle,
         iconBgColor: "bg-amber-50",
         iconColor: "text-amber-600",
-        actionLabel: "View alerts",
+        actionLabel: "Review",
         onAction: () => setIsLowStockModalOpen(true),
         actionDisabled: lowStock.length === 0,
       },
@@ -135,6 +136,7 @@ export function Dashboard() {
         icon: PhilippinePeso,
         iconBgColor: "bg-purple-50",
         iconColor: "text-purple-600",
+        valueClassName: "text-[clamp(1.25rem,2vw,1.875rem)]",
       },
     ];
 
@@ -171,7 +173,7 @@ export function Dashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,15rem),1fr))] gap-6">
         <StatsCard {...stats[0]} loading={inventoryLoading} />
         <StatsCard {...stats[1]} loading={inventoryLoading} />
         <StatsCard {...stats[2]} loading={restockLoading} />
@@ -199,6 +201,11 @@ export function Dashboard() {
         />
 
       </div>
+      <RecentActivityWidget
+        activities={recentActivity}
+        loading={logsLoading || restockLoading}
+        onViewAll={() => setIsActivityModalOpen(true)}
+      />
 
       <ActivityModal
         isOpen={isActivityModalOpen}

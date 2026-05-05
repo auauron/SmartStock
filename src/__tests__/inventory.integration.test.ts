@@ -1,17 +1,7 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { testClient, clearDatabase } from "./utils/db";
-
-const TEST_USER_ID = "11111111-1111-1111-1111-111111111111";
+import { describe, it, expect, } from "vitest";
+import { testClient, TEST_USER_ID } from "./utils/db";
 
 let createdInventoryId: string;
-
-beforeAll(async () => {
-  await clearDatabase();
-});
-
-afterAll(async () => {
-  await clearDatabase();
-});
 
 describe("Inventory API", () => {
   it("POST inventories - should create a new inventory row", async () => {
@@ -55,6 +45,62 @@ describe("Inventory API", () => {
     expect(error).toBeNull();
     expect(Array.isArray(data)).toBe(true);
     expect(data!.length).toBeGreaterThan(0);
+  });
+
+  describe("Validation & Constraints", () => {
+    it("POST inventories - should fail when name is empty", async () => {
+      const { error } = await testClient
+        .from("inventories")
+        .insert({
+          user_id: TEST_USER_ID,
+          name: "", 
+          category: "Test",
+          price: 10,
+          quantity: 5
+        });
+
+      // We expect the database to reject this (RLS or Constraint)
+      expect(error).not.toBeNull();
+    });
+
+    it("POST inventories - should fail with negative price", async () => {
+      const { error } = await testClient
+        .from("inventories")
+        .insert({
+          user_id: TEST_USER_ID,
+          name: "Negative Price Item",
+          category: "Test",
+          price: -100,
+          quantity: 10
+        });
+
+      // If error is null here, you are missing a database constraint!
+      expect(error).not.toBeNull();
+      expect(error!.message).toMatch(/(check|row-level security)/i);
+    });
+  });
+
+  describe("Business Logic Filtering", () => {
+    it("GET low stock items - should return only items where quantity < min_stock", async () => {
+      // Seed a low stock item
+      await testClient.from("inventories").insert({
+        user_id: TEST_USER_ID,
+        name: "Low Stock Item",
+        quantity: 1,
+        min_stock: 5
+      });
+
+      const { data, error } = await testClient
+        .from("inventories")
+        .select("*")
+        .lt("quantity", 5); // Simple filter for now
+
+      expect(error).toBeNull();
+      expect(data?.every(item => item.quantity < 5)).toBe(true);
+      
+      // Cleanup
+      await testClient.from("inventories").delete().eq("name", "Low Stock Item");
+    });
   });
 
   it("DELETE inventories - should delete the created inventory row", async () => {

@@ -67,18 +67,6 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
-            // Cache Supabase API responses (stale-while-revalidate)
-            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-api',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 5, // 5 minutes
-              },
-            },
-          },
-          {
             // Cache Google Fonts
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'StaleWhileRevalidate',
@@ -110,7 +98,6 @@ export default defineConfig({
           environment: 'node',
           include: ['src/__tests__/**/*.test.ts'],
           exclude: ['src/__tests__/**/*.integration.test.ts'],
-          setupFiles: ['./src/__tests__/setup.ts'],
         }
       },
       {
@@ -119,6 +106,7 @@ export default defineConfig({
           name: 'integration',
           environment: 'node',
           include: ['src/__tests__/**/*.integration.test.ts'],
+          globalSetup: ['./src/__tests__/utils/globalTeardown.ts'],
           // No setupFiles — intentionally no MSW so real Supabase HTTP calls go through
         }
       },

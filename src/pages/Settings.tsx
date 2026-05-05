@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router";
-import { User, Bell, Shield, Database, LogOut } from "lucide-react";
+import { User, Bell, Shield, LogOut } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { clearCachedProfile } from "../hooks/useProfileCache";
 import { clearCachedLogs } from "../hooks/useAuditLog";
@@ -9,10 +9,9 @@ import type { UserProfile, LayoutOutletContext } from "../types";
 import { ProfileTab } from "../components/settings/tabs/ProfileTab";
 import { NotificationsTab } from "../components/settings/tabs/NotificationsTab";
 import { SecurityTab } from "../components/settings/tabs/SecurityTab";
-import { DataTab } from "../components/settings/tabs/DataTab";
 import { LogoutConfirmModal } from "../components/settings/LogoutConfirmModal";
 
-type SettingsTab = "profile" | "notifications" | "security" | "data";
+type SettingsTab = "profile" | "notifications" | "security";
 
 interface TabConfig {
   id: SettingsTab;
@@ -24,7 +23,6 @@ const tabs: TabConfig[] = [
   { id: "profile", label: "Profile", icon: User },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "security", label: "Security", icon: Shield },
-  { id: "data", label: "Data", icon: Database },
 ];
 
 export function Settings() {
@@ -37,6 +35,7 @@ export function Settings() {
     fullName: "",
     email: "",
     businessName: "",
+    avatarUrl: "",
   });
 
   useEffect(() => {
@@ -127,7 +126,6 @@ export function Settings() {
           )}
           {activeTab === "notifications" && <NotificationsTab />}
           {activeTab === "security" && <SecurityTab />}
-          {activeTab === "data" && <DataTab />}
         </div>
       </div>
 

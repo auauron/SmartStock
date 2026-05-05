@@ -10,7 +10,6 @@ export default defineConfig({
           exclude: ["src/**/*.integration.test.{ts,tsx}"],
           environment: "node",
           globals: true,
-          setupFiles: ["./src/__tests__/setup.ts"],
         },
       },
       {
@@ -19,6 +18,7 @@ export default defineConfig({
           include: ["src/**/*.integration.test.{ts,tsx}"],
           environment: "node",
           globals: true,
+          globalSetup: ["./src/__tests__/utils/globalTeardown.ts"],
         },
       },
     ],

@@ -1,5 +1,6 @@
 import type { AuditLog, AuditLogChanges, AuditLogKey, Inventory } from "../types";
 import { supabase } from "../lib/supabaseClient";
+import { getCurrentUser } from "./currentUser";
 import { InventoryFactory, ProductRow } from "../factories/inventoryFactory";
 import { AuditLogFactory } from "../factories/auditLogFactory";
 
@@ -18,7 +19,8 @@ class InventoryService {
         const { data, error } = await supabase
             .from("inventories")
             .select("*")
-            .eq("user_id", userId);
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false });
 
         if (error) throw error;
         return (data || []).map(InventoryFactory.createFromDb);
@@ -93,7 +95,7 @@ export class InventoryServiceProxy implements IInventoryService {
     private service: InventoryService = new InventoryService();
 
     private async getUserId() {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const { data: { user }, error } = await getCurrentUser();
         if (error || !user) throw new Error("You must be signed in to manage inventory.");
         return user.id;
     }

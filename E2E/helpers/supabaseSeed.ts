@@ -107,6 +107,62 @@ export async function seedRestockEntry(
   return data as { id: string };
 }
 
+export async function clearDatabase() {
+  const { client, userId } = await getAuthedSeedClient();
+
+  // 1. Clear audit logs
+  const { error: auditError } = await client
+    .from("audit_logs")
+    .delete()
+    .eq("user_id", userId);
+
+  if (auditError) {
+    throw new Error(`Failed to clear audit_logs: ${auditError.message}`);
+  }
+
+  // 2. Clear restocks (must be before inventories due to FK)
+  const { error: restockError } = await client
+    .from("restocks")
+    .delete()
+    .eq("user_id", userId);
+
+  if (restockError) {
+    throw new Error(`Failed to clear restocks: ${restockError.message}`);
+  }
+
+  // 3. Clear inventories
+  const { error: inventoryError } = await client
+    .from("inventories")
+    .delete()
+    .eq("user_id", userId);
+
+  if (inventoryError) {
+    throw new Error(`Failed to clear inventories: ${inventoryError.message}`);
+  }
+}
+
+export async function resetOnboarding(status = "not_started") {
+  const { client, userId } = await getAuthedSeedClient();
+
+  const { error } = await client.from("user_onboarding").upsert(
+    {
+      user_id: userId,
+      status,
+      role: null,
+      first_goal: null,
+      started_at: null,
+      completed_at: null,
+      skipped_at: null,
+      first_item_added_at: null,
+    },
+    { onConflict: "user_id" },
+  );
+
+  if (error) {
+    throw new Error(`Failed to reset onboarding state: ${error.message}`);
+  }
+}
+
 export async function deleteRestocksForInventory(inventoryId: string) {
   const { client } = await getAuthedSeedClient();
 

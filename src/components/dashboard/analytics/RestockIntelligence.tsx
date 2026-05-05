@@ -54,7 +54,11 @@ export function RestockIntelligence({
 
     const results: ItemForecast[] = inventory.map((item) => {
       // Map by ID, fallback to name for legacy entries without inventoryId
-      const itemRestocks = history.filter((h) => h.inventoryId === item.id || (!h.inventoryId && h.inventoryName === item.name));
+      const itemRestocks = history.filter(
+        (h) =>
+          h.inventoryId === item.id ||
+          (!h.inventoryId && h.inventoryName === item.name),
+      );
 
       let dailyRestockRate: number;
 
@@ -151,43 +155,43 @@ export function RestockIntelligence({
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-      {/* Clickable header — always visible */}
       <button
+        type="button"
+        aria-expanded={isExpanded}
         onClick={() => setIsExpanded((prev) => !prev)}
-        className="w-full px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-gray-50/50 transition-colors rounded-lg"
+        className="w-full px-6 py-4 flex items-center justify-between gap-4 border-b border-gray-200 text-left transition-colors hover:bg-gray-50/50"
       >
-        <div className="text-left">
+        <div
+          data-recommendation-header-left
+          className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-left"
+        >
           <h3 className="text-base font-semibold text-gray-900">
-            Restock Intelligence
+            Restock Recommendations
           </h3>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Data-driven restocking recommendations
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Summary badges when collapsed */}
-          {!isExpanded && (criticalCount > 0 || warningCount > 0) && (
-            <div className="flex items-center gap-1.5">
+          {(criticalCount > 0 || warningCount > 0) && (
+            <div className="flex shrink-0 flex-wrap items-center gap-1.5">
               {criticalCount > 0 && (
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-red-50 text-red-700 border border-red-100">
+                <span className="inline-flex items-center rounded border border-red-100 bg-red-50 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-red-700">
                   {criticalCount} Critical
                 </span>
               )}
               {warningCount > 0 && (
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-amber-50 text-amber-700 border border-amber-100">
+                <span className="inline-flex items-center rounded border border-amber-100 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-amber-700">
                   {warningCount} Warning
                 </span>
               )}
             </div>
           )}
-
-          <ChevronDown
-            className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
-              isExpanded ? "rotate-180" : ""
-            }`}
-          />
+          <p className="basis-full text-xs text-gray-500 mt-0.5">
+            Priority items to replenish next
+          </p>
         </div>
+
+        <ChevronDown
+          className={`h-5 w-5 shrink-0 text-gray-400 transition-transform duration-200 ${
+            isExpanded ? "rotate-180" : ""
+          }`}
+        />
       </button>
 
       <div
@@ -197,25 +201,22 @@ export function RestockIntelligence({
             : "max-h-0 opacity-0 overflow-hidden"
         }`}
       >
-        <div className="px-6 pb-6 pt-2 border-t border-gray-100">
+        <div className="px-6 py-5">
           {inventory.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">
               Add inventory items to generate recommendations
             </p>
-          ) : forecasts.every((f) => f.urgency === "healthy") ? (
+          ) : forecasts.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">
-              All inventory levels are optimal! 🎉
+              All inventory levels are optimal! 
             </p>
           ) : (
             <div className="space-y-3">
-              <div className="hidden md:grid md:grid-cols-[2fr_2fr_120px_120px_104px] gap-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 pb-2 border-b border-gray-100">
-                <div className="flex items-center gap-2">
-                  <span className="w-[60px] text-center">Status</span>
-                  <span>Item</span>
-                </div>
-                <span className="text-center">Stock Level</span>
-                <span className="text-center">Days Left</span>
-                <span className="text-center">Suggested</span>
+              <div className="hidden md:grid md:grid-cols-[minmax(0,2fr)_minmax(140px,1fr)_96px_128px_104px] gap-3 text-[10px] font-bold uppercase tracking-wider text-gray-400 pb-2 border-b border-gray-100">
+                <span>Item</span>
+                <span className="text-center">Current Stock</span>
+                <span className="text-center">Status</span>
+                <span className="text-center">Suggested Restock</span>
                 <span className="ml-10">Action</span>
               </div>
 
@@ -230,29 +231,20 @@ export function RestockIntelligence({
                 return (
                   <div
                     key={f.item.id}
-                    className="grid grid-cols-1 md:grid-cols-[2fr_2fr_120px_120px_104px] gap-4 items-center py-3 border-b border-gray-50 last:border-0 last:pb-0"
+                    className="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(140px,1fr)_96px_128px_104px] gap-3 items-center py-3 border-b border-gray-50 last:border-0 last:pb-0"
                   >
                     {/* Item info */}
-                    <div className="flex items-center gap-2">
-                      <div className="w-[60px] flex justify-center">
-                        <span
-                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider ${URGENCY_STYLES[f.urgency]}`}
-                        >
-                          {URGENCY_LABELS[f.urgency]}
-                        </span>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {f.item.name}
-                        </p>
-                        <p className="text-[10px] text-gray-400 truncate">
-                          {f.item.category}
-                        </p>
-                      </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {f.item.name}
+                      </p>
+                      <p className="text-[10px] text-gray-400 truncate">
+                        {f.item.category}
+                      </p>
                     </div>
 
-                    {/* Stock level bar */}
-                    <div className="flex items-center justify-center gap-3 mx-auto w-full max-w-[200px] px-2">
+                    {/* Current stock */}
+                    <div className="flex items-center justify-center gap-2 mx-auto w-full max-w-[160px]">
                       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all ${BAR_COLORS[f.urgency]}`}
@@ -264,22 +256,14 @@ export function RestockIntelligence({
                       </span>
                     </div>
 
-                    {/* Days left */}
-                    <p
-                      className={`text-sm font-medium text-center ${
-                        f.urgency === "critical"
-                          ? "text-red-700"
-                          : f.urgency === "warning"
-                            ? "text-amber-700"
-                            : "text-gray-600"
-                      }`}
-                    >
-                      {f.daysUntilStockout === 999
-                        ? "—"
-                        : f.daysUntilStockout === 0
-                          ? "Now"
-                          : `${f.daysUntilStockout}d`}
-                    </p>
+                    {/* Status */}
+                    <div className="flex justify-start md:justify-center">
+                      <span
+                        className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider ${URGENCY_STYLES[f.urgency]}`}
+                      >
+                        {URGENCY_LABELS[f.urgency]}
+                      </span>
+                    </div>
 
                     {/* Suggested qty */}
                     <p className="text-sm font-medium text-gray-900 text-center">
@@ -288,7 +272,14 @@ export function RestockIntelligence({
 
                     {/* Action */}
                     <button
-                      onClick={() => navigate("/restock")}
+                      onClick={() =>
+                        navigate("/restock", {
+                          state: {
+                            prefillInventoryId: f.item.id,
+                            prefillQuantity: f.suggestedQty,
+                          },
+                        })
+                      }
                       className="inline-flex items-center justify-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-1.5 hover:bg-emerald-100 transition-colors cursor-pointer md:ml-auto"
                     >
                       Restock

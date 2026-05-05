@@ -7,9 +7,9 @@ import {
 import type { RestockInventoryOption } from "../types";
 
 const inventoryOptions: RestockInventoryOption[] = [
-  { id: "inv-1", name: "USB-C Cable" },
-  { id: "inv-2", name: "Desk Lamp" },
-  { id: "inv-3", name: "Mechanical Keyboard" },
+  { id: "inv-1", name: "USB-C Cable", quantity: 4, minStock: 8 },
+  { id: "inv-2", name: "Desk Lamp", quantity: 15, minStock: 6 },
+  { id: "inv-3", name: "Mechanical Keyboard", quantity: 9, minStock: 5 },
 ];
 
 const meta: Meta<typeof RestockAddForm> = {

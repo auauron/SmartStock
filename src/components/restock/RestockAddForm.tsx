@@ -39,9 +39,18 @@ export function RestockAddForm({
   onNotesChange,
   onSubmit,
 }: RestockAddFormProps) {
+  const selectedItem = inventory.find((item) => item.id === formData.inventoryId);
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Add Restock</h2>
+      <div className="mb-5">
+        <h2 className="text-lg font-semibold text-gray-900">
+          Add Restock Entry
+        </h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Record new stock added to an item.
+        </p>
+      </div>
       {errorMessage ? (
         <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           <div className="flex items-center justify-between gap-3">
@@ -59,32 +68,39 @@ export function RestockAddForm({
 
       <form key={formKey} onSubmit={onSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DropdownField
-            id="restock-item-select"
-            required
-            searchable
-            label="Item Name"
-            value={formData.inventoryId}
-            onChange={(e) => onInventoryChange(e.target.value)}
-            disabled={loading || submitting || inventory.length === 0}
-            className="py-2"
-          >
-            {loading ? (
-              <option value="">Loading items...</option>
-            ) : inventory.length === 0 ? (
-              <option value="">No items available</option>
-            ) : (
-              <option value="" disabled>
-                Select an item
-              </option>
-            )}
+          <div>
+            <DropdownField
+              id="restock-item-select"
+              required
+              searchable
+              label="Item Name"
+              value={formData.inventoryId}
+              onChange={(e) => onInventoryChange(e.target.value)}
+              disabled={loading || submitting || inventory.length === 0}
+              className="py-2"
+            >
+              {loading ? (
+                <option value="">Loading items...</option>
+              ) : inventory.length === 0 ? (
+                <option value="">No items available</option>
+              ) : (
+                <option value="" disabled>
+                  Select an item
+                </option>
+              )}
 
-            {inventory.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </DropdownField>
+              {inventory.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </DropdownField>
+            {selectedItem ? (
+              <p className="mt-2 text-xs font-medium text-emerald-700">
+                Current stock: {selectedItem.quantity} units
+              </p>
+            ) : null}
+          </div>
 
           <InputField
             id="restock-quantity"

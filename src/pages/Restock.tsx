@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router";
 import { useRestocks } from "../hooks/useRestocks";
 import {
   RestockAddForm,
@@ -6,7 +7,13 @@ import {
 } from "../components/restock/RestockAddForm";
 import { RestockHistoryTable } from "../components/restock/RestockHistoryTable";
 
+interface RestockPrefillState {
+  prefillInventoryId?: string;
+  prefillQuantity?: number;
+}
+
 export function Restock() {
+  const location = useLocation();
   const {
     history,
     inventory,
@@ -22,6 +29,7 @@ export function Restock() {
     quantity: "",
     notes: "",
   });
+  const hasAppliedPrefill = useRef(false);
   const [formKey, setFormKey] = useState(0);
   const [validationError, setValidationError] = useState("");
 
@@ -34,6 +42,37 @@ export function Restock() {
   useEffect(() => {
     setCurrentPage(1);
   }, [historyInventoryFilter, historyDateFilter]);
+
+  useEffect(() => {
+    const state = (location.state ?? null) as RestockPrefillState | null;
+
+    if (hasAppliedPrefill.current || !state?.prefillInventoryId) {
+      return;
+    }
+
+    const selectedItemExists = inventory.some(
+      (item) => item.id === state.prefillInventoryId,
+    );
+
+    if (!selectedItemExists) {
+      if (loading) {
+        return;
+      }
+      hasAppliedPrefill.current = true;
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      inventoryId: state.prefillInventoryId ?? "",
+      quantity:
+        typeof state.prefillQuantity === "number" && state.prefillQuantity > 0
+          ? String(state.prefillQuantity)
+          : prev.quantity,
+    }));
+    setValidationError("");
+    hasAppliedPrefill.current = true;
+  }, [inventory, loading, location.state]);
 
   const filteredHistory = useMemo(() => {
     let result = history;
@@ -95,7 +134,6 @@ export function Restock() {
 
   return (
     <div className="space-y-6">
-
       <RestockAddForm
         formKey={formKey}
         formData={formData}

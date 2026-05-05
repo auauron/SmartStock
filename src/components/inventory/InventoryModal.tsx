@@ -24,6 +24,11 @@ export function InventoryModal({
   item,
   existingCategories = [],
 }: ProductModalProps) {
+  const shouldAddCategoryDirectly = !item && existingCategories.length === 0;
+  const [isCustomCategory, setIsCustomCategory] = useState(
+    shouldAddCategoryDirectly,
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<Omit<Inventory, "id">>({
     name: item?.name || "",
     category: item?.category || "",
@@ -41,12 +46,9 @@ export function InventoryModal({
         quantity: item?.quantity || 0,
         minStock: item?.minStock || 0,
       });
-      setIsCustomCategory(false);
+      setIsCustomCategory(shouldAddCategoryDirectly);
     }
-  }, [item, isOpen]);
-
-  const [isCustomCategory, setIsCustomCategory] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  }, [item, isOpen, shouldAddCategoryDirectly]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -124,24 +126,30 @@ export function InventoryModal({
               id="inventory-new-category"
               type="text"
               required
-              label="New Category"
+              label={shouldAddCategoryDirectly ? "Category" : "New Category"}
               value={formData.category}
               onChange={(e) =>
                 setFormData({ ...formData, category: e.target.value })
               }
-              placeholder="e.g. Accessories"
+              placeholder="e.g. Beverages, Grocery, Accessories"
               className="py-2"
             />
-            <button
-              type="button"
-              onClick={() => {
-                setIsCustomCategory(false);
-                setFormData({ ...formData, category: "" });
-              }}
-              className="text-xs text-emerald-600 hover:text-emerald-700 underline"
-            >
-              Back to existing categories
-            </button>
+            {shouldAddCategoryDirectly ? (
+              <p className="text-xs text-gray-500">
+                Add your first category now. Future items can use this category.
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCustomCategory(false);
+                  setFormData({ ...formData, category: "" });
+                }}
+                className="text-xs text-emerald-600 hover:text-emerald-700 underline"
+              >
+                Back to existing categories
+              </button>
+            )}
           </div>
         )}
 

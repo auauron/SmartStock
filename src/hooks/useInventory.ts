@@ -6,10 +6,32 @@ import { notificationSubject } from "../services/notificationObserver";
 const service = new InventoryServiceProxy();
 
 let cache: Inventory[] | null = null;
+let pendingLoad: Promise<Inventory[]> | null = null;
 
 export const clearInventoryCache = () => {
   cache = null;
+  pendingLoad = null;
 };
+
+function loadInventoryFromService(force = false) {
+  if (cache && !force) {
+    return Promise.resolve(cache);
+  }
+
+  if (!pendingLoad) {
+    pendingLoad = service
+      .getInventory()
+      .then((data) => {
+        cache = data;
+        return data;
+      })
+      .finally(() => {
+        pendingLoad = null;
+      });
+  }
+
+  return pendingLoad;
+}
 
 export function useInventory() {
   const [inventory, setInventory] = useState<Inventory[]>(cache ?? []);
@@ -17,13 +39,16 @@ export function useInventory() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async (force = false) => {
-    if (cache && !force) return;
+    if (cache && !force) {
+      setInventory(cache);
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError(null);
     try {
-      const data = await service.getInventory();
-      cache = data;
+      const data = await loadInventoryFromService(force);
       setInventory(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load inventory");
@@ -55,7 +80,14 @@ export function useInventory() {
       if (exists) {
         updated = prev.map((i) => (i.id === item.id ? { ...i, ...item } : i));
       } else {
-        updated = [...prev, { ...item, id: savedId as string }];
+        updated = [
+          {
+            ...item,
+            id: savedId as string,
+            createdAt: item.createdAt ?? new Date(),
+          },
+          ...prev,
+        ];
       }
 
       cache = updated;

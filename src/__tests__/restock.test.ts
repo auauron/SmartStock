@@ -59,25 +59,27 @@ describe("restockService", () => {
 
     it("should return mapped inventory successfully", async () => {
       const mockData = [
-        { id: "1", name: "Item A" },
-        { id: "2", name: "Item B" },
+        { id: "1", name: "Item A", quantity: 4, min_stock: 8 },
+        { id: "2", name: "Item B", quantity: 10, min_stock: 3 },
       ];
 
-      const mockFrom = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            order: vi.fn().mockResolvedValue({ data: mockData, error: null }),
-          }),
+      const select = vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          order: vi.fn().mockResolvedValue({ data: mockData, error: null }),
         }),
+      });
+      const mockFrom = vi.fn().mockReturnValue({
+        select,
       });
       (supabase as any).from = mockFrom;
 
       const result = await getRestockInventory();
       expect(result).toEqual([
-        { id: "1", name: "Item A" },
-        { id: "2", name: "Item B" },
+        { id: "1", name: "Item A", quantity: 4, minStock: 8 },
+        { id: "2", name: "Item B", quantity: 10, minStock: 3 },
       ]);
       expect(mockFrom).toHaveBeenCalledWith("inventories");
+      expect(select).toHaveBeenCalledWith("id, name, quantity, min_stock");
     });
   });
 

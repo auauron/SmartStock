@@ -19,6 +19,38 @@ interface RestockHistoryTableProps {
   hasNoResults: boolean;
 }
 
+function SkeletonPulse({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`bg-gray-200 rounded animate-pulse ${className}`}
+      style={{ minHeight: "1rem" }}
+    />
+  );
+}
+
+function RestockHistorySkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <>
+      {Array.from({ length: rows }).map((_, index) => (
+        <tr key={index}>
+          <td className="px-6 py-4 whitespace-nowrap">
+            <SkeletonPulse className="h-4 w-32" />
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap">
+            <SkeletonPulse className="h-6 w-24 rounded-full" />
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap">
+            <SkeletonPulse className="h-4 w-28" />
+          </td>
+          <td className="px-6 py-4">
+            <SkeletonPulse className="h-4 w-full max-w-sm" />
+          </td>
+        </tr>
+      ))}
+    </>
+  );
+}
+
 export function RestockHistoryTable({
   loading,
   inventory,
@@ -82,16 +114,29 @@ export function RestockHistoryTable({
       </div>
 
       {loading ? (
-        <div
-          className="flex items-center justify-center gap-3 py-12"
-          role="status"
-          aria-live="polite"
-        >
-          <span
-            className="h-5 w-5 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600"
-            aria-hidden="true"
-          />
-          <p className="text-gray-500">Loading restock history...</p>
+        <div className="overflow-x-auto" role="status" aria-live="polite">
+          <span className="sr-only">Loading restock history...</span>
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Item Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Quantity Added
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Notes
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              <RestockHistorySkeleton />
+            </tbody>
+          </table>
         </div>
       ) : (
         <div className="overflow-x-auto">
