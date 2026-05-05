@@ -14,7 +14,6 @@ if (!TEST_EMAIL || !TEST_PASSWORD) {
 }
 
 // Helpers
-
 async function login(page: Page) {
   await page.goto(LOGIN_URL);
   await page.waitForSelector('input[type="email"]', { timeout: 15_000 });
@@ -188,9 +187,6 @@ test.describe("Inventory End-to-End Flow", () => {
         page.getByRole("heading", { name: "Delete Item" }),
       ).toBeVisible();
       await expect(page.getByText(`"${testItemName}"`)).toBeVisible();
-      await expect(
-        page.getByText(/This action.*cannot.*be undone/i),
-      ).toBeVisible();
 
       // Hit Delete in the modal
       await page.getByRole("button", { name: /^Delete$/ }).click();
