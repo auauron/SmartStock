@@ -15,6 +15,8 @@ import { transformAuditLogs, transformRestockLogs } from "../utils/activity";
 import { ActivityModal } from "../components/dashboard/ActivityModal";
 import { SmartAnalytics } from "../components/dashboard/SmartAnalytics";
 import { LowStockModal } from "../components/dashboard/LowStockModal";
+import { LowStockList } from "../components/dashboard/LowStockList";
+import { RecentActivityList } from "../components/dashboard/RecentActivityList";
 import { RecentActivityWidget } from "../components/dashboard/RecentActivityWidget";
 
 export function Dashboard() {
@@ -184,6 +186,21 @@ export function Dashboard() {
         loading={inventoryLoading || restockLoading}
       />
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <LowStockList 
+        items={lowStockItems}
+        loading={inventoryLoading}
+        onViewAll={() => setIsLowStockModalOpen(true)}
+        />
+
+        <RecentActivityList 
+        activities={recentActivity}
+        loading={logsLoading || restockLoading}
+        onViewAll={() => setIsActivityModalOpen(true)}
+        />
+
+      </div>
       <RecentActivityWidget
         activities={recentActivity}
         loading={logsLoading || restockLoading}

@@ -158,6 +158,7 @@ The Supabase PostgreSQL schema contains:
 | `inventories`              | Inventory items with price, quantity, min_stock |
 | `restocks`                 | Restock transaction log with quantity and notes |
 | `notification_preferences` | Per-user notification toggles                   |
+| `audit_logs`               | System-wide activity tracking                   |
 
 **Key features:**
 

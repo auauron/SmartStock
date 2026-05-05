@@ -131,11 +131,6 @@ export function DeleteConfirmationModal({
                         )}
                     </button>
                 </div>
-
-                <p className="text-center text-xs text-gray-400">
-                    This action{" "}
-                    <span className="font-medium text-gray-500">cannot</span> be undone.
-                </p>
             </div>
         </Modal>
     );
